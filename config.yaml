@@ -53,3 +53,12 @@ demo_mode: false
 
 guards:
   congruency_threshold: 0.2     # check the message against every misconception above this posterior
+
+rag:
+  chunk_words: 300          # ~300-500 tokens per chunk
+  top_k: 5
+  rrf_k: 60                 # reciprocal rank fusion constant
+  # e5 cosines are compressed: same-language relevant ~0.90, unrelated ~0.80 (checked 2026-11-21). Cross-language
+  # (FR query -> AR passage) scored 0.81, i.e. NOT separable: such hits only count if BM25 also matches.
+  min_cosine: 0.85
+  embed_model: intfloat/multilingual-e5-small

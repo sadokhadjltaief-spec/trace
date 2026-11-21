@@ -1,0 +1,108 @@
+{
+ "$defs": {
+  "CourseHit": {
+   "additionalProperties": false,
+   "description": "One retrieved passage from the student's course files (extractive: the text is never rewritten).",
+   "properties": {
+    "folder": {
+     "title": "Folder",
+     "type": "string"
+    },
+    "file": {
+     "title": "File",
+     "type": "string"
+    },
+    "page": {
+     "title": "Page",
+     "type": "integer"
+    },
+    "snippet": {
+     "title": "Snippet",
+     "type": "string"
+    },
+    "lang": {
+     "enum": [
+      "fr",
+      "ar",
+      "en",
+      "darija"
+     ],
+     "title": "Lang",
+     "type": "string"
+    },
+    "source_url": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Source Url"
+    },
+    "allow_derivatives": {
+     "title": "Allow Derivatives",
+     "type": "boolean"
+    },
+    "score": {
+     "title": "Score",
+     "type": "number"
+    }
+   },
+   "required": [
+    "folder",
+    "file",
+    "page",
+    "snippet",
+    "lang",
+    "allow_derivatives",
+    "score"
+   ],
+   "title": "CourseHit",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "Course Q&A (since 1.2). Extractive: `hits` ARE the answer, each with file + page. `found` is false when\nnothing relevant was retrieved; then show `note` and do not answer from memory.",
+ "properties": {
+  "contract_version": {
+   "default": "1.2",
+   "title": "Contract Version",
+   "type": "string"
+  },
+  "query": {
+   "title": "Query",
+   "type": "string"
+  },
+  "found": {
+   "title": "Found",
+   "type": "boolean"
+  },
+  "hits": {
+   "items": {
+    "$ref": "#/$defs/CourseHit"
+   },
+   "title": "Hits",
+   "type": "array"
+  },
+  "note": {
+   "title": "Note",
+   "type": "string"
+  },
+  "retrieval": {
+   "title": "Retrieval",
+   "type": "string"
+  }
+ },
+ "required": [
+  "query",
+  "found",
+  "hits",
+  "note",
+  "retrieval"
+ ],
+ "title": "CourseAnswer",
+ "type": "object"
+}

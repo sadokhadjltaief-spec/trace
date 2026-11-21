@@ -147,6 +147,14 @@ lines "Situation / Ta tâche / Ensuite" into `message.text` (render the newlines
 student answers like `scripts/demo_session.py` (French or Arabic, "adds numerators and denominators").
 A different path in demo mode falls back to verified bank text (still correct, just not the recorded wording).
 
+## 6b. Course Q&A and uploads (since contract 1.2)
+
+- Upload zone: `POST /engine/courses/upload` (multipart form, field `files`; up to 10 files, 50 MB each, PDF / TXT /
+  MD; show these limits under the zone). Files go to `data/courses/uploads/` and are re-indexed.
+- Search: `POST /engine/courses/search {"query": "...", "k": 3}` → `CourseAnswer`. Show each hit as a quote with
+  "file, p. N" and its `source_url`. If `found` is false, show `note` only.
+- The folder picker of the brief is a desktop dialog; in the web app, use the upload zone instead.
+
 ## 7. Other endpoints
 
 `GET /engine/misconceptions` (names FR/AR/EN), `GET /engine/results` and `/engine/results/{name}` (read-only

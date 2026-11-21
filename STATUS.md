@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-21 ~21:30, step 10 + FR/AR templates (P1 started).
+Last update: 2026-11-21 ~22:30, step 11 (course RAG, no LLM).
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [ ] Set `live.allow_unverified_dev: false` in `config.yaml` (now true = dev mode). Claude reminds the human at
@@ -11,6 +11,33 @@ Last update: 2026-11-21 ~21:30, step 10 + FR/AR templates (P1 started).
 - gpt-oss-20b: ~244k tokens logged in 3 h (detector eval) -> capped until about 15:00 on 22 Nov (after the deadline).
 - gpt-oss-120b: ~75k logged in 24 h -> ~125k left. Guard judge moved to 120b (`llm.judge_model`).
 - `engine/llm.py` now fails fast on a daily-cap 429 (the caller falls back) instead of retrying for minutes.
+
+## ⚠ Token budget policy (team decision 2026-11-21 ~22:00)
+- No more Groq calls for development. 120b: ~169k of 200k tokens used in the last 24 h; 20b capped.
+  Remaining tokens are kept for (1) re-running eval_guards after label fixes (free: cached) and (2) the final
+  demo texts. The demo replays offline from cache (0 tokens).
+
+## Step 11: course folders + retrieval with page citations (`engine/rag.py`), 0 LLM calls
+- PDF/TXT/MD under `data/courses/<folder>/` -> text per page (PyMuPDF). Pages with < 50 characters: OCR if
+  pytesseract is installed (it is NOT: such pages are logged as unreadable). Arabic: presentation forms normalised
+  (NFKC), reversed text detected and fixed (heuristic on al- words). Chunks ~300 words with folder, file, page,
+  language, allow_derivatives, source link.
+- Retrieval: BM25 + `intfloat/multilingual-e5-small` (downloaded once from Hugging Face, loads on CPU, 384-dim),
+  reciprocal rank fusion, chunks and embeddings cached by file hash in `.cache/rag/`. Falls back to BM25 only if the
+  model cannot load.
+- Relevance gate: half of the query words in the passage, or cosine >= 0.85. Checked: same-language relevant
+  ~0.90 vs unrelated ~0.80. **Cross-language (FR question -> AR passage) is NOT separable (0.81)**: such passages
+  are only returned if the words match.
+- Course Q&A is **extractive**: the passages themselves, with file + page + source link; "nothing relevant" is said
+  explicitly (no answer from memory). **LLM summary of the passages: paused** (token budget).
+- Remediation: `SessionSummary.lesson_refs` = lesson pages for the diagnosed misconception (when course files exist).
+- Najahni: `docs/NAJAHNI_NOTE.md` (policy + French partnership email), `data/courses/najahni/meta.yaml`
+  (`allow_derivatives: false`), `SOURCES.md` template. No code contacts najahni.tn. PDFs stay gitignored.
+- Contract 1.2 (additive): `CourseAnswer` / `CourseHit`; API `course_index`, `course_search`; HTTP
+  `/api/v1/courses/{index,search,upload}` (upload: 10 files, 50 MB, PDF/TXT/MD -> `data/courses/uploads/`).
+  DOCX/PPTX uploads are refused for now (no parser installed). Folder picker: web app uses the upload zone.
+- **No course PDFs in `data/courses/` yet**: the team adds them (own notes; Najahni free PDFs by hand).
+- 125 tests pass (`tests/test_rag.py`: report, citations, nothing-relevant, Arabic fixes, lesson refs, embeddings).
 
 ## Measured: `results/guards.json` (judge validation vs HUMAN labels, 30 messages, judge = gpt-oss-120b)
 | check | accuracy | precision | recall |
@@ -261,4 +288,4 @@ Will resume if time permits.
 ## Time spent
 - Step 1: ~25 min. Step 2: ~50 min. Step 2 fixes + step 3: ~45 min. Step 4 (contract + stubs): ~40 min.
 - Step 5: ~1.5 h (mostly the rate-limited LLM eval). Step 6: ~35 min. Steps 7-8: ~1 h. Step 9 + FastAPI + gate: ~1 h.
-- Guard eval + step 10 + FR/AR templates: ~1 h.
+- Guard eval + step 10 + FR/AR templates: ~1 h. Step 11: ~45 min.

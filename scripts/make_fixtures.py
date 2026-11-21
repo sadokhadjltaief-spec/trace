@@ -13,7 +13,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from engine import ROOT  # noqa: E402
 from engine import safetext  # noqa: E402
-from engine.contract import (Agenda, AnswerRecord, Calibration, Check, Cost, ExplanationEvidence,  # noqa: E402
+from engine.contract import (Agenda, AnswerRecord, Calibration, Check, Cost, CourseAnswer, CourseHit,  # noqa: E402
+                             ExplanationEvidence,
                              GuardEvent, Grading, HypProb, LabelProb,
                              LessonRef, MisconceptionView, NextQuestion, OutputFile, QuestionView, Reconstruction,
                              SessionState, SessionSummary, Source, StudioOutput, TutorTurn)
@@ -103,17 +104,27 @@ studio = StudioOutput(session_id=SID, tool="flashcards", targeted_at=MV,
 refused = StudioOutput(session_id=SID, tool="summary", targeted_at=MV, sources=[], files=[], items=[],
                        refused="This folder does not allow derived material (allow_derivatives: false).")
 
+course = CourseAnswer(query="additionner deux fractions", found=True,
+                      note="Passages copied from your course files (not rewritten). Check the page cited.",
+                      retrieval="BM25 + intfloat/multilingual-e5-small (reciprocal rank fusion)",
+                      hits=[CourseHit(folder="mes_notes", file="mes_notes/fractions.pdf", page=3, lang="fr",
+                                      snippet="Pour additionner deux fractions, on les met d'abord au même dénominateur…",
+                                      source_url=None, allow_derivatives=True, score=0.03252)])
+course_none = CourseAnswer(query="photosynthèse", found=False, hits=[],
+                           note="Nothing relevant was found in your course files. TRACE does not answer from memory.",
+                           retrieval="BM25 + intfloat/multilingual-e5-small (reciprocal rank fusion)")
+
 OUT = ROOT / "docs" / "fixtures"
 OUT.mkdir(parents=True, exist_ok=True)
 for name, obj in {"session_state": state, "tutor_turn": turn, "tutor_turn_reconstruct": turn_recon,
                   "next_question": NQ, "session_summary": summ, "studio_output": studio,
-                  "studio_output_refused": refused}.items():
+                  "studio_output_refused": refused, "course_answer": course, "course_answer_none": course_none}.items():
     (OUT / f"{name}.json").write_text(json.dumps(obj.model_dump(), ensure_ascii=False, indent=1), encoding="utf-8")
     print("wrote", f"docs/fixtures/{name}.json")
 
 # JSON Schema for each contract object (for the frontend teammate / editor tooling)
 SCH = ROOT / "docs" / "schema"
 SCH.mkdir(parents=True, exist_ok=True)
-for model in (SessionState, TutorTurn, NextQuestion, SessionSummary, StudioOutput):
+for model in (SessionState, TutorTurn, NextQuestion, SessionSummary, StudioOutput, CourseAnswer):
     (SCH / f"{model.__name__}.json").write_text(json.dumps(model.model_json_schema(), indent=1), encoding="utf-8")
     print("wrote", f"docs/schema/{model.__name__}.json")

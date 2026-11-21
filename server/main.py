@@ -12,14 +12,14 @@ from __future__ import annotations
 import threading
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from engine import api
 from engine.config import cfg
-from engine.contract import (CONTRACT_VERSION, MisconceptionView, NextQuestion, SessionState, SessionSummary,
-                             StudioOutput, TutorTurn)
+from engine.contract import (CONTRACT_VERSION, CourseAnswer, MisconceptionView, NextQuestion, SessionState,
+                             SessionSummary, StudioOutput, TutorTurn)
 
 app = FastAPI(title="TRACE engine API", version=CONTRACT_VERSION,
               description="Thin HTTP wrapper over engine/api.py. Shapes: docs/INTERFACE.md.")
@@ -126,3 +126,46 @@ def list_results() -> list[str]:
 @app.get("/api/v1/results/{name}")
 def read_results(name: str) -> dict:
     return _call(api.read_results, name)
+
+
+class SearchBody(BaseModel):
+    query: str
+    k: int = Field(default=3, ge=1, le=10)
+
+
+@app.post("/api/v1/courses/index")
+def course_index(refresh: bool = True) -> dict:
+    return _call(api.course_index, refresh=refresh)
+
+
+@app.post("/api/v1/courses/search", response_model=CourseAnswer)
+def course_search(body: SearchBody):
+    return _call(api.course_search, body.query, body.k)
+
+
+UPLOAD_EXT = {".pdf", ".txt", ".md"}   # DOCX/PPTX: not supported yet (no parser installed)
+UPLOAD_MAX_FILES, UPLOAD_MAX_BYTES = 10, 50 * 1024 * 1024
+
+
+@app.post("/api/v1/courses/upload")
+async def course_upload(files: list[UploadFile] = File(...)) -> dict:
+    """Copy the student's own files into data/courses/uploads/ (allow_derivatives: true), then re-index.
+    Limits: up to 10 files, 50 MB each, PDF / TXT / MD."""
+    from pathlib import Path as _P
+
+    from engine import rag
+    if len(files) > UPLOAD_MAX_FILES:
+        raise HTTPException(400, f"up to {UPLOAD_MAX_FILES} files")
+    dest = rag.COURSES / "uploads"
+    dest.mkdir(parents=True, exist_ok=True)
+    saved = []
+    for f in files:
+        name = _P(f.filename or "").name
+        if _P(name).suffix.lower() not in UPLOAD_EXT:
+            raise HTTPException(400, f"{name}: only PDF, TXT and MD files are accepted")
+        data = await f.read()
+        if len(data) > UPLOAD_MAX_BYTES:
+            raise HTTPException(400, f"{name}: larger than 50 MB")
+        (dest / name).write_bytes(data)
+        saved.append(name)
+    return {"saved": saved, "index": _call(api.course_index, refresh=True)}

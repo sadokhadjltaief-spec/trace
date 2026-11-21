@@ -1,0 +1,19 @@
+{
+ "contract_version": "1.2",
+ "query": "additionner deux fractions",
+ "found": true,
+ "hits": [
+  {
+   "folder": "mes_notes",
+   "file": "mes_notes/fractions.pdf",
+   "page": 3,
+   "snippet": "Pour additionner deux fractions, on les met d'abord au même dénominateur…",
+   "lang": "fr",
+   "source_url": null,
+   "allow_derivatives": true,
+   "score": 0.03252
+  }
+ ],
+ "note": "Passages copied from your course files (not rewritten). Check the page cited.",
+ "retrieval": "BM25 + intfloat/multilingual-e5-small (reciprocal rank fusion)"
+}

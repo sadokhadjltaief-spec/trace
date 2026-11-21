@@ -6,6 +6,7 @@ __pycache__/
 data/raw/*
 !data/raw/README.md
 data/courses/**
+!data/courses/*/
 !data/courses/najahni/SOURCES.md
 !data/courses/*/meta.yaml
 exports/

@@ -73,3 +73,19 @@ def test_full_session_over_http(monkeypatch):
     assert r["status"] == "mastered"
     assert c.post(f"/api/v1/sessions/{sid}/studio", json={"tool": "flashcards"}).status_code == 501
     assert len(c.get("/api/v1/misconceptions").json()) == 5
+
+
+def test_course_endpoints(tmp_path, monkeypatch):
+    from engine import rag
+    monkeypatch.setattr(rag, "COURSES", tmp_path / "courses")
+    monkeypatch.setattr(rag, "CACHE", tmp_path / "cache")
+    monkeypatch.setattr(rag, "embedder", lambda: None)  # BM25 only: fast
+    r = c.post("/api/v1/courses/upload",
+               files=[("files", ("notes.txt", "Pour additionner deux fractions, on cherche un denominateur commun.".encode(),
+                                 "text/plain"))])
+    assert r.status_code == 200 and r.json()["saved"] == ["notes.txt"]
+    assert (tmp_path / "courses" / "uploads" / "notes.txt").exists()
+    a = c.post("/api/v1/courses/search", json={"query": "additionner deux fractions"}).json()
+    assert a["found"] and a["hits"][0]["file"] == "uploads/notes.txt" and a["hits"][0]["allow_derivatives"]
+    bad = c.post("/api/v1/courses/upload", files=[("files", ("x.exe", b"MZ", "application/octet-stream"))])
+    assert bad.status_code == 400

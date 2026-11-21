@@ -1,0 +1,3 @@
+# Najahni folder: retrieval with citation only (docs/NAJAHNI_NOTE.md).
+# Set to true ONLY if SOURCES.md records the owner's written permission.
+allow_derivatives: false

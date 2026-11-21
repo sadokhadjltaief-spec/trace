@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.1"  # 1.1: optional TutorTurn.explanation_evidence (additive, non-breaking)
+CONTRACT_VERSION = "1.2"  # 1.1: TutorTurn.explanation_evidence; 1.2: CourseAnswer (additive, non-breaking)
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]
@@ -187,6 +187,29 @@ class LessonRef(_M):
     page: int
     snippet: str
     source_url: str | None = None
+
+
+class CourseHit(_M):
+    """One retrieved passage from the student's course files (extractive: the text is never rewritten)."""
+    folder: str
+    file: str
+    page: int
+    snippet: str
+    lang: Literal["fr", "ar", "en", "darija"]
+    source_url: str | None = None
+    allow_derivatives: bool
+    score: float
+
+
+class CourseAnswer(_M):
+    """Course Q&A (since 1.2). Extractive: `hits` ARE the answer, each with file + page. `found` is false when
+    nothing relevant was retrieved; then show `note` and do not answer from memory."""
+    contract_version: str = CONTRACT_VERSION
+    query: str
+    found: bool
+    hits: list[CourseHit]
+    note: str
+    retrieval: str                 # e.g. "BM25 + intfloat/multilingual-e5-small (RRF)"
 
 
 class Calibration(_M):

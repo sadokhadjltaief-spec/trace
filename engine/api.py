@@ -21,9 +21,9 @@ from engine import i18n
 from engine.i18n import lang_of, t as tr
 from engine import safetext
 from engine.config import cfg
-from engine.contract import (AnswerRecord, Agenda, Calibration, Cost, ExplanationEvidence, Grading, HypProb,
-                             LabelProb, MisconceptionView, NextQuestion, QuestionView, SessionState, SessionSummary,
-                             TutorTurn)
+from engine.contract import (AnswerRecord, Agenda, Calibration, CourseAnswer, CourseHit, Cost, ExplanationEvidence,
+                             Grading, HypProb, LabelProb, LessonRef, MisconceptionView, NextQuestion, QuestionView,
+                             SessionState, SessionSummary, TutorTurn)
 
 _SESSIONS: dict[str, dict] = {}
 _BANK: dict | None = None
@@ -293,11 +293,63 @@ def summary(session_id: str) -> dict:
         diagnosis_names=MisconceptionView(**mv), status=status, evidence=ev,
         tried=list(s.get("states", ["DIAGNOSE"])),
         outcome=safetext.static(tr(f"outcome_{status}", lang), lang=lang, style_kwargs=kw),
-        next_step=safetext.static(tr(f"next_{status}", lang), lang=lang, style_kwargs=kw), lesson_refs=[],
+        next_step=safetext.static(tr(f"next_{status}", lang), lang=lang, style_kwargs=kw),
+        lesson_refs=_lesson_refs(mv),
         handoff_note=safetext.static(note, style_kwargs=kw) if note else None,
         calibration=Calibration(sure_correct=sum(a.correct for a in sure), sure_total=len(sure),
                                 unsure_correct=sum(a.correct for a in unsure), unsure_total=len(unsure)),
         cost=_cost(session_id)).model_dump()
+
+
+# ---------------------------------------------------------------- course folders (step 11, no LLM)
+def course_index(refresh: bool = False) -> dict:
+    """(Re)index data/courses/ (PDF/TXT). Returns the indexing report (files, chunks, unreadable pages, flags)."""
+    from engine import rag
+    return copy.deepcopy(rag.index(refresh=refresh).report)
+
+
+def _retrieval_label(ix) -> str:
+    return "BM25 + " + ix.report["embeddings"] + " (reciprocal rank fusion)" if ix.emb is not None else \
+        "BM25 only (" + str(ix.report["embeddings"]) + ")"
+
+
+def course_search(query: str, k: int = 3) -> dict:
+    """Course Q&A, extractive: the most relevant passages with file + page. No LLM (paused: token budget)."""
+    from engine import rag
+    query = (query or "").strip()
+    if not query:
+        raise ValueError("empty query")
+    ix = rag.index()
+    hits = [h for h in ix.search(query, k) if h["relevant"]]
+    found = bool(hits)
+    if not ix.chunks:
+        note = "No course files are indexed. Add PDF files to data/courses/<folder>/ and re-index."
+    elif not found:
+        note = "Nothing relevant was found in your course files. TRACE does not answer from memory."
+    else:
+        note = "Passages copied from your course files (not rewritten). Check the page cited."
+    return CourseAnswer(query=query, found=found, note=note, retrieval=_retrieval_label(ix),
+                        hits=[CourseHit(folder=h["folder"], file=h["file"], page=h["page"],
+                                        snippet=rag.snippet(h["text"], query), lang=h["lang"],
+                                        source_url=h["source_url"], allow_derivatives=h["allow_derivatives"],
+                                        score=h["score"]) for h in hits]).model_dump()
+
+
+def _lesson_refs(mv: dict, k: int = 2) -> list[LessonRef]:
+    """Curriculum-grounded remediation: lesson pages for the diagnosed misconception (only if courses exist)."""
+    if mv["id"] == "M0":
+        return []
+    try:
+        from engine import rag
+        if not any(p.suffix.lower() in rag.TEXT_EXT for p in rag.COURSES.rglob("*")
+                   if p.name not in ("SOURCES.md", "README.md")):
+            return []
+        m = _mis(mv["id"]) or {}
+        query = " ".join(x for x in (mv.get("name_fr"), mv.get("name_en"), m.get("description")) if x)
+        return [LessonRef(file=h["file"], page=h["page"], snippet=rag.snippet(h["text"], query, 200),
+                          source_url=h["source_url"]) for h in rag.index().search(query, k) if h["relevant"]]
+    except Exception:  # noqa: BLE001  retrieval must never break the report
+        return []
 
 
 def studio_generate(session_id: str, tool: str, source: dict) -> dict:

@@ -1,0 +1,8 @@
+{
+ "contract_version": "1.2",
+ "query": "photosynthèse",
+ "found": false,
+ "hits": [],
+ "note": "Nothing relevant was found in your course files. TRACE does not answer from memory.",
+ "retrieval": "BM25 + intfloat/multilingual-e5-small (reciprocal rank fusion)"
+}

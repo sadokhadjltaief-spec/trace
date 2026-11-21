@@ -1,6 +1,7 @@
 # TRACE frontend ↔ engine interface (contract v1.1)
 
 **Changelog.** 1.1 (2026-11-21): added optional `TutorTurn.explanation_evidence` (additive; 1.0 code keeps working).
+1.2 (2026-11-21): added `CourseAnswer` / `CourseHit` (Course Q&A) and real `SessionSummary.lesson_refs` (additive).
 No shape change in step 6: `tutor_reply` became real for hints. After the diagnosis stops, `submit_answer` raises
 `ValueError`; the page must switch to `tutor_reply` when `TutorTurn.state != "DIAGNOSE"`. A retry has
 `question.requires_confidence = false`. Step 8: RECONSTRUCT shows `reconstruction.steps` (numbered from 1); its
@@ -48,6 +49,8 @@ Any change to a field bumps `CONTRACT_VERSION` and updates this file, the schema
 | `summary(session_id)` | `SessionSummary` | fake until step 9 |
 | `studio_generate(session_id, tool, source)` | `StudioOutput` | fake until step 12 |
 | `misconceptions()` | `list[MisconceptionView]` | real |
+| `course_index(refresh=False)` | indexing report (files, chunks, unreadable pages, flags) | real (no LLM) |
+| `course_search(query, k=3)` | `CourseAnswer` | real, extractive (no LLM) |
 | `list_results()` / `read_results(name)` | `list[str]` / `dict` (read-only copy) | real |
 
 `student = {"name": str, "level": str, "lang": "fr"|"ar"|"en"}`.
@@ -118,6 +121,14 @@ handoff_note SafeText|null, calibration {sure_correct,sure_total,unsure_correct,
 ### StudioOutput: `docs/fixtures/studio_output.json`, `studio_output_refused.json`
 `{tool, targeted_at MisconceptionView|null, sources [{file,page,timestamp}], files [{path,mime}], items [...], refused str|null}`.
 `items` is tool-specific; every text inside an item is a SafeText dict. Flashcards: `{front, back, verified, misconception}`.
+
+### CourseAnswer: `docs/fixtures/course_answer.json`, `course_answer_none.json` (since 1.2)
+`{query, found, hits [{folder, file, page, snippet, lang, source_url|null, allow_derivatives, score}], note, retrieval}`.
+Extractive: the hits ARE the answer. Show each snippet as a quote with "file, p. N" and the source link.
+If `found` is false, show `note` and nothing else (TRACE never answers from memory). No LLM summary for now.
+HTTP: `POST /api/v1/courses/search {query, k}`, `POST /api/v1/courses/index`, `POST /api/v1/courses/upload`
+(multipart `files`, up to 10 files, 50 MB each, PDF/TXT/MD; saved to `data/courses/uploads/`).
+`SessionSummary.lesson_refs` is now filled from the course files (lesson pages for the diagnosed misconception).
 
 ### GuardEvent, Cost
 `GuardEvent {ts, check, status "pass|fail", action "shown|regenerated|fallback", summary}`.

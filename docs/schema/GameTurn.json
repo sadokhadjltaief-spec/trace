@@ -1,0 +1,270 @@
+{
+ "$defs": {
+  "Check": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "enum": [
+      "leak",
+      "congruency",
+      "math",
+      "style"
+     ],
+     "title": "Name",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "not_applicable"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "detail": {
+     "default": "",
+     "title": "Detail",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "status"
+   ],
+   "title": "Check",
+   "type": "object"
+  },
+  "GameFeedback": {
+   "additionalProperties": false,
+   "properties": {
+    "step_ok": {
+     "title": "Step Ok",
+     "type": "boolean"
+    },
+    "reason_ok": {
+     "title": "Reason Ok",
+     "type": "boolean"
+    },
+    "correct_step": {
+     "title": "Correct Step",
+     "type": "integer"
+    },
+    "correct_reason": {
+     "title": "Correct Reason",
+     "type": "string"
+    },
+    "points_gained": {
+     "title": "Points Gained",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "step_ok",
+    "reason_ok",
+    "correct_step",
+    "correct_reason",
+    "points_gained"
+   ],
+   "title": "GameFeedback",
+   "type": "object"
+  },
+  "GameRoundView": {
+   "additionalProperties": false,
+   "properties": {
+    "round": {
+     "title": "Round",
+     "type": "integer"
+    },
+    "total": {
+     "title": "Total",
+     "type": "integer"
+    },
+    "item_id": {
+     "title": "Item Id",
+     "type": "string"
+    },
+    "problem": {
+     "title": "Problem",
+     "type": "string"
+    },
+    "steps": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Steps",
+     "type": "array"
+    },
+    "reasons": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Reasons",
+     "type": "object"
+    }
+   },
+   "required": [
+    "round",
+    "total",
+    "item_id",
+    "problem",
+    "steps",
+    "reasons"
+   ],
+   "title": "GameRoundView",
+   "type": "object"
+  },
+  "HypProb": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "enum": [
+      "M0",
+      "M1",
+      "M2",
+      "M3",
+      "M4"
+     ],
+     "title": "Id",
+     "type": "string"
+    },
+    "name_en": {
+     "title": "Name En",
+     "type": "string"
+    },
+    "prob": {
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Prob",
+     "type": "number"
+    }
+   },
+   "required": [
+    "id",
+    "name_en",
+    "prob"
+   ],
+   "title": "HypProb",
+   "type": "object"
+  },
+  "SafeText": {
+   "additionalProperties": false,
+   "description": "Every piece of text the frontend may display. Render ONLY if shown_allowed is true.",
+   "properties": {
+    "text": {
+     "title": "Text",
+     "type": "string"
+    },
+    "lang": {
+     "default": "en",
+     "enum": [
+      "fr",
+      "ar",
+      "en"
+     ],
+     "title": "Lang",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "llm",
+      "verified_bank",
+      "template"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "checks": {
+     "items": {
+      "$ref": "#/$defs/Check"
+     },
+     "title": "Checks",
+     "type": "array"
+    },
+    "shown_allowed": {
+     "title": "Shown Allowed",
+     "type": "boolean"
+    },
+    "fallback_used": {
+     "default": false,
+     "title": "Fallback Used",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "text",
+    "origin",
+    "checks",
+    "shown_allowed"
+   ],
+   "title": "SafeText",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "properties": {
+  "contract_version": {
+   "default": "1.4",
+   "title": "Contract Version",
+   "type": "string"
+  },
+  "round": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/GameRoundView"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "feedback": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/GameFeedback"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "points": {
+   "title": "Points",
+   "type": "integer"
+  },
+  "streak": {
+   "title": "Streak",
+   "type": "integer"
+  },
+  "best_streak": {
+   "title": "Best Streak",
+   "type": "integer"
+  },
+  "done": {
+   "title": "Done",
+   "type": "boolean"
+  },
+  "message": {
+   "$ref": "#/$defs/SafeText"
+  },
+  "posterior": {
+   "items": {
+    "$ref": "#/$defs/HypProb"
+   },
+   "title": "Posterior",
+   "type": "array"
+  }
+ },
+ "required": [
+  "round",
+  "feedback",
+  "points",
+  "streak",
+  "best_streak",
+  "done",
+  "message",
+  "posterior"
+ ],
+ "title": "GameTurn",
+ "type": "object"
+}

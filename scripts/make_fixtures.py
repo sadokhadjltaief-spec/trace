@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from engine import ROOT  # noqa: E402
 from engine import safetext  # noqa: E402
 from engine.contract import (Agenda, AnswerRecord, Calibration, Check, Cost, CourseAnswer, CourseHit,  # noqa: E402
-                             ExplanationEvidence, SimItemView, SimRun, SimTurn,
+                             ExplanationEvidence, SimItemView, SimRun, SimTurn, GameFeedback, GameRoundView, GameTurn,
                              GuardEvent, Grading, HypProb, LabelProb,
                              LessonRef, MisconceptionView, NextQuestion, OutputFile, QuestionView, Reconstruction,
                              SessionState, SessionSummary, Source, StudioOutput, TutorTurn)
@@ -130,18 +130,32 @@ sim_turn = SimTurn(item_id="S1", stage="observe", observed="same",
                    message=safetext.static("Regarde la simulation. Compare le résultat avec ta prédiction.", lang="fr"),
                    expects="explanation")
 
+game_turn = GameTurn(round=GameRoundView(round=2, total=5, item_id="R_M1_1", problem="Additionne les fractions 2/3 et 1/4.",
+                                         steps=["Mettre chaque fraction au dénominateur 12 : 2/3 = 8/12 et 1/4 = 3/12.",
+                                                "Additionner les numérateurs et les dénominateurs : 8/12 + 3/12 = 11/24.",
+                                                "Écrire le résultat sous forme de fraction."],
+                                         reasons={"A": "Additionne les numérateurs et additionne les dénominateurs",
+                                                  "B": "Multiplie le numérateur et le dénominateur par le nombre entier",
+                                                  "C": "Pense que « moins par moins » donne toujours plus"}),
+                     feedback=GameFeedback(step_ok=True, reason_ok=True, correct_step=3, correct_reason="(FAKE)",
+                                           points_gained=15),
+                     points=15, streak=1, best_streak=1, done=False,
+                     message=safetext.static("Bonne ligne et bonne raison. Trouve la ligne fausse. Puis choisis la raison.", lang="fr"),
+                     posterior=post())
+
 OUT = ROOT / "docs" / "fixtures"
 OUT.mkdir(parents=True, exist_ok=True)
 for name, obj in {"session_state": state, "tutor_turn": turn, "tutor_turn_reconstruct": turn_recon,
                   "next_question": NQ, "session_summary": summ, "studio_output": studio,
                   "studio_output_refused": refused, "course_answer": course, "course_answer_none": course_none,
-                  "sim_item": sim_item, "sim_turn": sim_turn}.items():
+                  "sim_item": sim_item, "sim_turn": sim_turn,
+                  "game_turn": game_turn}.items():
     (OUT / f"{name}.json").write_text(json.dumps(obj.model_dump(), ensure_ascii=False, indent=1), encoding="utf-8")
     print("wrote", f"docs/fixtures/{name}.json")
 
 # JSON Schema for each contract object (for the frontend teammate / editor tooling)
 SCH = ROOT / "docs" / "schema"
 SCH.mkdir(parents=True, exist_ok=True)
-for model in (SessionState, TutorTurn, NextQuestion, SessionSummary, StudioOutput, CourseAnswer, SimItemView, SimTurn):
+for model in (SessionState, TutorTurn, NextQuestion, SessionSummary, StudioOutput, CourseAnswer, SimItemView, SimTurn, GameTurn):
     (SCH / f"{model.__name__}.json").write_text(json.dumps(model.model_json_schema(), indent=1), encoding="utf-8")
     print("wrote", f"docs/schema/{model.__name__}.json")

@@ -234,5 +234,25 @@
   "en": "Checked against the computed simulation",
   "fr": "Vérifié avec la simulation calculée",
   "ar": "تمّ التحقّق بالمحاكاة المحسوبة"
+ },
+ "game_start": {
+  "en": "Find the wrong line. Then choose the reason.",
+  "fr": "Trouve la ligne fausse. Puis choisis la raison.",
+  "ar": "جد السطر الخاطئ. ثم اختر السبب."
+ },
+ "game_right": {
+  "en": "Right line and right reason.",
+  "fr": "Bonne ligne et bonne raison.",
+  "ar": "السطر الصحيح والسبب الصحيح."
+ },
+ "game_partly": {
+  "en": "The wrong line was line {step}. The reason was: {reason}.",
+  "fr": "La ligne fausse était la ligne {step}. La raison était : {reason}.",
+  "ar": "السطر الخاطئ كان السطر {step}. السبب كان: {reason}."
+ },
+ "game_over": {
+  "en": "The game is over. You have {points} points.",
+  "fr": "La partie est terminée. Tu as {points} points.",
+  "ar": "انتهت اللعبة. لديك {points} نقطة."
  }
 }

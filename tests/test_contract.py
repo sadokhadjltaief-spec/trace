@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from engine import ROOT, api, api_fake, safetext
 from engine.contract import (Check, CourseAnswer, NextQuestion, SafeText, SessionState, SessionSummary,
-                             SimItemView, SimTurn, StudioOutput, TutorTurn)
+                             SimItemView, SimTurn, StudioOutput, TutorTurn, GameTurn)
 
 FX = ROOT / "docs" / "fixtures"
 FRONTEND = [ROOT / "app.py", *sorted((ROOT / "pages").glob("*.py")), *sorted((ROOT / "ui").glob("*.py"))]
@@ -17,7 +17,7 @@ HAS_BANK = (ROOT / "data" / "bank" / "bank.json").exists()
 MODELS = {"session_state": SessionState, "tutor_turn": TutorTurn, "tutor_turn_reconstruct": TutorTurn,
           "next_question": NextQuestion, "session_summary": SessionSummary, "studio_output": StudioOutput,
           "studio_output_refused": StudioOutput, "course_answer": CourseAnswer, "course_answer_none": CourseAnswer,
-          "sim_item": SimItemView, "sim_turn": SimTurn}
+          "sim_item": SimItemView, "sim_turn": SimTurn, "game_turn": GameTurn}
 
 
 # ---------------------------------------------------------------- shapes

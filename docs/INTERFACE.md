@@ -3,6 +3,7 @@
 **Changelog.** 1.1 (2026-11-21): added optional `TutorTurn.explanation_evidence` (additive; 1.0 code keeps working).
 1.2 (2026-11-21): added `CourseAnswer` / `CourseHit` (Course Q&A) and real `SessionSummary.lesson_refs` (additive).
 1.3 (2026-11-21): added simulations: `SimItemView`, `SimRun`, `SimTurn` (additive).
+1.4 (2026-11-21): added the game "Chasse aux erreurs": `GameTurn`, `GameRoundView`, `GameFeedback` (additive).
 No shape change in step 6: `tutor_reply` became real for hints. After the diagnosis stops, `submit_answer` raises
 `ValueError`; the page must switch to `tutor_reply` when `TutorTurn.state != "DIAGNOSE"`. A retry has
 `question.requires_confidence = false`. Step 8: RECONSTRUCT shows `reconstruction.steps` (numbered from 1); its
@@ -140,6 +141,12 @@ PHYSICS posterior (ids M0..M4 are the physics bank's slots; names given). Then `
 `transfer_result`. Free exploration with sliders: `GET /api/v1/sims/templates` (JSON schema: min, max, unit per
 parameter) and `POST /api/v1/sims/run {template, params}` → `SimRun` (400 if out of range). Plot with Plotly; no
 animation in clear mode (`no_timers_no_animation`).
+
+### Game "Chasse aux erreurs": `docs/fixtures/game_turn.json` (since 1.4)
+`POST /api/v1/sessions/{id}/game` → `GameTurn` (round 1 of 5). The student clicks a line of `round.steps`
+(1-based) and picks a reason letter → `POST …/game/answer {step, reason}` → `GameTurn` with `feedback` for that
+round and the next `round` (`done` and `round = null` at the end). Show `points` / `streak` unless `calm_theme`
+is on; never a timer in clear mode. A wrong reason updates the maths `posterior` (show it in the teacher view).
 
 ### GuardEvent, Cost
 `GuardEvent {ts, check, status "pass|fail", action "shown|regenerated|fallback", summary}`.

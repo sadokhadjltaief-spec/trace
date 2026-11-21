@@ -23,7 +23,8 @@ from engine import safetext
 from engine.config import cfg
 from engine.contract import (AnswerRecord, Agenda, Calibration, CourseAnswer, CourseHit, Cost, ExplanationEvidence,
                              Grading, HypProb, LabelProb, LessonRef, MisconceptionView, NextQuestion, QuestionView,
-                             SessionState, SessionSummary, SimItemView, SimRun, SimTurn, TutorTurn)
+                             SessionState, SessionSummary, SimItemView, SimRun, SimTurn, TutorTurn,
+                             GameFeedback, GameRoundView, GameTurn)
 
 _SESSIONS: dict[str, dict] = {}
 _BANK: dict | None = None
@@ -452,6 +453,56 @@ def sim_explain(session_id: str, item_id: str, text: str | None = None) -> dict:
                    grading=Grading(correct=None, method="none", label=""), posterior=_phys_posterior(ph),
                    message=tutor.txt(s, "sim_transfer" if nxt else "sim_done"),
                    expects="transfer_answer" if nxt else "none", next_item=nxt).model_dump()
+
+
+# ---------------------------------------------------------------- game "Chasse aux erreurs" (step 14, no LLM)
+def _game_turn(s: dict, feedback: dict | None, lead: str = "") -> dict:
+    from engine import game
+    g = s["game"]
+    lang = _lang(s)
+    view = game.round_view(g, _bank(), lang)
+    done = view is None
+    if done:
+        text = tr("game_over", lang, points=g["points"])
+    else:
+        text = tr("game_start", lang)
+    text = (lead + " " if lead else "") + text
+    fb = None
+    if feedback:
+        names = game._names(_bank(), lang)
+        fb = GameFeedback(step_ok=feedback["step_ok"], reason_ok=feedback["reason_ok"],
+                          correct_step=feedback["correct_step"], correct_reason=names[feedback["correct_reason"]],
+                          points_gained=feedback["points_gained"])
+    return GameTurn(round=GameRoundView(**view) if view else None, feedback=fb, points=g["points"],
+                    streak=g["streak"], best_streak=g["best_streak"], done=done,
+                    message=safetext.static(text, lang=lang, style_kwargs=tutor.style_kwargs(s["profile"], lang)),
+                    posterior=_posterior(s["diag"])).model_dump()
+
+
+def game_start(session_id: str) -> dict:
+    """New game: 5 rounds from the verified worked solutions (the diagnosed misconception first)."""
+    from engine import game
+    s = _SESSIONS[session_id]
+    first = s.get("target") if s.get("target") not in (None, "M0") else None
+    s["game"] = game.new_game(_bank(), first)
+    if not s["game"]["rounds"]:
+        raise ValueError("no verified worked solutions in the bank")
+    return _game_turn(s, None)
+
+
+def game_answer(session_id: str, step: int, reason: str) -> dict:
+    from engine import game
+    s = _SESSIONS[session_id]
+    g = s.get("game")
+    if not g or g["i"] >= len(g["rounds"]):
+        raise ValueError("no game round is open: call game_start")
+    fb = game.answer(g, int(step), reason, s["diag"])
+    lang = _lang(s)
+    if fb["step_ok"] and fb["reason_ok"]:
+        lead = tr("game_right", lang)
+    else:
+        lead = tr("game_partly", lang, step=fb["correct_step"], reason=game._names(_bank(), lang)[fb["correct_reason"]])
+    return _game_turn(s, fb, lead)
 
 
 def studio_generate(session_id: str, tool: str, source: dict) -> dict:

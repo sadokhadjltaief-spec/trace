@@ -1,0 +1,86 @@
+{
+ "contract_version": "1.4",
+ "round": {
+  "round": 2,
+  "total": 5,
+  "item_id": "R_M1_1",
+  "problem": "Additionne les fractions 2/3 et 1/4.",
+  "steps": [
+   "Mettre chaque fraction au dénominateur 12 : 2/3 = 8/12 et 1/4 = 3/12.",
+   "Additionner les numérateurs et les dénominateurs : 8/12 + 3/12 = 11/24.",
+   "Écrire le résultat sous forme de fraction."
+  ],
+  "reasons": {
+   "A": "Additionne les numérateurs et additionne les dénominateurs",
+   "B": "Multiplie le numérateur et le dénominateur par le nombre entier",
+   "C": "Pense que « moins par moins » donne toujours plus"
+  }
+ },
+ "feedback": {
+  "step_ok": true,
+  "reason_ok": true,
+  "correct_step": 3,
+  "correct_reason": "(FAKE)",
+  "points_gained": 15
+ },
+ "points": 15,
+ "streak": 1,
+ "best_streak": 1,
+ "done": false,
+ "message": {
+  "text": "Bonne ligne et bonne raison. Trouve la ligne fausse. Puis choisis la raison.",
+  "lang": "fr",
+  "origin": "template",
+  "checks": [
+   {
+    "name": "leak",
+    "status": "not_applicable",
+    "detail": "template text"
+   },
+   {
+    "name": "congruency",
+    "status": "not_applicable",
+    "detail": "template text"
+   },
+   {
+    "name": "math",
+    "status": "not_applicable",
+    "detail": "template text"
+   },
+   {
+    "name": "style",
+    "status": "pass",
+    "detail": ""
+   }
+  ],
+  "shown_allowed": true,
+  "fallback_used": false
+ },
+ "posterior": [
+  {
+   "id": "M0",
+   "name_en": "No misconception found (none of M1-M4)",
+   "prob": 0.08
+  },
+  {
+   "id": "M1",
+   "name_en": "Adds numerators and adds denominators",
+   "prob": 0.71
+  },
+  {
+   "id": "M2",
+   "name_en": "Multiplies both numerator and denominator by the whole number",
+   "prob": 0.07
+  },
+  {
+   "id": "M3",
+   "name_en": "Thinks 'two negatives make a positive' always applies",
+   "prob": 0.06
+  },
+  {
+   "id": "M4",
+   "name_en": "Makes equivalent fractions by adding instead of multiplying",
+   "prob": 0.08
+  }
+ ]
+}

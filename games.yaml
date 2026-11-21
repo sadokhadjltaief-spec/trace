@@ -1,0 +1,11 @@
+# "Chasse aux erreurs" (CLAUDE.md section 14). Deterministic, no LLM.
+chasse_aux_erreurs:
+  rounds: 5
+  topics: [M1, M2, M3, M4]       # maths misconceptions whose verified worked solutions are used
+  points_step: 10                # found the wrong line
+  points_reason: 5               # picked the right reason
+  reason_options: 3              # 1 correct + 2 distractors (other misconceptions)
+  # evidence for bayes.update_lik when the student picks a WRONG reason that names misconception M:
+  # likelihood M: wrong_reason_lik, every other hypothesis: 1.0, then tempered by bayes tau
+  wrong_reason_lik: 2.0
+  seed: 42

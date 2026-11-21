@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field
 from engine import api
 from engine.config import cfg
 from engine.contract import (CONTRACT_VERSION, CourseAnswer, MisconceptionView, NextQuestion, SessionState,
-                             SessionSummary, SimItemView, SimRun, SimTurn, StudioOutput, TutorTurn)
+                             SessionSummary, SimItemView, SimRun, SimTurn, StudioOutput, TutorTurn, GameTurn)
 
 app = FastAPI(title="TRACE engine API", version=CONTRACT_VERSION,
               description="Thin HTTP wrapper over engine/api.py. Shapes: docs/INTERFACE.md.")
@@ -208,3 +208,18 @@ def sim_predict(sid: str, item_id: str, body: SimPredictBody):
 @app.post("/api/v1/sessions/{sid}/sims/{item_id}/explain", response_model=SimTurn)
 def sim_explain(sid: str, item_id: str, body: SimExplainBody):
     return _call(api.sim_explain, sid, item_id, body.text)
+
+
+class GameAnswerBody(BaseModel):
+    step: int
+    reason: str
+
+
+@app.post("/api/v1/sessions/{sid}/game", response_model=GameTurn)
+def game_start(sid: str):
+    return _call(api.game_start, sid)
+
+
+@app.post("/api/v1/sessions/{sid}/game/answer", response_model=GameTurn)
+def game_answer(sid: str, body: GameAnswerBody):
+    return _call(api.game_answer, sid, body.step, body.reason)

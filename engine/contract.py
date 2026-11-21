@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.3"  # 1.1 explanation_evidence; 1.2 CourseAnswer; 1.3 simulations (all additive)
+CONTRACT_VERSION = "1.4"  # 1.1 explanation_evidence; 1.2 CourseAnswer; 1.3 simulations; 1.4 game (additive)
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]
@@ -304,3 +304,33 @@ class SimTurn(_M):
     message: SafeText
     expects: Literal["explanation", "transfer_answer", "none"]
     next_item: SimItemView | None = None
+
+
+# ---------------------------------------------------------------- game "Chasse aux erreurs" (since 1.4)
+class GameRoundView(_M):
+    round: int
+    total: int
+    item_id: str
+    problem: str
+    steps: list[str]               # numbered from 1; exactly one is wrong (the index stays in the engine)
+    reasons: dict[str, str]        # letter -> misconception name (1 correct, 2 distractors)
+
+
+class GameFeedback(_M):
+    step_ok: bool
+    reason_ok: bool
+    correct_step: int
+    correct_reason: str            # misconception name in the student's language
+    points_gained: int
+
+
+class GameTurn(_M):
+    contract_version: str = CONTRACT_VERSION
+    round: GameRoundView | None    # the next round (None when the game is over)
+    feedback: GameFeedback | None  # about the round just answered
+    points: int
+    streak: int
+    best_streak: int
+    done: bool
+    message: SafeText
+    posterior: list[HypProb]       # maths posterior (a wrong reason is evidence)

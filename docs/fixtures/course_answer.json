@@ -1,5 +1,5 @@
 {
- "contract_version": "1.3",
+ "contract_version": "1.4",
  "query": "additionner deux fractions",
  "found": true,
  "hits": [

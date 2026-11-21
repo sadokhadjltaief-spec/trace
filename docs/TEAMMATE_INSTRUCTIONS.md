@@ -163,6 +163,12 @@ object a/b), show `result_text` and `grading.label`, ask "why?" → `POST …/ex
 transfer prediction) and predict it the same way. Sliders: `GET /engine/sims/templates` gives min/max/unit per
 parameter; `POST /engine/sims/run` recomputes. Never compute physics in the frontend.
 
+## 6d. Game "Chasse aux erreurs" (since contract 1.4)
+
+`POST /engine/sessions/{id}/game` starts 5 rounds. Show `round.problem`, the numbered `round.steps` as clickable
+lines and the 3 `round.reasons`; send `POST /engine/sessions/{id}/game/answer {"step": 2, "reason": "B"}`; show
+`feedback` and `message`, then the next `round`. Points and streak in the header (hidden with `calm_theme`).
+
 ## 7. Other endpoints
 
 `GET /engine/misconceptions` (names FR/AR/EN), `GET /engine/results` and `/engine/results/{name}` (read-only

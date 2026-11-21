@@ -1,10 +1,10 @@
 # STATUS
 
-Last update: 2026-11-21 ~23:30, step 13 (simulations). New Groq key in .env (quota restored).
+Last update: 2026-11-21, step 14 (game). New Groq key in .env (quota restored).
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
-- [ ] Set `live.allow_unverified_dev: false` in `config.yaml` (now true = dev mode). Claude reminds the human at
-      the start of step 6 and before the demo rehearsal.
+- [x] `live.allow_unverified_dev: false` set by the team in `config.yaml` (committed 2026-11-21). Consequence:
+      the physics items are live only once ticked in `data/bank/physics_review.md`.
 
 ## ⚠ Groq free-tier DAILY token cap (found 2026-11-21, 19:00)
 - Besides 1000 requests/day and 8000 tokens/min, Groq caps **200,000 tokens/day per model** (rolling window).
@@ -43,6 +43,15 @@ Last update: 2026-11-21 ~23:30, step 13 (simulations). New Groq key in .env (quo
 - The team put a new `GROQ_API_KEY` in `.env`, but the old key was still a Windows user variable, which took
   precedence. `engine/config.py` now loads `.env` with `override=True`. Checked (key never printed): the engine uses
   the `.env` key; both models answer (120b 927/1000 requests left today, 20b 999/1000).
+
+## Step 14: game "Chasse aux erreurs" (`engine/game.py`, `games.yaml`), 0 LLM calls
+- 5 rounds from the 8 human-verified worked solutions (diagnosed misconception first), in the student's language
+  (FR/AR translations of the bank). Click the wrong line, then pick the reason among 3 misconception names
+  (1 correct + 2 others). Points (10 line + 5 reason) and streak. A wrong reason naming misconception M is evidence
+  for M in the maths posterior (likelihood 2.0 for M, tempered by tau). No timer in the engine; the frontend hides
+  points with `calm_theme`. Contract 1.4: `GameTurn`; HTTP `/api/v1/sessions/{id}/game` and `/game/answer`.
+- Not done: LLM-generated variants of the worked solutions (the brief allows them after SymPy + human review).
+- 150 tests pass (`tests/test_game.py`).
 
 ## Step 13: simulations with Predict-Observe-Explain (`engine/sims/`), 0 LLM calls
 - Whitelisted templates with pydantic parameter schemas (ranges + units; unknown or out-of-range parameters are

@@ -9,6 +9,9 @@ bayes:
   stop_threshold: 0.85
   max_questions: 5
   smoothing: 1             # add-one smoothing for MAP frequencies
+  eps: 0.02                # floor for any (q, h, option) likelihood before normalising (avoids log 0)
+  use_map_data: true       # replace defaults with MAP frequencies where MAP covers (q, h)
+  fragile_power: 0.6       # right + not sure: tempered ("small") update, flagged fragile
 
 llm:
   # model names come from .env: LLM_MODEL (live tutor, drafting) and EVAL_MODEL (bulk evals)

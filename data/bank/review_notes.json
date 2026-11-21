@@ -1,0 +1,9 @@
+{
+  "_note": "Notes shown under items in review.md. No Eedi text here.",
+  "items": {
+    "R_M3_1": "Shows the error as -7 -> +7. This is not exactly what MAP students wrote (they wrote e.g. '8 - 5 = 3', 'two negatives make a positive'). Human decides at review.",
+    "R_M3_2": "Shows the error as -9 -> +9. This is not exactly what MAP students wrote (they wrote e.g. '8 - 5 = 3', 'two negatives make a positive'). Human decides at review.",
+    "Q6": "Warning confirmed as a false alarm by the human (the '1' is 'denominator 1', not the answer).",
+    "Q10": "Its only M3-mapped option relies on Eedi #795 (medium confidence, unconfirmed). Cannot be verified until the human confirms #795 in crosswalk.json."
+  }
+}

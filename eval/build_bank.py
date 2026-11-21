@@ -89,7 +89,9 @@ def map_question(df: pd.DataFrame, qid: int, label_to_m: dict) -> dict:
         sub = s[s.Misconception == lab]
         if len(sub):
             label_counts[m] = {inv[k]: int(v) for k, v in sub.MC_Answer.value_counts().items()}
-    label_counts["M0"] = {inv[k]: int(v) for k, v in s[s.Category == "True_Correct"].MC_Answer.value_counts().items()}
+    # M0 = no labelled misconception (Correct + Neither rows). Using True_Correct only would force
+    # P(correct|M0) ~ 1 by construction (selection bias); Neither rows include ordinary slips.
+    label_counts["M0"] = {inv[k]: int(v) for k, v in s[s.Misconception.isna()].MC_Answer.value_counts().items()}
     return {"text": s.QuestionText.iloc[0], "options": letters, "correct": inv[correct_txt],
             "option_misconception": om, "map_question_id": int(qid), "source": "map", "local_only": False,
             "map_option_counts": counts, "map_label_answer_counts": label_counts}
@@ -164,9 +166,36 @@ def draft_hints(q: dict, m: dict) -> tuple[list[str], list[dict], int]:
     return hints, flags, t + 1
 
 
-def draft_recon(m: dict, variant: int, avoid: list[str]) -> tuple[dict, list[dict], int]:
+HINT1_SYS = HINT_SYS.replace('Return JSON: {"hints": ["level 1", "level 2", "level 3"]}',
+                             'You rewrite ONE hint at the requested level, following the reviewer feedback.\n'
+                             'Return JSON: {"hint": "..."}')
+
+
+def redraft_hint(q: dict, m: dict, level: int, hints: list[str], feedback: str) -> tuple[list[str], list[dict], int]:
+    opts = "\n".join(f"{k}: {mc.latex_to_plain(v)}" for k, v in q["options"].items())
+    user = (f"Question: {mc.latex_to_plain(q['text'])}\nOptions:\n{opts}\n"
+            f"Correct option (DO NOT reveal): {q['correct']}\n"
+            f"Target misconception: {m['name_en']} - {m['description']}\n"
+            f"Current hints: {json.dumps(hints, ensure_ascii=False)}\n"
+            f"Rewrite hint level {level}. Reviewer feedback on the current version: {feedback}")
+    for t in range(MAX_TRIES):
+        h = llm.ask_json(HINT1_SYS, user, purpose="bank_hint_redraft", temperature=0.3,
+                         seed_tag="" if t == 0 else f"try{t}").get("hint", "")
+        new = list(hints)
+        new[level - 1] = h
+        flags = check_hints(q, new)
+        if h and not blocking(flags):
+            break
+    return new, flags, t + 1
+
+
+def draft_recon(m: dict, variant: int, avoid: list[str], feedback: str = "",
+                previous: dict | None = None) -> tuple[dict, list[dict], int]:
     user = (f"Misconception: {m['name_en']} - {m['description']}\nExample of it: {m['contrast_example']}\n"
             f"Variant number {variant}." + (f" The problem MUST be different from: {avoid}" if avoid else ""))
+    if feedback:
+        user += (f"\nA reviewer rejected this previous draft: {json.dumps(previous, ensure_ascii=False)}\n"
+                 f"Reviewer feedback: {feedback}\nWrite an improved item that fixes this.")
     for t in range(MAX_TRIES):
         r = llm.ask_json(RECON_SYS, user, purpose="bank_recon", temperature=0.4,
                          seed_tag=f"v{variant}" + ("" if t == 0 else f"try{t}"))
@@ -237,6 +266,11 @@ def check_recon(r: dict) -> list[dict]:
 
 
 # ------------------------------------------------------------------ review ticks
+def load_json_items(name: str) -> dict:
+    p = BANK / name
+    return json.loads(p.read_text(encoding="utf-8")).get("items", {}) if p.exists() else {}
+
+
 def read_approvals() -> set[str]:
     p = BANK / "review.md"
     if not p.exists():
@@ -248,9 +282,13 @@ def main():
     BANK.mkdir(parents=True, exist_ok=True)
     approved = read_approvals()
     log(f"approved items read from review.md: {len(approved)}")
+    redraft = load_json_items("redraft.json")
+    notes = load_json_items("review_notes.json")
     cw = json.loads((BANK / "crosswalk.json").read_text(encoding="utf-8"))
     label_to_m = {c["map_label"]: c["id"] for c in cw["mappings"]}
     eedi_to_m = {e["eedi_id"]: c["id"] for c in cw["mappings"] for e in c["eedi"]}
+    unconfirmed = {e["eedi_id"] for c in cw["mappings"] for e in c["eedi"] if e.get("confirmed") is False}
+    log(f"unconfirmed crosswalk Eedi IDs: {sorted(unconfirmed)}")
     mdf = pd.read_csv(RAW / "map" / "train.csv")
     edf = pd.read_csv(RAW / "eedi" / "train.csv")
     mis = {m["id"]: dict(m) for m in MISCONCEPTIONS}
@@ -278,10 +316,23 @@ def main():
         if target not in mapped:
             log(f"  !! {bid}: target {target} not among mapped options {mapped}")
         hints, flags, tries = draft_hints(q, mis[target])
+        q["redrafted"] = []
+        for lvl in (1, 2, 3):
+            fb = redraft.get(f"{bid}:hint{lvl}")
+            if fb:
+                hints, flags, t2 = redraft_hint(q, mis[target], lvl, hints, fb)
+                tries += t2
+                q["redrafted"].append(f"hint{lvl}")
         q["verified_hints"] = hints
         q["draft_tries"] = tries
         q["hint_flags"] = flags
-        q["verified"] = bid in approved and not blocking(flags)
+        # a question whose target mapping relies only on unconfirmed crosswalk IDs cannot be verified
+        q["blocked_by"] = []
+        if src == "eedi":
+            tids = {q["eedi_option_misconception_ids"][L] for L, v in q["option_misconception"].items() if v == target}
+            if tids and tids <= unconfirmed:
+                q["blocked_by"].append(f"crosswalk: target mapping relies only on unconfirmed Eedi {sorted(tids)}")
+        q["verified"] = bid in approved and not blocking(flags) and not q["blocked_by"]
         questions.append(q)
         review_q.append((q, hints, flags))
         log(f"  {bid} ({src} {sid}) target={target} correct={q['correct']} map={q['option_misconception']} "
@@ -292,14 +343,18 @@ def main():
     for m in mis.values():
         done: list[str] = []
         for v in (1, 2):
-            r, flags, tries = draft_recon(m, v, done)
-            done.append(r.get("problem", ""))
             rid = f"R_{m['id']}_{v}"
+            r, flags, tries = draft_recon(m, v, done)
+            if rid in redraft:
+                r, flags, t2 = draft_recon(m, v, done, feedback=redraft[rid], previous=r)
+                tries += t2
+            done.append(r.get("problem", ""))
             item = {"id": rid, "misconception": m["id"], "problem": r.get("problem", ""),
                     "worked_solution": [s.get("text", "") for s in r.get("steps", [])],
                     "step_math": [s.get("math", "") for s in r.get("steps", [])],
                     "error_step": r.get("error_step"), "expected_explanation": r.get("expected_explanation", ""),
                     "correct_answer": r.get("correct_answer", ""), "sympy_flags": flags, "draft_tries": tries,
+                    "redrafted": rid in redraft,
                     "verified": rid in approved and not blocking(flags)}
             recon.append(item)
             review_r.append(item)
@@ -313,7 +368,7 @@ def main():
             "set": "A", "misconceptions": list(mis.values()), "questions": questions,
             "reconstruction": recon, "transfer": transfer}
     (BANK / "bank.json").write_text(json.dumps(bank, ensure_ascii=False, indent=1), encoding="utf-8")
-    write_review(mis, review_q, review_r, approved)
+    write_review(mis, review_q, review_r, approved, redraft, notes)
     n_ok = sum(q["verified"] for q in questions) + sum(r["verified"] for r in recon)
     log(f"\nwrote data/bank/bank.json ({len(questions)} questions, {len(recon)} reconstruction items); "
         f"verified items: {n_ok}")
@@ -329,7 +384,8 @@ def readable(s: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"\\[a-zA-Z]+", " ", t)).strip()
 
 
-def write_review(mis, review_q, review_r, approved):
+def write_review(mis, review_q, review_r, approved, redraft=None, notes=None):
+    redraft, notes = redraft or {}, notes or {}
     tick = lambda k: "x" if k in approved else " "  # noqa: E731
     L = ["# Question bank review (Set A)", "",
          "Tick an item to approve it: change `- [ ]` to `- [x]`, then rerun `eval\\build_bank.py`.",
@@ -352,13 +408,25 @@ def write_review(mis, review_q, review_r, approved):
                                                              if q["option_misconception"].get(k) else "")
             L.append(f"  - {k}: {readable(v)}{tag}")
         for i, h in enumerate(hints, 1):
-            L.append(f"  - hint {i}: {h}")
+            mark = " **[REDRAFTED]**" if f"hint{i}" in q.get("redrafted", []) else ""
+            L.append(f"  - hint {i}{mark}: {h}")
+            if mark:
+                L.append(f"    - your feedback: {redraft.get(q['id'] + ':hint' + str(i), '')}")
         L.append(f"  - automatic checks: {fmt_flags(flags)}")
+        for b in q.get("blocked_by", []):
+            L.append(f"  - **BLOCKED (cannot be verified even if ticked):** {b}")
+        if q["id"] in notes:
+            L.append(f"  - NOTE: {notes[q['id']]}")
         L.append("")
     L += ["## Reconstruction (find-the-mistake) items", "",
           "Drafted by the LLM. SymPy checks that steps before the error are true and the error step is false.", ""]
     for r in review_r:
-        L += [f"- [{tick(r['id'])}] {r['id']}  ({r['misconception']})", f"  - problem: {r['problem']}"]
+        L += [f"- [{tick(r['id'])}] {r['id']}  ({r['misconception']})"
+              + ("  **[REDRAFTED]**" if r.get("redrafted") else ""), f"  - problem: {r['problem']}"]
+        if r.get("redrafted"):
+            L.append(f"  - your feedback: {redraft.get(r['id'], '')}")
+        if r["id"] in notes:
+            L.append(f"  - NOTE: {notes[r['id']]}")
         for i, (s, m_) in enumerate(zip(r["worked_solution"], r["step_math"]), 1):
             star = "  <- ERROR STEP" if i == r["error_step"] else ""
             L.append(f"  - step {i}: {s}  [`{m_}`]{star}")

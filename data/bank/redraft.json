@@ -1,0 +1,9 @@
+{
+  "_note": "Human feedback that forces a redraft. Items listed here are redrafted with the feedback in the prompt and stay unverified until ticked again in review.md. Hints are addressed as '<question id>:hint<level>'.",
+  "items": {
+    "R_M4_1": "Rejected: too roundabout (aimed for denominator 8, then multiplied by 2.5). Use a direct path towards the target denominator; the only wrong step is adding the same number to top and bottom. End right after the wrong result with the target denominator is written: no simplifying, no steps that undo a previous step.",
+    "R_M1_2": "Remove the pointless trailing steps (multiplying by 2 and simplifying back). End right after the wrong result is written.",
+    "Q9:hint1": "Wrong: (-3) - 5 does not subtract a negative number. Point at what the minus sign in front of 5 does to the starting value -3.",
+    "Q14:hint3": "Muddled. Give a clear near-complete scaffold: say which number to multiply or divide 9 and 12 by to test each option, without saying which option is correct."
+  }
+}

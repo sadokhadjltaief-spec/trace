@@ -1,0 +1,905 @@
+{
+ "script": "eval/bench_diagnosis.py",
+ "label": "SIMULATION PROXY (simulated students, same model family as the engine)",
+ "created": "2026-11-21T15:31:11",
+ "git_commit": "7675174",
+ "seed": 42,
+ "noise": 0.2,
+ "hypotheses": [
+  "M0",
+  "M1",
+  "M2",
+  "M3",
+  "M4"
+ ],
+ "bank_questions": [
+  "Q1",
+  "Q2",
+  "Q3",
+  "Q4",
+  "Q5",
+  "Q6",
+  "Q7",
+  "Q8",
+  "Q9",
+  "Q11",
+  "Q12",
+  "Q13",
+  "Q14"
+ ],
+ "excluded_questions": "questions with blocked_by (unconfirmed crosswalk) are excluded",
+ "fixed_order": [
+  "Q1",
+  "Q5",
+  "Q8",
+  "Q11",
+  "Q2",
+  "Q6",
+  "Q9",
+  "Q12",
+  "Q3",
+  "Q7",
+  "Q13",
+  "Q4",
+  "Q14"
+ ],
+ "params": {
+  "p_hit": 0.7,
+  "p_correct_m0": 0.85,
+  "p_correct_despite": 0.3,
+  "eps": 0.02,
+  "stop_threshold": 0.85,
+  "max_questions": 5,
+  "use_map_data": true
+ },
+ "likelihood_sources": {
+  "Q1": {
+   "M0": "map_data",
+   "M1": "map_data",
+   "M2": "default",
+   "M3": "default",
+   "M4": "default"
+  },
+  "Q2": {
+   "M0": "default",
+   "M1": "default",
+   "M2": "default",
+   "M3": "default",
+   "M4": "default"
+  },
+  "Q3": {
+   "M0": "default",
+   "M1": "default",
+   "M2": "default",
+   "M3": "default",
+   "M4": "default"
+  },
+  "Q4": {
+   "M0": "default",
+   "M1": "default",
+   "M2": "default",
+   "M3": "default",
+   "M4": "default"
+  },
+  "Q5": {
+   "M0": "map_data",
+   "M1": "default",
+   "M2": "map_data",
+   "M3": "default",
+   "M4": "default"
+  },
+  "Q6": {
+   "M0": "default",
+   "M1": "default",
+   "M2": "default",
+   "M3": "default",
+   "M4": "default"
+  },
+  "Q7": {
+   "M0": "default",
+   "M1": "default",
+   "M2": "default",
+   "M3": "default",
+   "M4": "default"
+  },
+  "Q8": {
+   "M0": "map_data",
+   "M1": "default",
+   "M2": "default",
+   "M3": "map_data",
+   "M4": "default"
+  },
+  "Q9": {
+   "M0": "default",
+   "M1": "default",
+   "M2": "default",
+   "M3": "default",
+   "M4": "default"
+  },
+  "Q11": {
+   "M0": "map_data",
+   "M1": "default",
+   "M2": "default",
+   "M3": "default",
+   "M4": "map_data"
+  },
+  "Q12": {
+   "M0": "default",
+   "M1": "default",
+   "M2": "default",
+   "M3": "default",
+   "M4": "default"
+  },
+  "Q13": {
+   "M0": "default",
+   "M1": "default",
+   "M2": "default",
+   "M3": "default",
+   "M4": "default"
+  },
+  "Q14": {
+   "M0": "default",
+   "M1": "default",
+   "M2": "default",
+   "M3": "default",
+   "M4": "default"
+  }
+ },
+ "caveats": [
+  "World and engine share the likelihood model: optimistic vs real students.",
+  "Confidence taps and explanations are NOT simulated here (answers only).",
+  "M0 means 'none of M1..M4'; its MAP-based rows include students with other misconceptions.",
+  "Bank review pending: unverified hints do not affect this benchmark (answers only)."
+ ],
+ "conditions": {
+  "live_cap_5": {
+   "info_gain": {
+    "n_students": 1000,
+    "accuracy": 0.643,
+    "accuracy_ci95": [
+     0.6128,
+     0.6721
+    ],
+    "questions_used": {
+     "mean": 4.508,
+     "ci95": [
+      4.462,
+      4.554
+     ]
+    },
+    "reached_threshold_rate": 0.506,
+    "reached_threshold_ci95": [
+     0.475,
+     0.5369
+    ],
+    "accuracy_when_threshold_reached": 0.8043,
+    "per_true_hypothesis_accuracy": {
+     "M0": 0.7143,
+     "M1": 0.6904,
+     "M2": 0.5551,
+     "M3": 0.6611,
+     "M4": 0.6162
+    }
+   },
+   "fixed": {
+    "n_students": 1000,
+    "accuracy": 0.627,
+    "accuracy_ci95": [
+     0.5966,
+     0.6564
+    ],
+    "questions_used": {
+     "mean": 4.69,
+     "ci95": [
+      4.654,
+      4.726
+     ]
+    },
+    "reached_threshold_rate": 0.352,
+    "reached_threshold_ci95": [
+     0.323,
+     0.3821
+    ],
+    "accuracy_when_threshold_reached": 0.7812,
+    "per_true_hypothesis_accuracy": {
+     "M0": 0.6619,
+     "M1": 0.6648,
+     "M2": 0.7431,
+     "M3": 0.4579,
+     "M4": 0.5911
+    }
+   },
+   "random": {
+    "n_students": 1000,
+    "accuracy": 0.537,
+    "accuracy_ci95": [
+     0.506,
+     0.5677
+    ],
+    "questions_used": {
+     "mean": 4.807,
+     "ci95": [
+      4.773,
+      4.841
+     ]
+    },
+    "reached_threshold_rate": 0.195,
+    "reached_threshold_ci95": [
+     0.1716,
+     0.2207
+    ],
+    "accuracy_when_threshold_reached": 0.7795,
+    "per_true_hypothesis_accuracy": {
+     "M0": 0.6244,
+     "M1": 0.5146,
+     "M2": 0.6009,
+     "M3": 0.3934,
+     "M4": 0.5373
+    }
+   }
+  },
+  "no_cap": {
+   "info_gain": {
+    "n_students": 1000,
+    "accuracy": 0.752,
+    "accuracy_ci95": [
+     0.7243,
+     0.7778
+    ],
+    "questions_used": {
+     "mean": 6.685,
+     "ci95": [
+      6.466,
+      6.904
+     ]
+    },
+    "reached_threshold_rate": 0.809,
+    "reached_threshold_ci95": [
+     0.7835,
+     0.8322
+    ],
+    "accuracy_when_threshold_reached": 0.8059,
+    "per_true_hypothesis_accuracy": {
+     "M0": 0.8439,
+     "M1": 0.7327,
+     "M2": 0.7551,
+     "M3": 0.7005,
+     "M4": 0.7263
+    }
+   },
+   "fixed": {
+    "n_students": 1000,
+    "accuracy": 0.747,
+    "accuracy_ci95": [
+     0.7191,
+     0.773
+    ],
+    "questions_used": {
+     "mean": 7.937,
+     "ci95": [
+      7.717,
+      8.157
+     ]
+    },
+    "reached_threshold_rate": 0.825,
+    "reached_threshold_ci95": [
+     0.8002,
+     0.8473
+    ],
+    "accuracy_when_threshold_reached": 0.7842,
+    "per_true_hypothesis_accuracy": {
+     "M0": 0.8341,
+     "M1": 0.7552,
+     "M2": 0.7238,
+     "M3": 0.7196,
+     "M4": 0.6983
+    }
+   },
+   "random": {
+    "n_students": 1000,
+    "accuracy": 0.712,
+    "accuracy_ci95": [
+     0.6832,
+     0.7392
+    ],
+    "questions_used": {
+     "mean": 8.833,
+     "ci95": [
+      8.624,
+      9.042
+     ]
+    },
+    "reached_threshold_rate": 0.804,
+    "reached_threshold_ci95": [
+     0.7783,
+     0.8274
+    ],
+    "accuracy_when_threshold_reached": 0.7761,
+    "per_true_hypothesis_accuracy": {
+     "M0": 0.8476,
+     "M1": 0.6942,
+     "M2": 0.6442,
+     "M3": 0.6319,
+     "M4": 0.732
+    }
+   }
+  }
+ },
+ "ablation_engine_without_map_data": {
+  "n_students": 1000,
+  "accuracy": 0.626,
+  "accuracy_ci95": [
+   0.5956,
+   0.6555
+  ],
+  "questions_used": {
+   "mean": 4.613,
+   "ci95": [
+    4.568,
+    4.658
+   ]
+  },
+  "reached_threshold_rate": 0.334,
+  "reached_threshold_ci95": [
+   0.3055,
+   0.3638
+  ],
+  "accuracy_when_threshold_reached": 0.8713,
+  "per_true_hypothesis_accuracy": {
+   "M0": 0.6268,
+   "M1": 0.6421,
+   "M2": 0.6552,
+   "M3": 0.5952,
+   "M4": 0.6117
+  }
+ },
+ "sensitivity": {
+  "n_students_each": 300,
+  "condition": "info_gain, cap 5",
+  "accuracy_min": 0.5167,
+  "accuracy_max": 0.7667,
+  "grid": [
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.5,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.6967,
+    "accuracy_ci95": [
+     0.6424,
+     0.7459
+    ],
+    "questions_used": 4.237,
+    "reached_threshold_rate": 0.4833
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.5,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.7367,
+    "accuracy_ci95": [
+     0.6841,
+     0.7833
+    ],
+    "questions_used": 4.613,
+    "reached_threshold_rate": 0.36
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.5,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.7233,
+    "accuracy_ci95": [
+     0.6701,
+     0.7709
+    ],
+    "questions_used": 4.703,
+    "reached_threshold_rate": 0.48
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.6,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.69,
+    "accuracy_ci95": [
+     0.6355,
+     0.7397
+    ],
+    "questions_used": 4.267,
+    "reached_threshold_rate": 0.4967
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.6,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.74,
+    "accuracy_ci95": [
+     0.6876,
+     0.7864
+    ],
+    "questions_used": 4.427,
+    "reached_threshold_rate": 0.5133
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.6,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.7667,
+    "accuracy_ci95": [
+     0.7156,
+     0.811
+    ],
+    "questions_used": 4.657,
+    "reached_threshold_rate": 0.54
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.7,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.7167,
+    "accuracy_ci95": [
+     0.6632,
+     0.7647
+    ],
+    "questions_used": 4.22,
+    "reached_threshold_rate": 0.5667
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.7,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.6967,
+    "accuracy_ci95": [
+     0.6424,
+     0.7459
+    ],
+    "questions_used": 4.42,
+    "reached_threshold_rate": 0.5533
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.7,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.73,
+    "accuracy_ci95": [
+     0.6771,
+     0.7771
+    ],
+    "questions_used": 4.59,
+    "reached_threshold_rate": 0.5867
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.8,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.6867,
+    "accuracy_ci95": [
+     0.6321,
+     0.7365
+    ],
+    "questions_used": 4.163,
+    "reached_threshold_rate": 0.6067
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.8,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.69,
+    "accuracy_ci95": [
+     0.6355,
+     0.7397
+    ],
+    "questions_used": 4.377,
+    "reached_threshold_rate": 0.5767
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.8,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.7133,
+    "accuracy_ci95": [
+     0.6597,
+     0.7616
+    ],
+    "questions_used": 4.427,
+    "reached_threshold_rate": 0.5767
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.9,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.68,
+    "accuracy_ci95": [
+     0.6252,
+     0.7302
+    ],
+    "questions_used": 4.213,
+    "reached_threshold_rate": 0.57
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.9,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.7233,
+    "accuracy_ci95": [
+     0.6701,
+     0.7709
+    ],
+    "questions_used": 4.41,
+    "reached_threshold_rate": 0.5767
+   },
+   {
+    "world_noise": 0.1,
+    "engine_p_hit": 0.9,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.7133,
+    "accuracy_ci95": [
+     0.6597,
+     0.7616
+    ],
+    "questions_used": 4.19,
+    "reached_threshold_rate": 0.6133
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.5,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.6133,
+    "accuracy_ci95": [
+     0.5571,
+     0.6667
+    ],
+    "questions_used": 4.373,
+    "reached_threshold_rate": 0.4067
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.5,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.6567,
+    "accuracy_ci95": [
+     0.6013,
+     0.7081
+    ],
+    "questions_used": 4.633,
+    "reached_threshold_rate": 0.3533
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.5,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.59,
+    "accuracy_ci95": [
+     0.5335,
+     0.6442
+    ],
+    "questions_used": 4.69,
+    "reached_threshold_rate": 0.47
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.6,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.62,
+    "accuracy_ci95": [
+     0.5639,
+     0.6731
+    ],
+    "questions_used": 4.223,
+    "reached_threshold_rate": 0.4967
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.6,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.6567,
+    "accuracy_ci95": [
+     0.6013,
+     0.7081
+    ],
+    "questions_used": 4.57,
+    "reached_threshold_rate": 0.48
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.6,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.6667,
+    "accuracy_ci95": [
+     0.6115,
+     0.7176
+    ],
+    "questions_used": 4.617,
+    "reached_threshold_rate": 0.58
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.7,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.5833,
+    "accuracy_ci95": [
+     0.5268,
+     0.6377
+    ],
+    "questions_used": 4.26,
+    "reached_threshold_rate": 0.4933
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.7,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.61,
+    "accuracy_ci95": [
+     0.5537,
+     0.6635
+    ],
+    "questions_used": 4.51,
+    "reached_threshold_rate": 0.4867
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.7,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.6233,
+    "accuracy_ci95": [
+     0.5673,
+     0.6763
+    ],
+    "questions_used": 4.637,
+    "reached_threshold_rate": 0.5267
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.8,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.6033,
+    "accuracy_ci95": [
+     0.547,
+     0.6571
+    ],
+    "questions_used": 4.197,
+    "reached_threshold_rate": 0.53
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.8,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.6,
+    "accuracy_ci95": [
+     0.5436,
+     0.6538
+    ],
+    "questions_used": 4.427,
+    "reached_threshold_rate": 0.5267
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.8,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.6067,
+    "accuracy_ci95": [
+     0.5504,
+     0.6603
+    ],
+    "questions_used": 4.543,
+    "reached_threshold_rate": 0.5167
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.9,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.63,
+    "accuracy_ci95": [
+     0.574,
+     0.6827
+    ],
+    "questions_used": 4.22,
+    "reached_threshold_rate": 0.5667
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.9,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.6433,
+    "accuracy_ci95": [
+     0.5876,
+     0.6954
+    ],
+    "questions_used": 4.463,
+    "reached_threshold_rate": 0.5167
+   },
+   {
+    "world_noise": 0.2,
+    "engine_p_hit": 0.9,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.5767,
+    "accuracy_ci95": [
+     0.5201,
+     0.6313
+    ],
+    "questions_used": 4.297,
+    "reached_threshold_rate": 0.5233
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.5,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.6067,
+    "accuracy_ci95": [
+     0.5504,
+     0.6603
+    ],
+    "questions_used": 4.307,
+    "reached_threshold_rate": 0.4333
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.5,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.6133,
+    "accuracy_ci95": [
+     0.5571,
+     0.6667
+    ],
+    "questions_used": 4.603,
+    "reached_threshold_rate": 0.3567
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.5,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.5167,
+    "accuracy_ci95": [
+     0.4603,
+     0.5726
+    ],
+    "questions_used": 4.69,
+    "reached_threshold_rate": 0.4533
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.6,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.5433,
+    "accuracy_ci95": [
+     0.4868,
+     0.5988
+    ],
+    "questions_used": 4.243,
+    "reached_threshold_rate": 0.4967
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.6,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.6,
+    "accuracy_ci95": [
+     0.5436,
+     0.6538
+    ],
+    "questions_used": 4.55,
+    "reached_threshold_rate": 0.4767
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.6,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.5833,
+    "accuracy_ci95": [
+     0.5268,
+     0.6377
+    ],
+    "questions_used": 4.65,
+    "reached_threshold_rate": 0.4933
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.7,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.57,
+    "accuracy_ci95": [
+     0.5134,
+     0.6248
+    ],
+    "questions_used": 4.27,
+    "reached_threshold_rate": 0.4767
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.7,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.5333,
+    "accuracy_ci95": [
+     0.4768,
+     0.589
+    ],
+    "questions_used": 4.52,
+    "reached_threshold_rate": 0.4833
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.7,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.53,
+    "accuracy_ci95": [
+     0.4735,
+     0.5857
+    ],
+    "questions_used": 4.65,
+    "reached_threshold_rate": 0.4933
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.8,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.58,
+    "accuracy_ci95": [
+     0.5235,
+     0.6345
+    ],
+    "questions_used": 4.277,
+    "reached_threshold_rate": 0.5267
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.8,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.5633,
+    "accuracy_ci95": [
+     0.5068,
+     0.6183
+    ],
+    "questions_used": 4.45,
+    "reached_threshold_rate": 0.51
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.8,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.56,
+    "accuracy_ci95": [
+     0.5034,
+     0.6151
+    ],
+    "questions_used": 4.58,
+    "reached_threshold_rate": 0.4933
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.9,
+    "engine_p_correct_despite": 0.15,
+    "accuracy": 0.5967,
+    "accuracy_ci95": [
+     0.5403,
+     0.6506
+    ],
+    "questions_used": 4.293,
+    "reached_threshold_rate": 0.5467
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.9,
+    "engine_p_correct_despite": 0.3,
+    "accuracy": 0.5633,
+    "accuracy_ci95": [
+     0.5068,
+     0.6183
+    ],
+    "questions_used": 4.503,
+    "reached_threshold_rate": 0.49
+   },
+   {
+    "world_noise": 0.3,
+    "engine_p_hit": 0.9,
+    "engine_p_correct_despite": 0.45,
+    "accuracy": 0.5833,
+    "accuracy_ci95": [
+     0.5268,
+     0.6377
+    ],
+    "questions_used": 4.343,
+    "reached_threshold_rate": 0.5133
+   }
+  ]
+ },
+ "runtime_s": 100.0
+}

@@ -1,8 +1,7 @@
 # TRACE: 5-minute demo script (jury)
 
 Every number below comes from a file in `results/` produced by a script; the file is named next to it.
-Say "simulation" when a number comes from simulated students. Do not show anything that is not built
-(Study Studio and simulations are not built: they are the roadmap).
+Say "simulation" when a number comes from simulated students. Video and podcast are not built: do not show them.
 
 ---
 
@@ -118,6 +117,17 @@ the rules are enforced by code).
 > "Najahni-style content stays theirs: we cite the page and link back; no copying, no derivatives without
 > permission. That is our partnership pitch."
 
+## Optional (if time, replaces part of 3:50 – 4:15) · Study Studio, simulation, game
+
+All offline: the Study Studio outputs for Amira (FR, M1) are cached; simulations, game and report use no LLM.
+- Study Studio → **Flashcards** / **Slides** (cached for Amira after the recorded run; check it in rehearsal): every output says **"Ciblé sur : Additionne les numérateurs et
+  additionne les dénominateurs"** and lists its sources. Flashcards wait for a teacher's approval before use.
+- Simulations → S1 (two balls, 1 kg and 5 kg, no air): predict "the heavier one", watch them land together
+  (computed by scipy, not generated); the physics bars move to "heavier objects always fall faster".
+  **Needs the physics items ticked in `data/bank/physics_review.md`** (allow_unverified_dev is false).
+- Chasse aux erreurs: one round, click the wrong line, choose the reason.
+- Report → PDF in French and Arabic, with the confidence chart.
+
 ## 4:15 – 4:40 · Results slide (read from `results/`)
 
 | what | number | source |
@@ -132,8 +142,9 @@ the rules are enforced by code).
 
 > "TRACE is the diagnostic layer for tutors, small centres, schools and parents: it tells a tutor *which* idea
 > to fix and hands over a one-page report and a handoff note. One repaired misconception costs about 4k LLM tokens
-> on a free model tier (measured from our logs; no price set). Next: the Study Studio that turns the diagnosed gap
-> into flashcards and slides, physics simulations, and partnerships with Tunisian content sites."
+> on a free model tier (measured from our logs; no price set). The Study Studio already turns the diagnosed gap
+> into flashcards, slides and worksheets; next are narrated videos, more topics, and partnerships with Tunisian
+> content sites."
 
 ---
 

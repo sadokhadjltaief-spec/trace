@@ -42,7 +42,15 @@ dinars a year; an estimate, not our data). Tutors have no time to diagnose each 
 6. **Grounds the repair in the student's own course**: it indexes her PDFs locally and cites the exact page that
    covers the diagnosed misconception. Course Q&A returns passages with page numbers, or says nothing relevant was
    found; it never answers from memory.
-7. **Reports** to the teacher or parent: misconception, evidence, what was tried, outcome, next step, lesson page.
+7. **Reports** to the teacher or parent in French, Arabic or English (PDF + Markdown): misconception, evidence,
+   what was tried, outcome, next step, lesson page, confidence calibration chart, and a 3-line handoff note.
+8. **Study Studio, targeted at the diagnosis**: flashcards (guarded, human-approved, Leitner review, Anki export),
+   a revision sheet, a quiz worksheet with its answer key, slides and exact diagrams, each stamped
+   "Targeted at: <misconception>" with its sources. Third-party course folders that forbid derivatives are refused.
+9. **Physics simulations (Predict, Observe, Explain)**: free fall, pendulum and a pushed cart, computed with
+   scipy (never generated). The prediction updates a physics diagnosis; the result grades it.
+10. **Game "Chasse aux erreurs"**: find the wrong line in a worked solution and name the reason; a wrong reason is
+    evidence for that misconception.
 
 ## What is new
 
@@ -84,8 +92,7 @@ What these numbers do **not** show, and we do not claim:
   report tokens, not dinars). The diagnosis itself needs no LLM.
 - **Content partners**: TRACE cites the exact lesson page of a partner site and links back instead of copying it
   (see `docs/NAJAHNI_NOTE.md`, with a French partnership email).
-- **Roadmap**: Study Studio (flashcards, summaries, slides targeted at the diagnosed misconception), physics
-  simulations with predict-observe-explain, more topics.
+- **Roadmap**: narrated explainer videos and podcasts, more simulations and topics, tests with real students.
 
 ## How it is built
 
@@ -98,6 +105,7 @@ student ── Next.js frontend ──HTTP──▶ server/main.py (FastAPI, /ap
      bayes.py        detector.py     tutor.py         guards.py       rag.py       style.py / i18n
   posterior, IG   TF-IDF + LLM rank  state machine   leak, congruency  PDF pages,   profiles, linter,
   (no LLM)        + translation      (code decides)  SymPy, style     BM25 + e5    FR / AR / EN text
+          studio/ (flashcards, sheet, quiz, slides, PDF, diagrams) · sims/ (scipy physics, POE) · game.py
                                           │
                                        llm.py: every LLM call, disk cache, demo replay, retries, token log
 ```
@@ -109,7 +117,8 @@ student ── Next.js frontend ──HTTP──▶ server/main.py (FastAPI, /ap
 - The question bank (14 questions, 8 worked solutions, 3 hints each) was drafted with the LLM, checked with SymPy
   and **approved item by item by a human** (13 questions and 8 worked solutions approved; one question waits on an
   unconfirmed misconception mapping); only approved items are used live.
-- 125 automated tests (`tests/`): engine maths, guards, state machine, contract, HTTP API, retrieval, encoding.
+- 170 automated tests (`tests/`): engine maths, guards, state machine, contract, HTTP API, retrieval, physics
+  against analytic solutions, game, Study Studio outputs, trilingual report, encoding.
 
 ## Run it (Windows, PowerShell)
 

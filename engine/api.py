@@ -18,8 +18,8 @@ import uuid
 from engine import ROOT, bayes, llm
 from engine import safetext
 from engine.config import cfg
-from engine.contract import (AnswerRecord, Agenda, Cost, Grading, HypProb, MisconceptionView, NextQuestion,
-                             QuestionView, SessionState, TutorTurn)
+from engine.contract import (AnswerRecord, Agenda, Cost, ExplanationEvidence, Grading, HypProb, LabelProb,
+                             MisconceptionView, NextQuestion, QuestionView, SessionState, TutorTurn)
 
 _SESSIONS: dict[str, dict] = {}
 _BANK: dict | None = None
@@ -120,7 +120,8 @@ def _state(sid: str) -> SessionState:
 
 
 # ---------------------------------------------------------------- public API
-def start_session(student: dict, profile: dict | None = None, demo: bool = False) -> dict:
+def start_session(student: dict, profile: dict | None = None, demo: bool = False,
+                  detector_llm: bool = True) -> dict:
     sid = uuid.uuid4().hex[:12]
     llm.set_session(sid)
     llm.set_demo_mode(demo)
@@ -131,7 +132,7 @@ def start_session(student: dict, profile: dict | None = None, demo: bool = False
                       "profile": dict(profile or {}), "demo": demo, "state": "DIAGNOSE",
                       "diag": bayes.Diagnoser(table), "pool": [q["id"] for q in pool],
                       "by_id": {q["id"]: q for q in pool}, "asked": [], "guard_events": [], "turn": 0,
-                      "warnings": warnings, "created": time.time()}
+                      "warnings": warnings, "created": time.time(), "detector_llm": detector_llm}
     return _state(sid).model_dump()
 
 
@@ -156,6 +157,15 @@ def submit_answer(session_id: str, question_id: str, option: str, confidence: st
     d: bayes.Diagnoser = s["diag"]
     d.observe_answer(question_id, option, confidence)
     correct = option == q["correct"]
+    evidence = None
+    # free-text "Why?" -> explanation detector -> tempered posterior update (structured choices carry no signal)
+    if explanation and explanation.strip() and not s["profile"].get("structured_why"):
+        from engine import detector  # lazy: loads the TF-IDF model on first use
+        r = detector.detect(q, option, explanation, use_llm=s.get("detector_llm", True))
+        d.observe_explanation(r["dist"], {"question": question_id, "method": r["method"], "lang": r["lang"]})
+        evidence = ExplanationEvidence(method=r["method"], lang=r["lang"], original=r["original"],
+                                       english=r["english"], notes=r["notes"],
+                                       dist=[LabelProb(id=k, prob=round(v, 6)) for k, v in r["dist"].items()])
     s["asked"].append(AnswerRecord(question_id=question_id, option=option, confidence=confidence,
                                    correct=correct, explanation=explanation))
     s["turn"] += 1
@@ -169,7 +179,7 @@ def submit_answer(session_id: str, question_id: str, option: str, confidence: st
     turn = TutorTurn(session_id=session_id, turn_id=s["turn"], state=s["state"], message=safetext.static(msg),
                      expects=expects, agenda=_agenda(s), question=nxt,
                      grading=Grading(correct=correct, method="answer_key", label="Checked against the answer key"),
-                     posterior=_posterior(d), next_question=nq, guard_events=[])
+                     posterior=_posterior(d), next_question=nq, guard_events=[], explanation_evidence=evidence)
     return turn.model_dump()
 
 

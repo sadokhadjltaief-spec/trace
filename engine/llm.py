@@ -132,17 +132,41 @@ def _log(req: Request, model: str, resp: Response | None, attempts: int, error: 
 
 
 # ---------------------------------------------------------------- throttle
-def _throttle(model: str) -> None:
+_tok_window: dict[str, list[tuple[float, int]]] = {}  # model -> [(t, tokens)] in the last 60 s
+
+
+def estimate_tokens(messages: list[dict], max_tokens: int) -> int:
+    chars = sum(len(str(m.get("content", ""))) for m in messages)
+    return int(chars / 3.5) + max_tokens // 2  # rough: prompt + half the completion budget
+
+
+def _throttle(model: str, est_tokens: int = 0) -> None:
+    """Min interval between request starts + a sliding 60 s token budget (tpm_budget, per model)."""
     gap = float(_c().get("min_interval_s", 0))
+    budget = int(_c().get("tpm_budget") or 0)
     while True:
         with _lock:
             now = time.monotonic()
+            win = [(t, n) for t, n in _tok_window.get(model, []) if now - t < 60]
+            _tok_window[model] = win
+            used = sum(n for _, n in win)
             nxt = _last_start.get(model, 0.0) + gap
-            if now >= nxt:
+            over = budget and win and used + est_tokens > budget
+            if now >= nxt and not over:
                 _last_start[model] = now
+                win.append((now, est_tokens))  # reserve; corrected after the response
                 return
-            wait = nxt - now
+            wait = max(nxt - now, (win[0][0] + 60 - now) if over else 0, 0.05)
         time.sleep(wait)
+
+
+def _record_tokens(model: str, est: int, actual: int) -> None:
+    with _lock:
+        win = _tok_window.get(model, [])
+        for i in range(len(win) - 1, -1, -1):
+            if win[i][1] == est:
+                win[i] = (win[i][0], actual)
+                break
 
 
 def _push_back(model: str, seconds: float) -> None:
@@ -154,7 +178,11 @@ def _push_back(model: str, seconds: float) -> None:
 def _retry_after(exc: Exception) -> float | None:
     resp = getattr(exc, "response", None)
     headers = getattr(resp, "headers", None) or {}
-    for h in ("retry-after", "x-ratelimit-reset-requests", "x-ratelimit-reset-tokens"):
+    # per-minute token reset first; the request reset is a DAILY window and only applies when requests ran out
+    order = ["retry-after", "x-ratelimit-reset-tokens"]
+    if str(headers.get("x-ratelimit-remaining-requests", "1")) == "0":
+        order.append("x-ratelimit-reset-requests")
+    for h in order:
         v = headers.get(h)
         if not v:
             continue
@@ -222,7 +250,8 @@ def chat(req: Request) -> Response:
     attempts, last_err = 0, ""
     while attempts < int(c["retries"]):
         attempts += 1
-        _throttle(model)
+        est = estimate_tokens(req.messages, req.max_tokens or int(c["max_tokens"]))
+        _throttle(model, est)
         t0 = time.monotonic()
         try:
             kwargs: dict[str, Any] = dict(model=model, messages=req.messages,
@@ -239,6 +268,7 @@ def chat(req: Request) -> Response:
             u = out.usage
             resp = Response(text, data, model, getattr(u, "prompt_tokens", 0) or 0,
                             getattr(u, "completion_tokens", 0) or 0, False, time.monotonic() - t0)
+            _record_tokens(model, est, resp.prompt_tokens + resp.completion_tokens)
             cpath.write_text(json.dumps({"text": text, "data": data, "prompt_tokens": resp.prompt_tokens,
                                          "completion_tokens": resp.completion_tokens,
                                          "model": model, "purpose": req.purpose}, ensure_ascii=False),

@@ -77,6 +77,13 @@ def test_explanation_tempered(table):
     assert d.top()[0] == "M3" and d.top()[1] < 0.85
 
 
+def test_explanation_other_folds_into_m0(table):
+    a, b = Diagnoser(table), Diagnoser(table)
+    a.observe_explanation({"M0": 0.1, "other": 0.5, "M1": 0.4})
+    b.observe_explanation({"M0": 0.6, "M1": 0.4})
+    assert np.allclose(a.posterior, b.posterior)
+
+
 def test_scripted_m3_student_diagnosed_in_most_runs(table):
     rng = np.random.default_rng(0)
     correct = 0

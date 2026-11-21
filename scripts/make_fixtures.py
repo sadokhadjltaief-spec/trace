@@ -13,7 +13,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from engine import ROOT  # noqa: E402
 from engine import safetext  # noqa: E402
-from engine.contract import (Agenda, AnswerRecord, Calibration, Check, Cost, GuardEvent, Grading, HypProb,  # noqa: E402
+from engine.contract import (Agenda, AnswerRecord, Calibration, Check, Cost, ExplanationEvidence,  # noqa: E402
+                             GuardEvent, Grading, HypProb, LabelProb,
                              LessonRef, MisconceptionView, NextQuestion, OutputFile, QuestionView, Reconstruction,
                              SessionState, SessionSummary, Source, StudioOutput, TutorTurn)
 
@@ -63,7 +64,12 @@ turn = TutorTurn(session_id=SID, turn_id=3, state="HINT_1",
                  message=llm_text("Look at the bottom numbers. What does the 3 in 1/3 tell you about the pieces?"),
                  expects="retry", agenda=Agenda(step=3, total=7, next="you try the question again"), question=Q1,
                  grading=Grading(correct=False, method="answer_key", label="Checked against the answer key"),
-                 posterior=post(), next_question=None, guard_events=GE)
+                 posterior=post(), next_question=None, guard_events=GE,
+                 explanation_evidence=ExplanationEvidence(
+                     method="combined", lang="fr", original="j'ai fait 1+2=3 et 3+5=8",
+                     english="I did 1+2=3 and 3+5=8",
+                     dist=[LabelProb(id=k, prob=v) for k, v in
+                           {"M0": 0.05, "M1": 0.82, "M2": 0.03, "M3": 0.02, "M4": 0.03, "other": 0.05}.items()]))
 
 turn_recon = TutorTurn(session_id=SID, turn_id=6, state="RECONSTRUCT",
                        message=llm_text("Here is a worked solution with one wrong step. Which step is wrong?"),

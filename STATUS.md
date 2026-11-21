@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-21, during build step 5.
+Last update: 2026-11-21, step 5 committed; starting step 6.
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [ ] Set `live.allow_unverified_dev: false` in `config.yaml` (now true = dev mode). Claude reminds the human at
@@ -15,6 +15,38 @@ Last update: 2026-11-21, during build step 5.
   pandas `read_csv`/`read_json`/`to_csv`/`to_json` and `subprocess(text=True)` must pass `encoding=`.
   Found and fixed 6 (3 pandas reads, 3 subprocess calls). Also checks that bank.json / review.md / i18n files
   decode as UTF-8 and break under cp1252.
+
+## Step 5: explanation detector (`engine/detector.py`) + real-data evaluation
+- Labels M0, M1..M4, other (other = any other MAP misconception; bayes folds it into M0).
+- TF-IDF (word 1-2 on question/answer/correctness tokens + explanation, char 3-5 on explanation) + LR;
+  LLM few-shot (8 nearest MAP examples, same question) returns a RANKING; code converts it to a distribution
+  (`detector.rank_weights`). Combined = mean. Deterministic language detection (en/fr/ar/darija) + LLM translation.
+- Wired into `api.submit_answer`: free-text "Why?" -> detector -> `bayes.observe_explanation` (tau 0.5).
+  Contract 1.1 adds optional `TutorTurn.explanation_evidence` (additive). TF-IDF-only fallback if the LLM fails.
+- `engine/llm.py`: sliding 60 s token budget (`tpm_budget: 7000`); fixed a bug where a token-limit 429 could wait
+  for the DAILY request reset (~47 min) instead of seconds. Groq free tier = 1000 requests/day + 8000 tokens/min per model.
+
+### Measured: `results/detector.json` (REAL MAP data, seed 42, stratified 80/20)
+TF-IDF on the full held-out set (7,340 rows): accuracy 0.912, MAP@3 0.955, macro-F1 0.873;
+right-answer-wrong-reasoning (True_Misconception) flaw recall 0.389 (72 rows). On the 4 bank questions: acc 0.902.
+400-row sample (all 72 held-out True_Misconception rows + label quotas), LLM = gpt-oss-20b, batched:
+| variant | accuracy | MAP@3 | macro-F1 | TM flaw recall [95% CI] |
+|---|---|---|---|---|
+| TF-IDF | 0.795 | 0.893 | 0.822 | 0.389 [0.285, 0.504] |
+| LLM zero-shot | 0.600 | 0.650 | 0.575 | 0.264 [0.176, 0.376] |
+| LLM few-shot | 0.780 | 0.850 | 0.797 | 0.250 [0.164, 0.361] |
+| combined | **0.813** | 0.887 | **0.835** | 0.319 [0.223, 0.434] |
+- Honest reading: combined is best on accuracy/macro-F1 but within noise of TF-IDF. Per-class F1 for M1–M4 is
+  0.88–0.98 (combined). **Weak spot: right answer + flawed reasoning is caught only ~1/3 of the time** (best:
+  TF-IDF 0.39). Do not pitch that case as solved; pitch it as detected sometimes, measured, and the open problem.
+- MAP@3 is over our 6 labels, not comparable to Kaggle's ~65-label leaderboard.
+
+### Translation eval (`eval/eval_translation.py`): PAUSED
+Translation eval paused due to free-tier rate limits and time constraints. Detector eval completed successfully.
+Will resume if time permits.
+- The run was stopped after French only; `results/translation.json` was NOT written. The log line
+  (`.cache/eval_translation.log`, 100 rows, TF-IDF): fr language detection 0.99, accuracy English 0.82 ->
+  French back-translated 0.86, raw French without translation 0.67. Unsaved partial run: do not cite as a result.
 
 ## Step 4: frontend contract + stub pages (final pages = teammate)
 - `docs/INTERFACE.md` (contract v1.0) + `engine/contract.py` (pydantic, source of truth) + `docs/schema/*.json`

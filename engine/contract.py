@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.0"
+CONTRACT_VERSION = "1.1"  # 1.1: optional TutorTurn.explanation_evidence (additive, non-breaking)
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]
@@ -144,6 +144,21 @@ class Reconstruction(_M):
     steps: list[str]
 
 
+class LabelProb(_M):
+    id: Literal["M0", "M1", "M2", "M3", "M4", "other"]
+    prob: float = Field(ge=0, le=1)
+
+
+class ExplanationEvidence(_M):
+    """What the explanation detector concluded (teacher/judge panel). Numbers come from engine code."""
+    method: Literal["combined", "tfidf"]       # combined = TF-IDF + LLM few-shot ranking
+    lang: Literal["en", "fr", "ar", "darija"]  # detected language of the student's text
+    original: str
+    english: str                               # translation used by the detector (== original if English)
+    dist: list[LabelProb]                      # over M0..M4 + other
+    notes: list[str] = []                      # e.g. "LLM detector unavailable; TF-IDF only"
+
+
 class Grading(_M):
     correct: bool | None
     method: Literal["answer_key", "sympy", "simulation", "llm_rubric", "none"]
@@ -164,6 +179,7 @@ class TutorTurn(_M):
     posterior: list[HypProb]       # snapshot after this turn (teacher/judge panel)
     next_question: NextQuestion | None = None
     guard_events: list[GuardEvent] = []
+    explanation_evidence: ExplanationEvidence | None = None  # since 1.1
 
 
 class LessonRef(_M):

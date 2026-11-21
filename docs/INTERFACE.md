@@ -1,4 +1,6 @@
-# TRACE frontend ↔ engine interface (contract v1.0)
+# TRACE frontend ↔ engine interface (contract v1.1)
+
+**Changelog.** 1.1 (2026-11-21): added optional `TutorTurn.explanation_evidence` (additive; 1.0 code keeps working).
 
 This is the contract between the engine (built by Claude Code) and the frontend pages (built by the teammate).
 The source of truth is **`engine/contract.py`** (pydantic models). This file explains it.
@@ -78,7 +80,11 @@ Judge panel text: "Next question chosen because IG = {ig_bits} bits (alternative
 `{turn_id, state, message SafeText, expects "answer|retry|error_step|explanation|transfer_answer|none",
 agenda, question QuestionView|null, reconstruction {id, problem, steps[]}|null,
 grading {correct|null, method "answer_key|sympy|simulation|llm_rubric|none", label}, posterior, next_question|null,
-guard_events}`. Show `grading.label`; `llm_rubric` must be visibly labelled as LLM-graded.
+guard_events, explanation_evidence|null}`. Show `grading.label`; `llm_rubric` must be visibly labelled as LLM-graded.
+
+`explanation_evidence` (since 1.1, teacher/judge panel only): `{method "combined|tfidf", lang "en|fr|ar|darija",
+original, english, dist [{id "M0..M4|other", prob}], notes [str]}`. It is set when the student typed a free-text
+"Why?". Show `english` next to `original` when `lang != "en"`. Do not show it in the student view in clear mode.
 
 ### SessionSummary: `docs/fixtures/session_summary.json`
 `{diagnosis HypProb, diagnosis_names {id,name_en,name_fr,name_ar}, status "mastered|in_progress|handoff|no_misconception",

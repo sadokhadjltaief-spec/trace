@@ -172,8 +172,12 @@ class Diagnoser:
 
     # --- explanation detector
     def observe_explanation(self, dist: dict[str, float], detail: dict | None = None) -> None:
+        """Detector distribution over M0..M4 (+ 'other'), tempered by tau. 'other' (a misconception outside
+        M1..M4) counts as M0, because engine M0 means 'none of M1..M4'."""
         tau = self.p["tau"]
-        lik = np.array([max(dist.get(h, 0.0), self.p["eps"]) for h in H]) ** tau
+        d = dict(dist)
+        d["M0"] = d.get("M0", 0.0) + d.pop("other", 0.0)
+        lik = np.array([max(d.get(h, 0.0), self.p["eps"]) for h in H]) ** tau
         self.update_lik(lik, "explanation", detail or {"dist": dist})
 
     # --- question selection

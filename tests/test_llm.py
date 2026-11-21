@@ -56,3 +56,18 @@ def test_retry_after_parsing():
     assert llm._retry_after(E({"retry-after": "3"})) == 3.0
     assert abs(llm._retry_after(E({"x-ratelimit-reset-tokens": "1m2.5s"})) - 62.5) < 1e-9
     assert llm._retry_after(E({})) is None
+    # the daily request reset must NOT be used for a per-minute token 429
+    assert llm._retry_after(E({"x-ratelimit-reset-requests": "47m31s", "x-ratelimit-reset-tokens": "0.7s",
+                               "x-ratelimit-remaining-requests": "900"})) == 0.7
+    assert llm._retry_after(E({"x-ratelimit-reset-requests": "2m", "x-ratelimit-remaining-requests": "0"})) == 120
+
+
+def test_token_budget_throttle_waits(monkeypatch):
+    base = dict(llm._c())
+    base.update(min_interval_s=0, tpm_budget=1000)
+    monkeypatch.setattr(llm, "_c", lambda: base)
+    llm._tok_window["m"] = [(llm.time.monotonic() - 59.8, 900)]  # 900 tokens used, expires in 0.2 s
+    t0 = llm.time.monotonic()
+    llm._throttle("m", 300)
+    assert llm.time.monotonic() - t0 >= 0.15
+    llm._tok_window.pop("m", None)

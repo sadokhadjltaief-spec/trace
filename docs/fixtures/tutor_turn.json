@@ -1,5 +1,5 @@
 {
- "contract_version": "1.0",
+ "contract_version": "1.1",
  "session_id": "fake0000demo",
  "turn_id": 3,
  "state": "HINT_1",
@@ -93,5 +93,38 @@
    "action": "regenerated",
    "summary": "1 hint blocked: revealed answer"
   }
- ]
+ ],
+ "explanation_evidence": {
+  "method": "combined",
+  "lang": "fr",
+  "original": "j'ai fait 1+2=3 et 3+5=8",
+  "english": "I did 1+2=3 and 3+5=8",
+  "dist": [
+   {
+    "id": "M0",
+    "prob": 0.05
+   },
+   {
+    "id": "M1",
+    "prob": 0.82
+   },
+   {
+    "id": "M2",
+    "prob": 0.03
+   },
+   {
+    "id": "M3",
+    "prob": 0.02
+   },
+   {
+    "id": "M4",
+    "prob": 0.03
+   },
+   {
+    "id": "other",
+    "prob": 0.05
+   }
+  ],
+  "notes": []
+ }
 }

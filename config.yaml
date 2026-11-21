@@ -20,6 +20,8 @@ llm:
   backoff_base_s: 2.0        # exponential backoff base when no retry-after header is sent
   backoff_max_s: 60.0
   min_interval_s: 2.0        # our own throttle between request starts, per model (not a provider number)
+  # Groq free tier headers read on 2026-11-21: 1000 requests/day and 8000 tokens/min per model.
+  tpm_budget: 7000           # our sliding 60 s token budget per model (kept under the 8000 TPM limit)
   batch_workers: 2           # concurrent workers for bulk evals; the throttle still applies
   reasoning_effort: low      # gpt-oss models on Groq accept low / medium / high
   max_tokens: 2048
@@ -29,6 +31,14 @@ llm:
   cost_label: "free tier, rate-limited"
   price_input_per_m: null
   price_output_per_m: null
+
+detector:
+  rank_weights: [0.7, 0.2, 0.1]   # LLM ranking -> distribution (fixed by code; the LLM gives no numbers)
+  rank_floor: 0.01
+  fewshot_k: 8
+  eval_sample: 400                # held-out rows for the LLM variants
+  batch_fewshot: 5                # items per LLM call (free tier: 1000 requests/day)
+  batch_zeroshot: 20
 
 live:
   # Only human-verified bank items are used live. While the review is pending, dev mode may use

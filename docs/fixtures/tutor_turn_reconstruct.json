@@ -1,5 +1,5 @@
 {
- "contract_version": "1.0",
+ "contract_version": "1.1",
  "session_id": "fake0000demo",
  "turn_id": 6,
  "state": "RECONSTRUCT",
@@ -81,5 +81,6 @@
   }
  ],
  "next_question": null,
- "guard_events": []
+ "guard_events": [],
+ "explanation_evidence": null
 }

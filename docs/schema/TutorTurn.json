@@ -78,6 +78,62 @@
    "title": "Check",
    "type": "object"
   },
+  "ExplanationEvidence": {
+   "additionalProperties": false,
+   "description": "What the explanation detector concluded (teacher/judge panel). Numbers come from engine code.",
+   "properties": {
+    "method": {
+     "enum": [
+      "combined",
+      "tfidf"
+     ],
+     "title": "Method",
+     "type": "string"
+    },
+    "lang": {
+     "enum": [
+      "en",
+      "fr",
+      "ar",
+      "darija"
+     ],
+     "title": "Lang",
+     "type": "string"
+    },
+    "original": {
+     "title": "Original",
+     "type": "string"
+    },
+    "english": {
+     "title": "English",
+     "type": "string"
+    },
+    "dist": {
+     "items": {
+      "$ref": "#/$defs/LabelProb"
+     },
+     "title": "Dist",
+     "type": "array"
+    },
+    "notes": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Notes",
+     "type": "array"
+    }
+   },
+   "required": [
+    "method",
+    "lang",
+    "original",
+    "english",
+    "dist"
+   ],
+   "title": "ExplanationEvidence",
+   "type": "object"
+  },
   "Grading": {
    "additionalProperties": false,
    "properties": {
@@ -196,6 +252,35 @@
     "prob"
    ],
    "title": "HypProb",
+   "type": "object"
+  },
+  "LabelProb": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "enum": [
+      "M0",
+      "M1",
+      "M2",
+      "M3",
+      "M4",
+      "other"
+     ],
+     "title": "Id",
+     "type": "string"
+    },
+    "prob": {
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Prob",
+     "type": "number"
+    }
+   },
+   "required": [
+    "id",
+    "prob"
+   ],
+   "title": "LabelProb",
    "type": "object"
   },
   "NextQuestion": {
@@ -394,7 +479,7 @@
  "additionalProperties": false,
  "properties": {
   "contract_version": {
-   "default": "1.0",
+   "default": "1.1",
    "title": "Contract Version",
    "type": "string"
   },
@@ -488,6 +573,17 @@
    },
    "title": "Guard Events",
    "type": "array"
+  },
+  "explanation_evidence": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/ExplanationEvidence"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
   }
  },
  "required": [

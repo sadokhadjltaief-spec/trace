@@ -11,10 +11,19 @@ bayes:
   smoothing: 1             # add-one smoothing for MAP frequencies
 
 llm:
-  timeout_s: 30
-  retries: 3
+  # model names come from .env: LLM_MODEL (live tutor, drafting) and EVAL_MODEL (bulk evals)
+  timeout_s: 60
+  retries: 6                 # total attempts on 429 / 5xx / timeouts
+  backoff_base_s: 2.0        # exponential backoff base when no retry-after header is sent
+  backoff_max_s: 60.0
+  min_interval_s: 2.0        # our own throttle between request starts, per model (not a provider number)
+  batch_workers: 2           # concurrent workers for bulk evals; the throttle still applies
+  reasoning_effort: low      # gpt-oss models on Groq accept low / medium / high
+  max_tokens: 2048
   cache_dir: .cache/llm
-  # Prices per 1M tokens: fill in current values from the provider. Left null on purpose (never invented).
+  log_db: .cache/trace.db
+  # Groq free tier (rate-limited). Prices stay null on purpose; cost.json reports tokens only.
+  cost_label: "free tier, rate-limited"
   price_input_per_m: null
   price_output_per_m: null
 

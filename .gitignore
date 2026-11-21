@@ -21,3 +21,6 @@ assets/fonts/*.ttf
 assets/fonts/*.otf
 .pytest_cache/
 .streamlit/secrets.toml
+data/bank/bank.json
+data/bank/review.md
+data/bank/build_log.md

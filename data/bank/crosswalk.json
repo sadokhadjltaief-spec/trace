@@ -1,0 +1,20 @@
+{
+  "_note": "Manual crosswalk MAP label <-> Eedi misconception ID (Set A, chosen 2026-11-21). Eedi names are not copied here (Eedi licence unverified, local-only); look them up in data/raw/eedi/misconception_mapping.csv. confidence: high = same error; medium = overlapping error, flagged for review.",
+  "mappings": [
+    {"id": "M1", "map_label": "Adding_across", "map_question_id": 33472,
+     "eedi": [{"eedi_id": 217, "confidence": "high"}],
+     "evidence": "MAP explanations: '1+2=3 and 3+5=8' -> 3/8."},
+    {"id": "M2", "map_label": "Duplication", "map_question_id": 32833,
+     "eedi": [{"eedi_id": 1976, "confidence": "high"}],
+     "evidence": "MAP explanations: '2x5=10 and 3x5=15' -> 10/15."},
+    {"id": "M3", "map_label": "Positive", "map_question_id": 89443,
+     "eedi": [{"eedi_id": 1435, "confidence": "high"},
+              {"eedi_id": 795, "confidence": "medium", "flag": "Eedi 795 = ignores negative signs; MAP 'Positive' students who answer 13 do this, but the Eedi label is broader. Needs human check."}],
+     "evidence": "MAP explanations: 'two negatives make a positive' -> 3 or 13.",
+     "not_mapped": [{"eedi_id": 1282, "why": "opposite error (thinks the answer must be negative)"},
+                    {"eedi_id": 1805, "why": "different error (treats a-(-b) as a-b)"}]},
+    {"id": "M4", "map_label": "Additive", "map_question_id": 31778,
+     "eedi": [{"eedi_id": 1429, "confidence": "high"}],
+     "evidence": "MAP explanations: '10 to 15 is adding 5, so 9-5=4'."}
+  ]
+}

@@ -16,7 +16,9 @@ import re
 import time
 import uuid
 
-from engine import ROOT, bayes, llm, tutor
+from engine import ROOT, bayes, llm, style, tutor
+from engine import i18n
+from engine.i18n import lang_of, t as tr
 from engine import safetext
 from engine.config import cfg
 from engine.contract import (AnswerRecord, Agenda, Calibration, Cost, ExplanationEvidence, Grading, HypProb,
@@ -60,13 +62,13 @@ def _live_questions() -> tuple[list[dict], list[str]]:
     return [], ["No verified questions in the bank: tick items in data/bank/review.md."]
 
 
-def _qview(q: dict, profile: dict) -> QuestionView:
+def _qview(q: dict, profile: dict, lang: str = "en") -> QuestionView:
     structured = bool(profile.get("structured_why"))
     why = []
     if structured:
-        why = [safetext.static(t) for t in ("I used a rule I remember.", "I worked it out step by step.",
-                                            "I compared it with an example.", "I guessed.")]
-    return QuestionView(id=q["id"], text=q["text"], options=q["options"], requires_confidence=True,
+        why = [safetext.static(tr(k, lang), lang=lang) for k in ("why_rule", "why_steps", "why_example", "why_guess")]
+    text, options = i18n.question(q, lang)
+    return QuestionView(id=q["id"], text=text, options=options, requires_confidence=True,
                         why_mode="structured" if structured else "free", why_options=why)
 
 
@@ -99,11 +101,16 @@ def _cost(sid: str) -> Cost:
                 completion_tokens=sum(r["completion_tokens"] for r in rows), label=u["cost_label"] or "")
 
 
+def _lang(s: dict) -> str:
+    return lang_of(s["student"].get("lang"))
+
+
 def _agenda(s: dict) -> Agenda:
     d = s["diag"]
     total = d.p["max_questions"]
     step = min(len(d.asked) + 1, total)
-    return Agenda(step=step, total=total, next="next question" if not d.done() else "your results")
+    return Agenda(step=step, total=total,
+                  next=tr("agenda_next_question" if not d.done() else "agenda_results", _lang(s)))
 
 
 def _state(sid: str) -> SessionState:
@@ -114,13 +121,13 @@ def _state(sid: str) -> SessionState:
     nq = _next(d, s["pool"])
     if s["state"] == "DIAGNOSE":
         cur = s["by_id"].get(nq.question_id) if not nq.stop else None
-        cur_view = _qview(cur, s["profile"]) if cur else None
+        cur_view = _qview(cur, s["profile"], _lang(s)) if cur else None
     else:
         qid = s.get("repair_q") if s["state"].startswith("HINT") else (
             s.get("transfer_q") if s["state"] == "TRANSFER" else None)
-        cur_view = tutor.qview(s["by_id"][qid]) if qid else None
+        cur_view = tutor.qview(s["by_id"][qid], _lang(s)) if qid else None
     return SessionState(session_id=sid, student=s["student"], profile=s["profile"], demo_mode=s["demo"],
-                        state=s["state"], agenda=_agenda(s) if s["state"] == "DIAGNOSE" else tutor.agenda(s["state"]),
+                        state=s["state"], agenda=_agenda(s) if s["state"] == "DIAGNOSE" else tutor.agenda(s["state"], _lang(s)),
                         posterior=_posterior(d),
                         top=HypProb(id=top_h, name_en=names[top_h], prob=round(top_p, 6)),
                         asked=s["asked"], current_question=cur_view,
@@ -138,7 +145,7 @@ def start_session(student: dict, profile: dict | None = None, demo: bool = False
     table = bayes.build_table(pool) if pool else bayes.build_table([])
     _SESSIONS[sid] = {"student": {"name": student.get("name", ""), "level": student.get("level", ""),
                                   "lang": student.get("lang", "fr")},
-                      "profile": dict(profile or {}), "demo": demo, "state": "DIAGNOSE",
+                      "profile": style.resolve(profile), "demo": demo, "state": "DIAGNOSE",
                       "diag": bayes.Diagnoser(table), "pool": [q["id"] for q in pool],
                       "by_id": {q["id"]: q for q in pool}, "asked": [], "guard_events": [], "turn": 0,
                       "warnings": warnings, "created": time.time(), "detector_llm": detector_llm}
@@ -184,16 +191,16 @@ def submit_answer(session_id: str, question_id: str, option: str, confidence: st
     grading = Grading(correct=correct, method="answer_key", label="Checked against the answer key")
     if nq.stop:  # diagnosis over: the state machine takes over (code decides the state and message type)
         h = d.top()[0]
-        f = tutor.begin(s, h, _names(), _mis(h), d.as_dict())
+        f = tutor.frame(s, tutor.begin(s, h, _names(), _mis(h), d.as_dict()))
         s["guard_events"] += f.get("guard_events", [])
         turn = TutorTurn(session_id=session_id, turn_id=s["turn"], grading=grading, posterior=_posterior(d),
                          next_question=nq, explanation_evidence=evidence, **f)
         _track(s)
         return turn.model_dump()
-    msg = "Thank you. Your answer is saved. Here is the next question."
+    f = tutor.frame(s, {"message": tutor.txt(s, "answer_saved"), "expects": "answer", "agenda": _agenda(s)})
     turn = TutorTurn(session_id=session_id, turn_id=s["turn"], state=s["state"],
-                     message=safetext.static(msg, style_kwargs=tutor.style_kwargs(s["profile"])),
-                     expects="answer", agenda=_agenda(s), question=_qview(s["by_id"][nq.question_id], s["profile"]),
+                     message=f["message"], expects="answer", agenda=f["agenda"],
+                     question=_qview(s["by_id"][nq.question_id], s["profile"], _lang(s)),
                      grading=grading, posterior=_posterior(d), next_question=nq, guard_events=[],
                      explanation_evidence=evidence)
     return turn.model_dump()
@@ -215,6 +222,7 @@ def tutor_reply(session_id: str, text: str | None = None, choice: str | None = N
             raise ValueError("a retry needs `choice` (the option letter)")
         s["turn"] += 1
         f, grading = tutor.on_retry(s, choice, _names(), _mis(s["target"]), d.as_dict(), _bank())
+        f = tutor.frame(s, f)
         s["guard_events"] += f.get("guard_events", [])
         _track(s)
         return TutorTurn(session_id=session_id, turn_id=s["turn"], grading=grading, posterior=_posterior(d),
@@ -229,6 +237,7 @@ def tutor_reply(session_id: str, text: str | None = None, choice: str | None = N
         f, grading = tutor.on_transfer(s, choice, _names(), _bank(), d)
     else:
         raise ValueError(f"no tutor reply expected in state {st}")
+    f = tutor.frame(s, f)
     s["guard_events"] += f.get("guard_events", [])
     _track(s)
     return TutorTurn(session_id=session_id, turn_id=s["turn"], grading=grading, posterior=_posterior(d),
@@ -241,18 +250,6 @@ def _track(s: dict) -> None:
         h.append(s["state"])
 
 
-_OUTCOME = {
-    "mastered": "The student found the wrong step and solved a new question of the same type.",
-    "in_progress": "The work on this misconception is not finished yet.",
-    "handoff": "The student still makes this mistake after the hints. A teacher should take over.",
-    "no_misconception": "No misconception from the list was found, and the student solved a new question.",
-}
-_NEXT = {
-    "mastered": "Check this topic again in a few days with one new question.",
-    "in_progress": "Continue the session to finish the hints, the worked solution and the new question.",
-    "handoff": "Work on this topic with the student in person. Use the note below.",
-    "no_misconception": "Move on to the next topic.",
-}
 
 
 def summary(session_id: str) -> dict:
@@ -288,14 +285,15 @@ def summary(session_id: str) -> dict:
         ev.append(f"New question {x['question_id']}: {x['option']} ({'correct' if x['correct'] else 'wrong'})")
     sure = [a for a in s["asked"] if a.confidence == "sure"]
     unsure = [a for a in s["asked"] if a.confidence == "unsure"]
-    kw = tutor.style_kwargs(s["profile"])
+    lang = _lang(s)
+    kw = tutor.style_kwargs(s["profile"], lang)
     note = s.get("handoff_note")
     return SessionSummary(
         session_id=session_id, diagnosis=HypProb(id=h, name_en=names[h], prob=round(float(d.as_dict()[h]), 6)),
         diagnosis_names=MisconceptionView(**mv), status=status, evidence=ev,
         tried=list(s.get("states", ["DIAGNOSE"])),
-        outcome=safetext.static(_OUTCOME[status], style_kwargs=kw),
-        next_step=safetext.static(_NEXT[status], style_kwargs=kw), lesson_refs=[],
+        outcome=safetext.static(tr(f"outcome_{status}", lang), lang=lang, style_kwargs=kw),
+        next_step=safetext.static(tr(f"next_{status}", lang), lang=lang, style_kwargs=kw), lesson_refs=[],
         handoff_note=safetext.static(note, style_kwargs=kw) if note else None,
         calibration=Calibration(sure_correct=sum(a.correct for a in sure), sure_total=len(sure),
                                 unsure_correct=sum(a.correct for a in unsure), unsure_total=len(unsure)),

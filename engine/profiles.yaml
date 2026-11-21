@@ -1,0 +1,27 @@
+# Clear and structured mode: support-profile toggles (CLAUDE.md section 11).
+# Chosen by the student or a guardian in the UI, stored only as these flags. Never inferred from behaviour,
+# never a diagnosis. The UI calls it "Mode clair et structuré" / "الوضع الواضح والمنظّم" / "Clear and structured mode".
+# Wording rules are design choices based on established practice; they should be reviewed by a special-education
+# professional or an autistic person before real use. No therapeutic or clinical claim.
+toggles:
+  literal_language: false          # no idioms, sarcasm, metaphors, rhetorical questions
+  one_question_per_message: false  # at most one question mark
+  max_words_per_sentence: 25       # base limit; the preset uses 15
+  visible_agenda: false            # always show "Step 2 of 5" and what happens next (frontend; agenda is always sent)
+  fixed_template: false            # every turn: Situation / Your task / What happens next (built by code)
+  neutral_feedback: false          # calm, specific, no praise words, no exclamation marks
+  structured_why: false            # choose-from-options reasoning instead of a free-text "Why?"
+  visual_steps: false              # worked steps as numbered boxes (frontend)
+  no_timers_no_animation: false    # frontend
+  calm_theme: false                # muted palette, no motion, no confetti, no sounds (frontend)
+  example_theme: ""                # optional interest used as the context of examples; never changes the maths
+  advance_notice: false            # before a change of activity, show what comes next and ask "Ready?" (frontend)
+presets:
+  clear_structured:                # turns on toggles 1-6
+    literal_language: true
+    one_question_per_message: true
+    max_words_per_sentence: 15
+    visible_agenda: true
+    fixed_template: true
+    neutral_feedback: true
+    structured_why: true

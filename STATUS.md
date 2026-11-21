@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-21 ~20:00, step 9 + Gate P0.
+Last update: 2026-11-21 ~21:30, step 10 + FR/AR templates (P1 started).
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [ ] Set `live.allow_unverified_dev: false` in `config.yaml` (now true = dev mode). Claude reminds the human at
@@ -11,6 +11,54 @@ Last update: 2026-11-21 ~20:00, step 9 + Gate P0.
 - gpt-oss-20b: ~244k tokens logged in 3 h (detector eval) -> capped until about 15:00 on 22 Nov (after the deadline).
 - gpt-oss-120b: ~75k logged in 24 h -> ~125k left. Guard judge moved to 120b (`llm.judge_model`).
 - `engine/llm.py` now fails fast on a daily-cap 429 (the caller falls back) instead of retrying for minutes.
+
+## Measured: `results/guards.json` (judge validation vs HUMAN labels, 30 messages, judge = gpt-oss-120b)
+| check | accuracy | precision | recall |
+|---|---|---|---|
+| leak, full guard (deterministic + judge) | 0.83 | 0.67 | 0.57 (4/7) |
+| leak, deterministic only | 0.87 | 0.80 | 0.57 |
+| congruency (judge, per suspected misconception, n=25) | 0.76 | 0.56 | 0.71 (5/7) |
+- Labels file: Excel saved the labels after `;;;;;` at the end of each line and damaged the accents. The labels
+  were read from those trailing fields and written with the ORIGINAL messages to `eval/guard_labels_clean.csv`
+  (UTF-8); results use that file. `eval/guard_labels.csv` was still locked by Excel and is left as Excel saved it.
+- **6 of the 9 disagreements are rows whose labels look like entry slips** (pending human check, not changed):
+  G07/G08 and G11/G12 look swapped (a neutral question labelled leak + congruent, the endorsing message next to
+  it labelled none), G22 "The answer is -3." labelled no-leak (−3 is the answer), G17 (AR "multiply numerator and
+  denominator by 5") labelled none. The other 3 are real errors: G04 (human: leak; guard: no), G06 (near-complete
+  scaffold called a leak), G16 (contrasting example called congruent).
+- Re-running after a label fix is free (the judge answers are cached): `eval\eval_guards.py --labels eval\guard_labels_clean.csv`.
+- The guards are now measured but on a small, hand-written set; say "checked on 30 labelled messages", not "validated".
+
+## Step 10: clear and structured mode (`engine/profiles.yaml`, `engine/style.py`)
+- 12 toggles (defaults off) + preset `clear_structured` (toggles 1-6: literal language, one question, 15 words per
+  sentence, visible agenda, fixed template, neutral feedback, structured why). Stored as flags only; never inferred.
+- Linter: words per sentence, question marks, idioms (short EN/FR/AR lists), praise words, emoji, ALL-CAPS, "!".
+  Prompts get the active rules (default profile = identical prompt, so the demo cache stays valid);
+  `example_theme` goes to the prompt (never changes the maths). `fixed_template`: the engine frames every turn as
+  "Situation / Your task / What happens next" by code, style re-checked.
+- Frontend-only toggles (visual steps, calm theme, no timers, advance notice) are stored and documented
+  (`docs/INTERFACE.md` 2a); the teammate renders them.
+
+### Measured: `results/style.json` (RAW LLM hints before guards, 10 per condition, FR/AR/EN rotating, 120b)
+| rule (clear-mode limits) | default profile | clear_structured preset |
+|---|---|---|
+| max 15 words per sentence | 9/10 | 9/10 |
+| at most one question, no idioms, no praise, no "!", no emoji/caps, right language | 10/10 each | 10/10 each |
+| all rules | 9/10 | 9/10 |
+- Honest reading: **no measurable difference** at n=10; the base hint prompt is already strict (neutral, short,
+  no praise), so the preset adds little on raw wording. The difference in clear mode comes from code: the linter
+  blocks the one long sentence and regenerates, and fixed_template / structured why / agenda are built by code.
+  Brief asked for 100 messages; 10 fit today's token budget.
+
+## FR/AR everywhere in the tutor (2026-11-21)
+- All fixed strings in `i18n/tutor.json` (EN/FR/AR; our translations, **native-speaker check needed**): tutor
+  messages, agenda labels, structured-why options, report outcome / next step, fixed-template labels.
+- Question stems and worked solutions: hand translations in `data/bank/bank_i18n.json` (**local-only**, Eedi-derived,
+  gitignored). Maths copied unchanged; `tests/test_style.py` checks every number matches the English bank.
+- French hints now address the student as "tu" (like the templates). FR demo re-recorded; both demos replay
+  offline 8/8 cached, every line in the student's language. (The new FR hint 2 no longer contains the false
+  claim, so this demo no longer shows a blocked hint; the inequality guard is covered by tests.)
+- Report outcome / next step follow `student.lang`; the 3-line handoff note stays English (teacher-facing; step 15).
 
 ## Step 9 + P0 follow-ups (2026-11-21 evening)
 - **Math guard now checks inequalities**: symbolic (`<`, `>`, `≤`, `≥`) and in words (EN "smaller/greater than",
@@ -213,3 +261,4 @@ Will resume if time permits.
 ## Time spent
 - Step 1: ~25 min. Step 2: ~50 min. Step 2 fixes + step 3: ~45 min. Step 4 (contract + stubs): ~40 min.
 - Step 5: ~1.5 h (mostly the rate-limited LLM eval). Step 6: ~35 min. Steps 7-8: ~1 h. Step 9 + FastAPI + gate: ~1 h.
+- Guard eval + step 10 + FR/AR templates: ~1 h.

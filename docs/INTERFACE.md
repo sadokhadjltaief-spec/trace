@@ -55,6 +55,20 @@ Any change to a field bumps `CONTRACT_VERSION` and updates this file, the schema
 `source` for Study Studio: `{"kind": "diagnosis"|"folder"|"pages", "folder": str?, "pages": [...]?}`.
 All functions return plain dicts (`model.model_dump()`), JSON-serialisable.
 
+## 2a. Profiles and languages (since step 10; no shape change)
+- `profile` in `start_session` = toggles from `engine/profiles.yaml`, or `{"preset": "clear_structured"}`
+  (toggles 1-6), optionally with overrides (`{"preset": "clear_structured", "fixed_template": false}`).
+  `SessionState.profile` returns the resolved toggles. The UI name is "Mode clair et structuré" /
+  "الوضع الواضح والمنظّم" / "Clear and structured mode"; never the word "autism" in the student UI.
+- Engine-side toggles: `literal_language`, `one_question_per_message`, `max_words_per_sentence`, `neutral_feedback`
+  (linter + prompt), `fixed_template` (the engine writes "Situation: … / Your task: … / What happens next: …" in
+  `message.text`, one per line), `structured_why` (`why_options` instead of free text), `example_theme` (prompt).
+- Frontend-side toggles (the engine only stores them): `visible_agenda` (show `agenda`), `visual_steps`,
+  `no_timers_no_animation`, `calm_theme`, `advance_notice`.
+- Every engine text is in `student.lang` (fr / ar / en): LLM hints (checked by a language guard), fixed strings
+  (`i18n/tutor.json`), agenda labels, report outcome / next step, and (local bank file) question stems and worked
+  solutions. `message.lang` tells you the language; render Arabic right-to-left and keep `\( … \)` maths LTR.
+
 ## 2b. HTTP (for the Next.js frontend)
 `server/main.py` (FastAPI) exposes the same functions under `/api/v1` (one endpoint per function, contract
 models as responses, OpenAPI at `/openapi.json`). How to connect: `docs/TEAMMATE_INSTRUCTIONS.md`.

@@ -12,6 +12,7 @@ Usage: .\\.venv\\Scripts\\python.exe eval\\eval_guards.py
 """
 from __future__ import annotations
 
+import argparse
 import csv
 import datetime as dt
 import sys
@@ -24,8 +25,8 @@ from engine import ROOT, api, bayes, guards, llm  # noqa: E402
 LABELS = ROOT / "eval" / "guard_labels.csv"
 
 
-def labelled_rows() -> list[dict]:
-    with LABELS.open(encoding="utf-8", newline="") as f:
+def labelled_rows(path: Path = LABELS) -> list[dict]:
+    with path.open(encoding="utf-8", newline="") as f:
         rows = list(csv.DictReader(f))
     ok = []
     for r in rows:
@@ -50,7 +51,10 @@ def binary(pred: list[bool], gold: list[bool]) -> dict:
 
 
 def main():
-    rows = labelled_rows()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--labels", type=Path, default=LABELS)
+    a = ap.parse_args()
+    rows = labelled_rows(a.labels)
     if not rows:
         print("No labelled rows in eval/guard_labels.csv: fill human_reveals_answer (yes/no) and human_congruent "
               "(e.g. M1, or none). Nothing written.")
@@ -61,6 +65,7 @@ def main():
     by_id = {q["id"]: q for q in bank["questions"]}
     names = {m["id"]: m["name_en"] for m in api.misconceptions()}
     out, leak_pred, leak_gold, leak_det, cong_pred, cong_gold = [], [], [], [], [], []
+    det_all, gold_all, skipped = [], [], []
     for r in rows:
         q = by_id[r["question_id"]]
         sus = [s.strip() for s in r["suspects"].split(",") if s.strip()]
@@ -70,9 +75,19 @@ def main():
         judge = detail.get("judge") or {}
         leak = st["leak"] == "fail"
         cong = {h for h in sus if bool((judge.get("congruent") or {}).get(h))}
+        det_all.append(bool(detail.get("deterministic_leak")))
+        gold_all.append(r["_leak"])
+        if detail.get("judge_error"):  # judge unavailable (e.g. daily cap): not counted against the judge
+            skipped.append({"id": r["id"], "error": detail["judge_error"]})
+            continue
         leak_pred.append(leak)
         leak_gold.append(r["_leak"])
         leak_det.append(bool(detail.get("deterministic_leak")))
+        if detail.get("deterministic_leak"):
+            out.append({"id": r["id"], "lang": r["lang"], "human_leak": r["_leak"], "guard_leak": True,
+                        "deterministic_leak": detail["deterministic_leak"], "human_congruent": sorted(r["_cong"]),
+                        "judge_congruent": None, "judge_ran": False, "checks": st})
+            continue  # congruency is not judged when the deterministic leak check already blocked the message
         for h in sus:
             cong_pred.append(h in cong)
             cong_gold.append(h in r["_cong"])
@@ -83,11 +98,14 @@ def main():
            "label": "Guard decisions vs human labels (our 30 hand-written test messages, labelled by the team)",
            "created": dt.datetime.now().isoformat(timespec="seconds"), "judge_model": guards._judge_model(),
            "n_labelled": len(rows), "n_total": sum(1 for _ in LABELS.open(encoding="utf-8")) - 1,
-           "leak_full_guard": binary(leak_pred, leak_gold), "leak_deterministic_only": binary(leak_det, leak_gold),
-           "congruency_judge": binary(cong_pred, cong_gold), "rows": out,
+           "labels_file": str(a.labels.relative_to(ROOT)) if a.labels.is_absolute() else str(a.labels),
+           "leak_full_guard": binary(leak_pred, leak_gold), "leak_deterministic_only": binary(det_all, gold_all),
+           "congruency_judge": binary(cong_pred, cong_gold), "judge_unavailable": skipped, "rows": out,
            "caveats": ["Small hand-written test set, not real tutor traffic.",
                        "Leak = deterministic check OR LLM judge; congruency is judged per suspected misconception.",
-                       "If the judge did not run (API error), the guard fails closed and counts as 'leak'."],
+                       "Rows where the judge could not run (API error / daily cap) are listed in judge_unavailable "
+                       "and left out of the judge metrics (in the live tutor they fail closed).",
+                       "Congruency is only judged on messages that passed the deterministic leak check."],
            "runtime_s": round(time.time() - t0, 1)}
     from engine.detector import save_json
     save_json(res, ROOT / "results" / "guards.json")

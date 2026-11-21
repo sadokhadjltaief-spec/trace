@@ -15,8 +15,10 @@ posterior (the same question re-answered after a hint is not independent evidenc
 """
 from __future__ import annotations
 
-from engine import guards, llm, mathcheck as mc, safetext
-from engine.contract import Agenda, Grading, QuestionView, Reconstruction
+from engine import guards, llm, mathcheck as mc, safetext, style
+from engine import i18n
+from engine.i18n import lang_of, t as tr
+from engine.contract import Agenda, Check, Grading, QuestionView, Reconstruction, SafeText
 
 LANG = {"fr": "French", "ar": "Modern Standard Arabic", "en": "English"}
 HINT_TYPES = {
@@ -42,7 +44,7 @@ Rules:
 - Any equality you write must be true.
 - At most {max_words} words per sentence, at most {max_q} question mark(s), no exclamation marks, no emoji,
   no ALL-CAPS words, no praise words.
-- Under 60 words in total.
+- Under 60 words in total.{profile_rules}
 Message type you must write: {hint_type}
 Return JSON: {{"message": "..."}}"""
 
@@ -52,19 +54,48 @@ def _plain_q(q: dict) -> str:
     return f"{mc.latex_to_plain(q['text'])} Options: {opts}"
 
 
-def style_kwargs(profile: dict) -> dict:
-    """Active style limits (base rules; the full support-profile toggles arrive in step 10)."""
-    kw = {"max_words_per_sentence": int(profile.get("max_words_per_sentence", 25)),
-          "neutral": True, "max_questions": 1 if profile.get("one_question_per_message") else 2}
-    return kw
+def style_kwargs(profile: dict, lang: str = "en") -> dict:
+    """Active style-linter limits for this student's support profile (engine/style.py, profiles.yaml)."""
+    return style.lint_kwargs(profile, lang)
 
 
-def agenda(state: str) -> Agenda:
+def _lang(s: dict) -> str:
+    return lang_of(s.get("student", {}).get("lang"))
+
+
+def txt(s: dict, key: str, **kw):
+    """A fixed string (i18n/tutor.json) in the student's language, through the style linter."""
+    lang = _lang(s)
+    return safetext.static(tr(key, lang, **kw), lang=lang, style_kwargs=style_kwargs(s.get("profile", {}), lang))
+
+
+def frame(s: dict, f: dict) -> dict:
+    """fixed_template toggle: every turn uses the same layout, built by code around the checked message:
+    Situation: <message> / Your task: <what to do, from `expects`> / What happens next: <agenda.next>.
+    The leak/congruency/math results of the inner message are kept; the style linter re-runs on the framed text."""
+    if not style.resolve(s.get("profile")).get("fixed_template") or "message" not in f:
+        return f
+    lang = _lang(s)
+    m = f["message"]
+    if not m.shown_allowed:
+        return f
+    task = tr(f"task_{f['expects']}", lang)
+    text = (f"{tr('frame_situation', lang)}: {m.text}\n{tr('frame_task', lang)}: {task}\n"
+            f"{tr('frame_next', lang)}: {f['agenda'].next}.")
+    viol = style.lint(text, **style_kwargs(s.get("profile"), lang))
+    checks = [c for c in m.checks if c.name != "style"] + [
+        Check(name="style", status="fail" if viol else "pass", detail="; ".join(viol) or "framed (fixed_template)")]
+    ok = not any(c.status == "fail" for c in checks)
+    framed = SafeText(text=text, lang=m.lang, origin=m.origin, checks=checks, shown_allowed=ok,
+                      fallback_used=m.fallback_used)
+    return {**f, "message": framed if ok else m}
+
+
+def agenda(state: str, lang: str = "en") -> Agenda:
     i = REPAIR_STEPS.index(state) if state in REPAIR_STEPS else len(REPAIR_STEPS) - 1
-    nxt = {"HINT_1": "you try the question again", "HINT_2": "you try the question again",
-           "HINT_3": "you try the question again", "RECONSTRUCT": "find the wrong step",
-           "TRANSFER": "a new question"}.get(state, "your results")
-    return Agenda(step=i + 1, total=len(REPAIR_STEPS), next=nxt)
+    key = {"HINT_1": "agenda_retry", "HINT_2": "agenda_retry", "HINT_3": "agenda_retry",
+           "RECONSTRUCT": "agenda_recon", "TRANSFER": "agenda_transfer"}.get(state, "agenda_results")
+    return Agenda(step=i + 1, total=len(REPAIR_STEPS), next=tr(key, lang))
 
 
 def pick_repair_question(s: dict, h: str) -> str:
@@ -103,10 +134,12 @@ def diagnose_error(q: dict, option: str, explanation: str | None, mis: dict) -> 
 
 
 def write_hint(level: int, q: dict, diag: dict, mis: dict, lang: str, kw: dict, feedback: str = "",
-               attempt: int = 0) -> str:
-    script = " (Arabic script; keep the numbers as digits)" if lang == "ar" else ""
+               attempt: int = 0, profile: dict | None = None) -> str:
+    script = {"ar": " (Arabic script; keep the numbers as digits)",
+              "fr": " (address the student as \"tu\", never \"vous\")"}.get(lang, "")
     sysmsg = HINT_SYS.format(lang=LANG.get(lang, "English"), script=script, max_words=kw["max_words_per_sentence"],
-                             max_q=kw["max_questions"], hint_type=HINT_TYPES[level])
+                             max_q=kw["max_questions"], hint_type=HINT_TYPES[level],
+                             profile_rules=style.prompt_rules(profile or {}))
     user = (f"Question: {_plain_q(q)}\nCorrect option (NEVER reveal): {q['correct']}\n"
             f"Student's misconception: {mis['name_en']}\nDiagnosis of the error: "
             f"{diag.get('error', '')} Faulty step: {diag.get('faulty_step', '')} "
@@ -121,8 +154,8 @@ def write_hint(level: int, q: dict, diag: dict, mis: dict, lang: str, kw: dict, 
 def hint_message(s: dict, level: int, h: str, names: dict, mis: dict, posterior: dict) -> tuple:
     """Returns (SafeText, guard_events, detail). Never raises: LLM failure -> verified fallback."""
     q = s["by_id"][s["repair_q"]]
-    lang = s["student"].get("lang", "en")
-    kw = style_kwargs(s["profile"])
+    lang = lang_of(s["student"].get("lang", "en"))
+    kw = style_kwargs(s["profile"], lang)
     events, detail = [], {"level": level}
     last = s["last_choice"]
     try:
@@ -131,7 +164,7 @@ def hint_message(s: dict, level: int, h: str, names: dict, mis: dict, posterior:
         diag = s["error_diag"]
         feedback = ""
         for attempt in range(2):  # first draft + one regeneration
-            text = write_hint(level, q, diag, mis, lang, kw, feedback, attempt)
+            text = write_hint(level, q, diag, mis, lang, kw, feedback, attempt, profile=s["profile"])
             if not text:
                 feedback = "empty message"
                 continue
@@ -149,12 +182,6 @@ def hint_message(s: dict, level: int, h: str, names: dict, mis: dict, posterior:
     return fb, events + fb_events, detail
 
 
-# last-resort text per language (our wording; FR/AR to be reviewed by a native speaker, see STATUS.md)
-LAST_RESORT = {
-    "en": "Look again at each step of your working. Check which step uses a rule you are not sure of.",
-    "fr": "Relis chaque étape de ton travail. Vérifie l'étape où tu utilises une règle dont tu n'es pas sûr.",
-    "ar": "راجع كل خطوة من حلّك. تحقّق من الخطوة التي تستعمل فيها قاعدة لست متأكدًا منها.",
-}
 TRANSLATE_HINT_SYS = """Translate this maths hint for a school student into {lang}{script}. Keep every number and
 operation exactly; maths as plain text with digits. Do not add anything. Return JSON: {{"text": "..."}}"""
 
@@ -172,7 +199,7 @@ def fallback(q: dict, level: int, kw: dict, lang: str = "en", posterior: dict | 
                 return t, events
         else:
             try:
-                script = " (Arabic script)" if lang == "ar" else ""
+                script = {"ar": " (Arabic script)", "fr": " (address the student as \"tu\")"}.get(lang, "")
                 d = llm.ask_json(TRANSLATE_HINT_SYS.format(lang=LANG[lang], script=script), hints[level - 1],
                                  purpose="tutor_fallback_translate", max_tokens=512)
                 text = str((d or {}).get("text", "")).strip()
@@ -184,13 +211,14 @@ def fallback(q: dict, level: int, kw: dict, lang: str = "en", posterior: dict | 
                         return safetext.from_guards(text, checks, lang=lang, fallback_used=True), events
             except Exception:  # noqa: BLE001
                 pass
-    return safetext.static(LAST_RESORT.get(lang, LAST_RESORT["en"]), lang=lang if lang in LAST_RESORT else "en",
-                           style_kwargs=kw, fallback_used=True), events
+    lang = lang_of(lang)  # last resort: fixed text in the student's language (i18n/tutor.json)
+    return safetext.static(tr("last_resort", lang), lang=lang, style_kwargs=kw, fallback_used=True), events
 
 
 # ---------------------------------------------------------------- transitions
-def qview(q: dict) -> QuestionView:
-    return QuestionView(id=q["id"], text=q["text"], options=q["options"], requires_confidence=False)
+def qview(q: dict, lang: str = "en") -> QuestionView:
+    text, options = i18n.question(q, lang)
+    return QuestionView(id=q["id"], text=text, options=options, requires_confidence=False)
 
 
 def begin(s: dict, h: str, names: dict, mis: dict | None, posterior: dict) -> dict:
@@ -215,14 +243,13 @@ def enter_hint(s: dict, level: int, names: dict, mis: dict, posterior: dict) -> 
     s["state"] = f"HINT_{level}"
     q = s["by_id"][s["repair_q"]]
     if s.get("last_choice") is None or not s["last_choice"].get("option"):
-        msg = safetext.static("Please answer this question. Then you will get help on it.",
-                              style_kwargs=style_kwargs(s["profile"]))
+        msg = txt(s, "answer_first")
         events, detail = [], {}
     else:
         msg, events, detail = hint_message(s, level, s["target"], names, mis, posterior)
     s.setdefault("tutor_log", []).append({"state": s["state"], "detail": detail})
-    return {"state": s["state"], "message": msg, "expects": "retry", "agenda": agenda(s["state"]),
-            "question": qview(q), "guard_events": events}
+    return {"state": s["state"], "message": msg, "expects": "retry", "agenda": agenda(s["state"], _lang(s)),
+            "question": qview(q, _lang(s)), "guard_events": events}
 
 
 def enter_reconstruct(s: dict, bank: dict) -> dict:
@@ -237,36 +264,38 @@ def enter_reconstruct(s: dict, bank: dict) -> dict:
     used.append(r["id"])
     s["recon"] = r
     s["recon_attempts"] = 0
-    return {"state": "RECONSTRUCT", "expects": "error_step", "agenda": agenda("RECONSTRUCT"),
-            "message": safetext.static("Here is a worked solution with one wrong step. Which step is wrong, and why?",
-                                       style_kwargs=style_kwargs(s["profile"])),
-            "reconstruction": recon_view(r), "guard_events": []}
+    return {"state": "RECONSTRUCT", "expects": "error_step", "agenda": agenda("RECONSTRUCT", _lang(s)),
+            "message": txt(s, "recon_intro"), "reconstruction": recon_view(r, _lang(s)), "guard_events": []}
 
 
-def recon_view(r: dict) -> Reconstruction:
-    return Reconstruction(id=r["id"], problem=r["problem"], steps=r["worked_solution"])
+def recon_view(r: dict, lang: str = "en") -> Reconstruction:
+    problem, steps = i18n.reconstruction(r, lang)
+    return Reconstruction(id=r["id"], problem=problem, steps=steps)
 
 
-def _done(s: dict, text: str) -> dict:
+def _done(s: dict, key: str, lead: str = "") -> dict:
     s["state"] = "DONE"
     s["outcome"]["status"] = mastery_status(s)
-    return {"state": "DONE", "expects": "none", "agenda": agenda("DONE"), "guard_events": [],
-            "message": safetext.static(text, style_kwargs=style_kwargs(s["profile"]))}
+    lang = _lang(s)
+    text = (lead + " " if lead else "") + tr(key, lang)
+    return {"state": "DONE", "expects": "none", "agenda": agenda("DONE", lang), "guard_events": [],
+            "message": safetext.static(text, lang=lang, style_kwargs=style_kwargs(s["profile"], lang))}
 
 
 def enter_transfer(s: dict, h: str, lead: str = "") -> dict:
+    """`lead` = an already translated sentence put before the intro (e.g. 'You found the wrong step.')."""
     s["state"] = "TRANSFER"
     qid = pick_transfer_question(s, h)
     s["transfer_q"] = qid
-    pre = lead + " " if lead else ""
+    lang = _lang(s)
     if qid is None:
         if any(not x["correct"] for x in s["outcome"]["transfers"]):
             return enter_handoff(s, s.get("names", {}))  # failed a transfer and no same-type question left
-        return _done(s, pre + "There are no more questions in the bank for this session.")
-    return {"state": "TRANSFER", "expects": "transfer_answer", "agenda": agenda("TRANSFER"),
-            "message": safetext.static(pre + "Here is a new question. Use what you checked in the last steps.",
-                                       style_kwargs=style_kwargs(s["profile"])),
-            "question": qview(s["by_id"][qid]), "guard_events": []}
+        return _done(s, "no_more", lead)
+    text = (lead + " " if lead else "") + tr("transfer_intro", lang)
+    return {"state": "TRANSFER", "expects": "transfer_answer", "agenda": agenda("TRANSFER", lang),
+            "message": safetext.static(text, lang=lang, style_kwargs=style_kwargs(s["profile"], lang)),
+            "question": qview(s["by_id"][qid], lang), "guard_events": []}
 
 
 # ---------------------------------------------------------------- step 8: RECONSTRUCT, TRANSFER, HANDOFF
@@ -295,7 +324,7 @@ def on_reconstruct(s: dict, choice: str | None, text: str | None) -> tuple[dict,
     """`choice` = the step number the student says is wrong (1-based); `text` = why.
     The step is graded against the item's error_step (deterministic); the 'why' by the LLM rubric (labelled)."""
     r = s["recon"]
-    kw = style_kwargs(s["profile"])
+    lang = _lang(s)
     try:
         step = int(str(choice).strip())
     except (TypeError, ValueError):
@@ -313,10 +342,10 @@ def on_reconstruct(s: dict, choice: str | None, text: str | None) -> tuple[dict,
     else:
         grading = Grading(correct=found, method="answer_key", label="Step checked against the answer key")
     if not found and s["recon_attempts"] < MAX_RECON_ATTEMPTS:
-        return {"state": "RECONSTRUCT", "expects": "error_step", "agenda": agenda("RECONSTRUCT"),
-                "message": safetext.static(f"Step {step} is correct. Look again: which step is wrong?", style_kwargs=kw),
-                "reconstruction": recon_view(r), "guard_events": []}, grading
-    lead = "Yes. You found the wrong step." if found else f"The wrong step was step {r['error_step']}."
+        return {"state": "RECONSTRUCT", "expects": "error_step", "agenda": agenda("RECONSTRUCT", lang),
+                "message": txt(s, "recon_retry", step=step), "reconstruction": recon_view(r, lang),
+                "guard_events": []}, grading
+    lead = tr("recon_found", lang) if found else tr("recon_reveal", lang, step=r["error_step"])
     return enter_transfer(s, s["target"], lead=lead), grading
 
 
@@ -331,12 +360,12 @@ def on_transfer(s: dict, option: str, names: dict, bank: dict, diag) -> tuple[di
                                       "loop": s["loops"]})
     grading = Grading(correct=correct, method="answer_key", label="Checked against the answer key")
     if correct:
-        return _done(s, "Correct. You solved a new question of the same type. Your results are ready."), grading
+        return _done(s, "done_mastered"), grading
     h = s.get("target") or "M0"
     if h == "M0":  # the mastery check after "no misconception" failed: look at the evidence again
         h = diag.top()[0]
         if h == "M0":
-            return _done(s, "Thank you. Your results are ready."), grading
+            return _done(s, "done_plain"), grading
     if s["loops"] >= MAX_LOOPS:
         return enter_handoff(s, names), grading
     s["loops"] += 1
@@ -361,9 +390,8 @@ def enter_handoff(s: dict, names: dict) -> dict:
                          f"Tried: {hints} hints, {s['loops']} repair loops, find-the-mistake "
                          f"({'found' if found else 'not found'}).\n"
                          f"Still wrong on new questions {', '.join(wrong)}. Please work on this with the student.")
-    return {"state": "HANDOFF", "expects": "none", "agenda": agenda("DONE"), "guard_events": [],
-            "message": safetext.static("Thank you for your work. This topic needs more time. "
-                                       "Your teacher will look at it with you.", style_kwargs=style_kwargs(s["profile"]))}
+    return {"state": "HANDOFF", "expects": "none", "agenda": agenda("DONE", _lang(s)), "guard_events": [],
+            "message": txt(s, "handoff")}
 
 
 def mastery_status(s: dict) -> str:

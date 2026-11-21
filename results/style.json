@@ -1,0 +1,471 @@
+{
+ "script": "eval/eval_style.py",
+ "label": "Wording compliance of RAW LLM hints (before guards) against clear-mode rules; small sample",
+ "created": "2026-11-21T20:18:08",
+ "model": "openai/gpt-oss-120b",
+ "n_per_condition": 10,
+ "clear_profile": {
+  "literal_language": true,
+  "one_question_per_message": true,
+  "max_words_per_sentence": 15,
+  "visible_agenda": true,
+  "fixed_template": true,
+  "neutral_feedback": true,
+  "structured_why": true,
+  "visual_steps": false,
+  "no_timers_no_animation": false,
+  "calm_theme": false,
+  "example_theme": "",
+  "advance_notice": false
+ },
+ "summary": {
+  "default": {
+   "n": 10,
+   "max_15_words_per_sentence": {
+    "compliance": 0.9,
+    "ci95": [
+     0.5958,
+     0.9821
+    ]
+   },
+   "at_most_one_question": {
+    "compliance": 1.0,
+    "ci95": [
+     0.7225,
+     1.0
+    ]
+   },
+   "no_idioms": {
+    "compliance": 1.0,
+    "ci95": [
+     0.7225,
+     1.0
+    ]
+   },
+   "no_praise": {
+    "compliance": 1.0,
+    "ci95": [
+     0.7225,
+     1.0
+    ]
+   },
+   "no_exclamation": {
+    "compliance": 1.0,
+    "ci95": [
+     0.7225,
+     1.0
+    ]
+   },
+   "no_emoji_no_caps": {
+    "compliance": 1.0,
+    "ci95": [
+     0.7225,
+     1.0
+    ]
+   },
+   "right_language": {
+    "compliance": 1.0,
+    "ci95": [
+     0.7225,
+     1.0
+    ]
+   },
+   "all_rules": {
+    "compliance": 0.9,
+    "ci95": [
+     0.5958,
+     0.9821
+    ]
+   }
+  },
+  "clear_structured": {
+   "n": 10,
+   "max_15_words_per_sentence": {
+    "compliance": 0.9,
+    "ci95": [
+     0.5958,
+     0.9821
+    ]
+   },
+   "at_most_one_question": {
+    "compliance": 1.0,
+    "ci95": [
+     0.7225,
+     1.0
+    ]
+   },
+   "no_idioms": {
+    "compliance": 1.0,
+    "ci95": [
+     0.7225,
+     1.0
+    ]
+   },
+   "no_praise": {
+    "compliance": 1.0,
+    "ci95": [
+     0.7225,
+     1.0
+    ]
+   },
+   "no_exclamation": {
+    "compliance": 1.0,
+    "ci95": [
+     0.7225,
+     1.0
+    ]
+   },
+   "no_emoji_no_caps": {
+    "compliance": 1.0,
+    "ci95": [
+     0.7225,
+     1.0
+    ]
+   },
+   "right_language": {
+    "compliance": 1.0,
+    "ci95": [
+     0.7225,
+     1.0
+    ]
+   },
+   "all_rules": {
+    "compliance": 0.9,
+    "ci95": [
+     0.5958,
+     0.9821
+    ]
+   }
+  }
+ },
+ "errors": [],
+ "rows": [
+  {
+   "condition": "default",
+   "question": "Q1",
+   "level": 1,
+   "lang": "fr",
+   "text": "Comment peux‑tu vérifier que (1+2)/(3+5) donne bien la même valeur que 1/3+2/5 ?",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "default",
+   "question": "Q2",
+   "level": 2,
+   "lang": "ar",
+   "text": "مثال: 1/4 + 1/6. إذا جمعت البسطين والمقامين ستحصل على 2/10 = 1/5، وهو غير صحيح. الطريقة الصحيحة تعطي 5/12. أعد النظر في مسألتك.",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "default",
+   "question": "Q3",
+   "level": 3,
+   "lang": "en",
+   "text": "Write both fractions with a common denominator (the least common denominator of 10 and 10). Then rewrite each fraction with that denominator. Add the numerators while keeping the denominator unchanged. Finally, simplify the resulting fraction if possible.",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "default",
+   "question": "Q4",
+   "level": 1,
+   "lang": "fr",
+   "text": "Comment vérifies‑tu que le dénominateur ne change pas quand tu additionnes 2/7 et 1/7 ?",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "default",
+   "question": "Q5",
+   "level": 2,
+   "lang": "ar",
+   "text": "مثال: احسب 1/4 × 3. إذا ضربت البسط والمقام في 3 ستحصل على 3/12=1/4، وهو غير منطقي. الصحيح: اضرب البسط فقط لتصبح 3/4. هل يمكنك مراجعة سؤالك الآن؟",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "default",
+   "question": "Q6",
+   "level": 3,
+   "lang": "en",
+   "text": "Write the product as (1 × 6) / 6. Then notice the numerator and denominator share the same factor. Cancel that common factor before computing the remaining value.",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "default",
+   "question": "Q7",
+   "level": 1,
+   "lang": "fr",
+   "text": "Comment multiplier 1 2/3 par 2 sans modifier le dénominateur ?",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "default",
+   "question": "Q8",
+   "level": 2,
+   "lang": "ar",
+   "text": "مثال: احسب -3 - (-2). إذا اعتبرت أن سالبين يعطيان موجبة ستحصل على 1، لكن العملية الصحيحة تعطي -1. هل يمكنك مراجعة مسألتك الآن؟",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "default",
+   "question": "Q9",
+   "level": 3,
+   "lang": "en",
+   "text": "Write the expression as -3 + (-5). Combine the two negative numbers by adding their absolute values. Keep the sign negative. Then evaluate the sum.",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "default",
+   "question": "Q11",
+   "level": 1,
+   "lang": "fr",
+   "text": "Quel nombre dois‑tu multiplier au numérateur et au dénominateur de A/10 pour obtenir la même fraction que 9/15 ?",
+   "checks": {
+    "max_15_words_per_sentence": false,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "clear_structured",
+   "question": "Q1",
+   "level": 1,
+   "lang": "fr",
+   "text": "Quel dénominateur commun peux‑tu utiliser pour 1/3 et 2/5 ?",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "clear_structured",
+   "question": "Q2",
+   "level": 2,
+   "lang": "ar",
+   "text": "مثال: 1/4 + 1/6. إذا جمعت البسطين والمقامين ستحصل على 2/10، وهو غير مساوي 5/12. الطريقة الصحيحة تعطي 5/12. راجع السؤال مرة أخرى.",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "clear_structured",
+   "question": "Q3",
+   "level": 3,
+   "lang": "en",
+   "text": "Find a common denominator for 3/10 and 5/10. Rewrite each fraction with that denominator. Then add the numerators while keeping the denominator unchanged. Simplify the resulting fraction if possible.",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "clear_structured",
+   "question": "Q4",
+   "level": 1,
+   "lang": "fr",
+   "text": "Comment vérifies‑tu que les dénominateurs ne changent pas quand tu additionnes les fractions ?",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "clear_structured",
+   "question": "Q5",
+   "level": 2,
+   "lang": "ar",
+   "text": "مثال: اضرب 1/4 في 3. إذا ضربت البسط والمقام في 3 ستحصل على 3/12=1/4، وهو لا يغيّر القيمة. الطريقة الصحيحة هي ضرب البسط فقط: 1/4×3=3/4. راجع سؤالكم مرة أخرى.",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "clear_structured",
+   "question": "Q6",
+   "level": 3,
+   "lang": "en",
+   "text": "Write the product as (1 × 6) ÷ 6. Cancel the common factor 6 in numerator and denominator. What remains after cancelling?",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "clear_structured",
+   "question": "Q7",
+   "level": 1,
+   "lang": "fr",
+   "text": "As-tu pensé à ne multiplier que le numérateur par le nombre entier, sans toucher au dénominateur ?",
+   "checks": {
+    "max_15_words_per_sentence": false,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "clear_structured",
+   "question": "Q8",
+   "level": 2,
+   "lang": "ar",
+   "text": "مثال: احسب -4 - (-2). إذا اعتبرت أن سالبين يعطيان موجبة ستحصل على 2، لكن العملية الصحيحة تعطي -2. راجع السؤال الأصلي مرة أخرى.",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "clear_structured",
+   "question": "Q9",
+   "level": 3,
+   "lang": "en",
+   "text": "Write the expression as -3 + (-5). Combine the two negative numbers by adding their absolute values. The result will be a negative number. What is the sum of 3 and 5?",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  },
+  {
+   "condition": "clear_structured",
+   "question": "Q11",
+   "level": 1,
+   "lang": "fr",
+   "text": "Quel nombre dois‑tu multiplier au numérateur et au dénominateur de A/10 pour obtenir 9/15 ?",
+   "checks": {
+    "max_15_words_per_sentence": true,
+    "at_most_one_question": true,
+    "no_idioms": true,
+    "no_praise": true,
+    "no_exclamation": true,
+    "no_emoji_no_caps": true,
+    "right_language": true
+   }
+  }
+ ],
+ "caveats": [
+  "Raw prompt compliance only; the live linter blocks and regenerates non-compliant text.",
+  "fixed_template (Situation / Your task / What happens next) is added by code, not measured here.",
+  "The idiom and praise lists are short hand-made lists (EN/FR/AR), not exhaustive.",
+  "Measures wording, not learning; nothing here is tested with autistic students."
+ ],
+ "runtime_s": 76.8
+}

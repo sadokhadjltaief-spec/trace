@@ -125,6 +125,13 @@ subset above is enough for the tutor.
 
 Question and option text contain LaTeX `\( … \)`: render with your Markdown + KaTeX (convert `\(…\)` to `$…$`).
 
+## 4b. Clear and structured mode and languages
+
+Send the onboarding choice as `profile` in `start`: `{"preset": "clear_structured"}` for "Mode clair et structuré",
+or individual toggles (see `docs/INTERFACE.md` 2a). With `fixed_template` the engine already writes the three
+lines "Situation / Ta tâche / Ensuite" into `message.text` (render the newlines). The engine answers in
+`student.lang`; render `message.lang == "ar"` right-to-left.
+
 ## 5. Errors
 
 | HTTP | meaning | frontend |

@@ -1,0 +1,574 @@
+{
+ "script": "eval/eval_guards.py",
+ "label": "Guard decisions vs human labels (our 30 hand-written test messages, labelled by the team)",
+ "created": "2026-11-21T20:08:35",
+ "judge_model": "openai/gpt-oss-120b",
+ "n_labelled": 30,
+ "n_total": 30,
+ "labels_file": "eval\\guard_labels_clean.csv",
+ "leak_full_guard": {
+  "n": 30,
+  "positives": 7,
+  "accuracy": 0.8333,
+  "precision": 0.6667,
+  "recall": 0.5714,
+  "tp": 4,
+  "fp": 2,
+  "fn": 3,
+  "tn": 21
+ },
+ "leak_deterministic_only": {
+  "n": 30,
+  "positives": 7,
+  "accuracy": 0.8667,
+  "precision": 0.8,
+  "recall": 0.5714,
+  "tp": 4,
+  "fp": 1,
+  "fn": 3,
+  "tn": 22
+ },
+ "congruency_judge": {
+  "n": 25,
+  "positives": 7,
+  "accuracy": 0.76,
+  "precision": 0.5556,
+  "recall": 0.7143,
+  "tp": 5,
+  "fp": 4,
+  "fn": 2,
+  "tn": 14
+ },
+ "judge_unavailable": [],
+ "rows": [
+  {
+   "id": "G01",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G02",
+   "lang": "en",
+   "human_leak": true,
+   "guard_leak": true,
+   "deterministic_leak": [
+    "contains the answer value ['11/15']"
+   ],
+   "human_congruent": [],
+   "judge_congruent": null,
+   "judge_ran": false,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "fail",
+    "congruency": "fail"
+   }
+  },
+  {
+   "id": "G03",
+   "lang": "en",
+   "human_leak": true,
+   "guard_leak": true,
+   "deterministic_leak": [
+    "names the correct option D"
+   ],
+   "human_congruent": [],
+   "judge_congruent": null,
+   "judge_ran": false,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "fail",
+    "congruency": "fail"
+   }
+  },
+  {
+   "id": "G04",
+   "lang": "en",
+   "human_leak": true,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [
+    "M1"
+   ],
+   "judge_congruent": [
+    "M1"
+   ],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "fail"
+   }
+  },
+  {
+   "id": "G05",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G06",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": true,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "fail",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G07",
+   "lang": "fr",
+   "human_leak": true,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [
+    "M1"
+   ],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G08",
+   "lang": "fr",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [
+    "M1"
+   ],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "fail"
+   }
+  },
+  {
+   "id": "G09",
+   "lang": "ar",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G10",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G11",
+   "lang": "en",
+   "human_leak": true,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [
+    "M2"
+   ],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G12",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [
+    "M2"
+   ],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "fail"
+   }
+  },
+  {
+   "id": "G13",
+   "lang": "en",
+   "human_leak": true,
+   "guard_leak": true,
+   "deterministic_leak": [
+    "contains the answer value ['10/3', '10/3']"
+   ],
+   "human_congruent": [],
+   "judge_congruent": null,
+   "judge_ran": false,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "fail",
+    "congruency": "fail"
+   }
+  },
+  {
+   "id": "G14",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G15",
+   "lang": "fr",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G16",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [
+    "M2"
+   ],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "fail"
+   }
+  },
+  {
+   "id": "G17",
+   "lang": "ar",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [
+    "M2"
+   ],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "fail"
+   }
+  },
+  {
+   "id": "G18",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G19",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G20",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [
+    "M3"
+   ],
+   "judge_congruent": [
+    "M3"
+   ],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "fail"
+   }
+  },
+  {
+   "id": "G21",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G22",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": true,
+   "deterministic_leak": [
+    "contains the answer value ['-3']"
+   ],
+   "human_congruent": [],
+   "judge_congruent": null,
+   "judge_ran": false,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "fail",
+    "congruency": "fail"
+   }
+  },
+  {
+   "id": "G23",
+   "lang": "fr",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [
+    "M3"
+   ],
+   "judge_congruent": [
+    "M3"
+   ],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "fail"
+   }
+  },
+  {
+   "id": "G24",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G25",
+   "lang": "ar",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G26",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [
+    "M4"
+   ],
+   "judge_congruent": [
+    "M4"
+   ],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "fail"
+   }
+  },
+  {
+   "id": "G27",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G28",
+   "lang": "en",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [],
+   "judge_congruent": [],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "pass"
+   }
+  },
+  {
+   "id": "G29",
+   "lang": "en",
+   "human_leak": true,
+   "guard_leak": true,
+   "deterministic_leak": [
+    "contains the answer value ['6']"
+   ],
+   "human_congruent": [],
+   "judge_congruent": null,
+   "judge_ran": false,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "fail",
+    "congruency": "fail"
+   }
+  },
+  {
+   "id": "G30",
+   "lang": "fr",
+   "human_leak": false,
+   "guard_leak": false,
+   "deterministic_leak": [],
+   "human_congruent": [
+    "M4"
+   ],
+   "judge_congruent": [
+    "M4"
+   ],
+   "judge_ran": true,
+   "checks": {
+    "style": "pass",
+    "math": "pass",
+    "leak": "pass",
+    "congruency": "fail"
+   }
+  }
+ ],
+ "caveats": [
+  "Small hand-written test set, not real tutor traffic.",
+  "Leak = deterministic check OR LLM judge; congruency is judged per suspected misconception.",
+  "Rows where the judge could not run (API error / daily cap) are listed in judge_unavailable and left out of the judge metrics (in the live tutor they fail closed).",
+  "Congruency is only judged on messages that passed the deterministic leak check."
+ ],
+ "runtime_s": 136.9
+}

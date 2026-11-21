@@ -39,6 +39,13 @@ Last update: 2026-11-21 ~22:30, step 11 (course RAG, no LLM).
 - **No course PDFs in `data/courses/` yet**: the team adds them (own notes; Najahni free PDFs by hand).
 - 125 tests pass (`tests/test_rag.py`: report, citations, nothing-relevant, Arabic fixes, lesson refs, embeddings).
 
+## Demo recordings (final, 2026-11-21)
+- FR default and AR default: full session, replay offline 8/8 cached, 0 fallbacks.
+- FR clear mode (`--profile clear`, ~6.2k tokens): replay offline 10/10 cached; hint 1 LLM-written; hint 2 is the
+  safe fallback sentence (the style guard blocked two drafts with sentences over 15 words; the translated bank hint
+  was also too long). Exact answers for each run: `docs/DEMO_SCRIPT.md`.
+- 120b: ~175k of 200k tokens used in the last 24 h. **Development stopped** (team decision).
+
 ## Measured: `results/guards.json` (guards vs HUMAN labels, 30 messages, judge = gpt-oss-120b; labels final)
 | decision | accuracy | precision | recall |
 |---|---|---|---|

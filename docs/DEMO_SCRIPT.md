@@ -16,8 +16,8 @@ Say "simulation" when a number comes from simulated students. Do not show anythi
   .\.venv\Scripts\python.exe scripts\demo_session.py --lang ar
   .\.venv\Scripts\python.exe scripts\demo_right_answer.py
   ```
-- [ ] Optional, costs ~5k Groq tokens once: record clear mode so its hints are LLM-written instead of the generic
-      fallback sentence: `.\.venv\Scripts\python.exe scripts\demo_session.py --record --lang fr --profile clear`
+- [x] Clear mode recorded (2026-11-21, ~6.2k tokens): hint 1 LLM-written; hint 2 = safe fallback (style guard).
+      Check its replay: `.\.venv\Scripts\python.exe scripts\demo_session.py --lang fr --profile clear`
 - [ ] Engine up: `.\.venv\Scripts\python.exe -m uvicorn server.main:app --host 127.0.0.1 --port 8000`
       (check `http://127.0.0.1:8000/api/v1/health`), then the Next.js app (`pnpm dev`).
 - [ ] Start the session with **`demo: true`** (LLM answers replayed from cache: works with no network).
@@ -92,7 +92,15 @@ rows). Say it: "This is the open problem; we measure it instead of hiding it."
 
 ## 3:20 – 3:50 · Clear and structured mode
 
-Switch the profile to "Mode clair et structuré" and start again:
+Switch the profile to "Mode clair et structuré" (`{"preset": "clear_structured"}`, demo mode) and start a new
+session. **Recorded answers for this mode** (different from the default run: in clear mode the "why" is a choice,
+not free text, so the diagnosis needs 4 questions):
+Q5 **A** sûr · Q1 **C** sûr · Q11 **A** sûr · Q2 **B** sûr → hint 1 (LLM) → retry **C** (wrong) → hint 2 → retry
+**A** (correct) → find the wrong step: **step 2** + any reason → new question Q3: **C** (4/5) → mastered.
+Hint 2 is the safe fallback sentence: the style guard blocked two LLM drafts because a sentence had more than
+15 words. Show it as the guard at work ("in clear mode, a sentence longer than 15 words is never shown").
+
+Then show:
 every message has the same three lines (Situation / Ta tâche / Ensuite), one question at a time, short sentences,
 no praise words, choose-a-reason instead of free text. Probability bars stay in the teacher view only.
 > "Designed with autistic learners in mind, from established practice. It changes how TRACE talks, never the

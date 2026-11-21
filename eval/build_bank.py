@@ -289,8 +289,8 @@ def main():
     eedi_to_m = {e["eedi_id"]: c["id"] for c in cw["mappings"] for e in c["eedi"]}
     unconfirmed = {e["eedi_id"] for c in cw["mappings"] for e in c["eedi"] if e.get("confirmed") is False}
     log(f"unconfirmed crosswalk Eedi IDs: {sorted(unconfirmed)}")
-    mdf = pd.read_csv(RAW / "map" / "train.csv")
-    edf = pd.read_csv(RAW / "eedi" / "train.csv")
+    mdf = pd.read_csv(RAW / "map" / "train.csv", encoding="utf-8")
+    edf = pd.read_csv(RAW / "eedi" / "train.csv", encoding="utf-8")
     mis = {m["id"]: dict(m) for m in MISCONCEPTIONS}
     for m in mis.values():
         c = next(c for c in cw["mappings"] if c["id"] == m["id"])

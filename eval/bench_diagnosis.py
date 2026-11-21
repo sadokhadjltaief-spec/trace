@@ -113,7 +113,7 @@ def main():
     order = fixed_order(qs)
     res = {"script": "eval/bench_diagnosis.py", "label": "SIMULATION PROXY (simulated students, same model family as the engine)",
            "created": dt.datetime.now().isoformat(timespec="seconds"),
-           "git_commit": subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True,
+           "git_commit": subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, encoding="utf-8",
                                         cwd=ROOT).stdout.strip(),
            "seed": a.seed, "noise": a.noise, "hypotheses": H,
            "bank_questions": [q["id"] for q in qs],

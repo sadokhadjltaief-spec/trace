@@ -1,6 +1,20 @@
 # STATUS
 
-Last update: 2026-11-21, after build step 4 (bank review still pending).
+Last update: 2026-11-21, during build step 5.
+
+## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
+- [ ] Set `live.allow_unverified_dev: false` in `config.yaml` (now true = dev mode). Claude reminds the human at
+      the start of step 6 and before the demo rehearsal.
+
+## Bank review (done by the human, 2026-11-21)
+- Verified: 13 questions (Q1–Q9, Q11–Q14), 8/8 reconstruction items, FR/AR names M1–M4.
+- Q10 stays unverified (Eedi #795 unconfirmed). Q6 and Q14 warnings judged false alarms.
+
+## Encoding audit (2026-11-21)
+- `tests/test_encoding.py`: AST audit of every .py file; text-mode `open`, `read_text`/`write_text`,
+  pandas `read_csv`/`read_json`/`to_csv`/`to_json` and `subprocess(text=True)` must pass `encoding=`.
+  Found and fixed 6 (3 pandas reads, 3 subprocess calls). Also checks that bank.json / review.md / i18n files
+  decode as UTF-8 and break under cp1252.
 
 ## Step 4: frontend contract + stub pages (final pages = teammate)
 - `docs/INTERFACE.md` (contract v1.0) + `engine/contract.py` (pydantic, source of truth) + `docs/schema/*.json`

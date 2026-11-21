@@ -51,7 +51,7 @@ def try_kaggle(comp: str, dest: Path) -> bool:
     dest.mkdir(parents=True, exist_ok=True)
     exe = Path(sys.executable).with_name("kaggle.exe")
     cmd = [str(exe) if exe.exists() else "kaggle", "competitions", "download", "-c", comp, "-p", str(dest)]
-    r = subprocess.run(cmd, capture_output=True, text=True)
+    r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
     if r.returncode != 0:
         msg = (r.stderr or r.stdout).strip()[:300]
         log(f"  Kaggle {comp}: failed: {msg}")
@@ -96,7 +96,7 @@ def fetch(name: str, dest: Path, steps) -> bool:
 
 
 def inspect_csv(p: Path) -> pd.DataFrame:
-    df = pd.read_csv(p)
+    df = pd.read_csv(p, encoding="utf-8")
     log(f"\n### {p.relative_to(ROOT)}")
     log(f"rows={len(df)} cols={len(df.columns)}")
     log("| column | dtype | missing |\n|---|---|---|")
@@ -167,7 +167,7 @@ def inspect_mathdial(d: Path) -> None:
     for p in files:
         log(f"  {p.relative_to(ROOT)} ({p.stat().st_size // 1024} KB)")
     for p in [f for f in files if f.suffix == ".jsonl"]:
-        df = pd.read_json(p, lines=True)
+        df = pd.read_json(p, lines=True, encoding="utf-8")
         log(f"  {p.name}: rows={len(df)} cols={list(df.columns)}")
         log(f"  example question: {str(df.iloc[0]['question'])[:200]}")
         log(f"  example conversation start: {str(df.iloc[0]['conversation'])[:300]}")

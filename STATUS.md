@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-21, steps 7-8 committed (bench_tutor not run).
+Last update: 2026-11-21 ~20:00, step 9 + Gate P0.
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [ ] Set `live.allow_unverified_dev: false` in `config.yaml` (now true = dev mode). Claude reminds the human at
@@ -11,6 +11,33 @@ Last update: 2026-11-21, steps 7-8 committed (bench_tutor not run).
 - gpt-oss-20b: ~244k tokens logged in 3 h (detector eval) -> capped until about 15:00 on 22 Nov (after the deadline).
 - gpt-oss-120b: ~75k logged in 24 h -> ~125k left. Guard judge moved to 120b (`llm.judge_model`).
 - `engine/llm.py` now fails fast on a daily-cap 429 (the caller falls back) instead of retrying for minutes.
+
+## Step 9 + P0 follow-ups (2026-11-21 evening)
+- **Math guard now checks inequalities**: symbolic (`<`, `>`, `≤`, `≥`) and in words (EN "smaller/greater than",
+  FR "inférieur/supérieur à", "plus petit/grand que", AR "أصغر/أكبر من") by regex + SymPy; and the judge now
+  EXTRACTS every claim written in words ("smaller than each fraction" -> 2/5 < 1/2, 2/5 < 1/3); SymPy decides.
+  The FR demo hint with the false claim is now blocked (`math: false claims: ['2/5 < 1/3 (extracted)', ...]`)
+  and regenerated; the new hint is correct. FR and AR demos re-recorded.
+- `api.summary()` (Report): built by code from the session (evidence lines, states tried, status, calibration,
+  handoff note, cost); outcome / next step are fixed templates (EN only until step 15); `lesson_refs` empty until
+  RAG (P1).
+- **FastAPI layer** `server/main.py`: one endpoint per `engine/api.py` function under `/api/v1`, contract models as
+  responses, errors -> 400/404/422/501, one lock (single worker). `tests/test_server.py` runs a full session over
+  HTTP. Run: `.\.venv\Scripts\python.exe -m uvicorn server.main:app --host 127.0.0.1 --port 8000`.
+- `docs/TEAMMATE_INSTRUCTIONS.md`: how the Next.js app replaces `app/api/chat/route.ts` (`streamText` ->
+  proxy to FastAPI), the `next.config.mjs` rewrite, the turn loop, the SafeText rule. Frontend repo not touched.
+
+## Gate P0 (checked 2026-11-21 ~20:00)
+- [x] pytest green: 100 passed (tests/test_server.py, test_tutor.py, test_contract.py, …).
+- [x] `results/diagnosis.json` (eval/bench_diagnosis.py) and `results/detector.json` (eval/eval_detector.py) exist,
+      produced by scripts.
+- [x] One full demo session (diagnosis -> hints -> RECONSTRUCT -> TRANSFER -> DONE) runs in demo mode offline from
+      cache: FR 10/10 and AR 8/8 calls cached, 0 tokens, 0 fallbacks; also checked with the API key removed and
+      the network blocked (dead proxy).
+- [x] STATUS.md up to date.
+- Not part of the gate but still open: guard judges NOT validated (labels pending), translation eval paused,
+  `live.allow_unverified_dev` still true (team sets it to false before the final demo), the UI is the teammate's
+  Next.js app (Streamlit pages here are stubs; Report stub reads the real `summary()`).
 
 ## Step 7: guard labels (`eval/guard_labels.csv`, `eval/eval_guards.py`)
 - 30 messages we wrote (safe hints, explicit leaks, near-trivial scaffolds, misconception-endorsing messages,
@@ -31,8 +58,7 @@ Last update: 2026-11-21, steps 7-8 committed (bench_tutor not run).
   (our wording; **needs a native-speaker check**).
 - Full demo session (diagnosis -> 2 hints -> RECONSTRUCT -> TRANSFER -> DONE, mastered) recorded in FR and AR and
   replayed offline: 8/8 calls from cache, 0 tokens, 0 fallbacks (`scripts/demo_session.py --lang fr|ar`).
-- **Known gap seen in the FR demo**: hint 2 says 2/5 is "inférieur à chaque fraction" (false: 2/5 > 1/3).
-  The math guard verifies equalities only, not comparisons in words; the LLM judge did not catch it.
+- Gap seen in the FR demo (hint 2: 2/5 "inférieur à chaque fraction", false): FIXED in step 9 (inequality check).
 - `eval/bench_tutor.py` written (A plain / B no guards / C full; 10 runs per condition planned) but **NOT run**:
   it needs ~160k tokens on 120b with 20b capped. Waiting for a team decision.
 - 88 tests pass.
@@ -170,4 +196,4 @@ Will resume if time permits.
 
 ## Time spent
 - Step 1: ~25 min. Step 2: ~50 min. Step 2 fixes + step 3: ~45 min. Step 4 (contract + stubs): ~40 min.
-- Step 5: ~1.5 h (mostly the rate-limited LLM eval). Step 6: ~35 min.
+- Step 5: ~1.5 h (mostly the rate-limited LLM eval). Step 6: ~35 min. Steps 7-8: ~1 h. Step 9 + FastAPI + gate: ~1 h.

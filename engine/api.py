@@ -5,8 +5,8 @@ State is held in memory per Streamlit server process (sessions dict).
 
 Real: sessions, diagnosis loop (answers + confidence + explanation detector), next-question selection,
 tutor hints HINT_1..3 with guards (step 6), entry into RECONSTRUCT / TRANSFER, cost, results reading.
-RECONSTRUCT/TRANSFER grading, HANDOFF (step 8), summaries (step 9) and Study Studio (P1) raise NotImplementedError;
-the stub pages use engine/api_fake.py for those.
+Step 8: RECONSTRUCT/TRANSFER grading, loops, HANDOFF. Step 9: summary(). Study Studio (P1) raises
+NotImplementedError; the stub pages use engine/api_fake.py for it.
 """
 from __future__ import annotations
 
@@ -19,8 +19,9 @@ import uuid
 from engine import ROOT, bayes, llm, tutor
 from engine import safetext
 from engine.config import cfg
-from engine.contract import (AnswerRecord, Agenda, Cost, ExplanationEvidence, Grading, HypProb, LabelProb,
-                             MisconceptionView, NextQuestion, QuestionView, SessionState, TutorTurn)
+from engine.contract import (AnswerRecord, Agenda, Calibration, Cost, ExplanationEvidence, Grading, HypProb,
+                             LabelProb, MisconceptionView, NextQuestion, QuestionView, SessionState, SessionSummary,
+                             TutorTurn)
 
 _SESSIONS: dict[str, dict] = {}
 _BANK: dict | None = None
@@ -187,6 +188,7 @@ def submit_answer(session_id: str, question_id: str, option: str, confidence: st
         s["guard_events"] += f.get("guard_events", [])
         turn = TutorTurn(session_id=session_id, turn_id=s["turn"], grading=grading, posterior=_posterior(d),
                          next_question=nq, explanation_evidence=evidence, **f)
+        _track(s)
         return turn.model_dump()
     msg = "Thank you. Your answer is saved. Here is the next question."
     turn = TutorTurn(session_id=session_id, turn_id=s["turn"], state=s["state"],
@@ -214,6 +216,7 @@ def tutor_reply(session_id: str, text: str | None = None, choice: str | None = N
         s["turn"] += 1
         f, grading = tutor.on_retry(s, choice, _names(), _mis(s["target"]), d.as_dict(), _bank())
         s["guard_events"] += f.get("guard_events", [])
+        _track(s)
         return TutorTurn(session_id=session_id, turn_id=s["turn"], grading=grading, posterior=_posterior(d),
                          **f).model_dump()
     if st == "RECONSTRUCT":
@@ -227,12 +230,76 @@ def tutor_reply(session_id: str, text: str | None = None, choice: str | None = N
     else:
         raise ValueError(f"no tutor reply expected in state {st}")
     s["guard_events"] += f.get("guard_events", [])
+    _track(s)
     return TutorTurn(session_id=session_id, turn_id=s["turn"], grading=grading, posterior=_posterior(d),
                      **f).model_dump()
 
 
+def _track(s: dict) -> None:
+    h = s.setdefault("states", ["DIAGNOSE"])
+    if h[-1] != s["state"]:
+        h.append(s["state"])
+
+
+_OUTCOME = {
+    "mastered": "The student found the wrong step and solved a new question of the same type.",
+    "in_progress": "The work on this misconception is not finished yet.",
+    "handoff": "The student still makes this mistake after the hints. A teacher should take over.",
+    "no_misconception": "No misconception from the list was found, and the student solved a new question.",
+}
+_NEXT = {
+    "mastered": "Check this topic again in a few days with one new question.",
+    "in_progress": "Continue the session to finish the hints, the worked solution and the new question.",
+    "handoff": "Work on this topic with the student in person. Use the note below.",
+    "no_misconception": "Move on to the next topic.",
+}
+
+
 def summary(session_id: str) -> dict:
-    raise NotImplementedError("session summary arrives in step 9 (use engine.api_fake)")
+    """One-page report data, built by code from the session (no LLM text). Lesson references need RAG (P1)."""
+    s = _SESSIONS[session_id]
+    d: bayes.Diagnoser = s["diag"]
+    names = _names()
+    h = s.get("target") or d.top()[0]
+    h = h if h in names else d.top()[0]
+    mv = next(m for m in misconceptions() if m["id"] == h)
+    status = tutor.mastery_status(s) if "outcome" in s else "in_progress"
+    by_id = s["by_id"]
+    ev = []
+    for a in s["asked"]:
+        q = by_id[a.question_id]
+        line = f"{a.question_id}: chose {a.option} ({a.confidence}), {'correct' if a.correct else 'wrong'}"
+        m = q.get("option_misconception", {}).get(a.option)
+        if m:
+            line += f"; this option is typical of {m}"
+        if a.explanation:
+            line += f"; explanation: '{a.explanation[:120]}'"
+        ev.append(line)
+    for r in s.get("retries", []):
+        ev.append(f"{r['state']} retry on {r['question_id']}: {r['option']} "
+                  f"({'correct' if r['correct'] else 'wrong'})")
+    o = s.get("outcome", {"reconstruct": [], "transfers": []})
+    for r in o["reconstruct"]:
+        line = f"Find-the-mistake {r['item']}: chose step {r['step']} ({'right' if r['found'] else 'not the wrong step'})"
+        if r.get("rubric"):
+            line += f"; explanation graded by the LLM: {r['rubric']['verdict']}"
+        ev.append(line)
+    for x in o["transfers"]:
+        ev.append(f"New question {x['question_id']}: {x['option']} ({'correct' if x['correct'] else 'wrong'})")
+    sure = [a for a in s["asked"] if a.confidence == "sure"]
+    unsure = [a for a in s["asked"] if a.confidence == "unsure"]
+    kw = tutor.style_kwargs(s["profile"])
+    note = s.get("handoff_note")
+    return SessionSummary(
+        session_id=session_id, diagnosis=HypProb(id=h, name_en=names[h], prob=round(float(d.as_dict()[h]), 6)),
+        diagnosis_names=MisconceptionView(**mv), status=status, evidence=ev,
+        tried=list(s.get("states", ["DIAGNOSE"])),
+        outcome=safetext.static(_OUTCOME[status], style_kwargs=kw),
+        next_step=safetext.static(_NEXT[status], style_kwargs=kw), lesson_refs=[],
+        handoff_note=safetext.static(note, style_kwargs=kw) if note else None,
+        calibration=Calibration(sure_correct=sum(a.correct for a in sure), sure_total=len(sure),
+                                unsure_correct=sum(a.correct for a in unsure), unsure_total=len(unsure)),
+        cost=_cost(session_id)).model_dump()
 
 
 def studio_generate(session_id: str, tool: str, source: dict) -> dict:

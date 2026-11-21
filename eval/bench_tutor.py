@@ -7,8 +7,11 @@ Each run plants ONE misconception (M1..M4, rotating, with the bank questions for
   up to 3 tutor turns (hint -> student retries); then a fresh transfer question for the same misconception.
 Measured: leak rate (DETERMINISTIC check on every tutor message: correct letter, option text, answer value),
 transfer pass rate (answer key), tutor turns until a correct retry.
-Small on purpose (free tier: 1000 requests/day per model): N_RUNS per condition (default 10, team decision
-2026-11-21). Students = EVAL_MODEL (gpt-oss-20b), tutor = LLM_MODEL (as in the product), judge = EVAL_MODEL.
+Small on purpose (Groq free tier: 1000 requests/day and 200k tokens/day per model): runs per condition
+(team decision 2026-11-21: 5). gpt-oss-20b hit its daily token cap, so by default every role runs on LLM_MODEL
+(gpt-oss-120b): tutor, students (--student-model) and guard judge (config llm.judge_model).
+Runs are interleaved A, B, C per planted student, so stopping early keeps the conditions balanced. If the daily cap
+is hit, the benchmark stops and saves what it has (stopped_early).
 Diagnosis is benchmarked separately (bench_diagnosis.py); RECONSTRUCT is not part of this benchmark.
 
 Usage: .\\.venv\\Scripts\\python.exe eval\\bench_tutor.py [--runs 10]
@@ -28,6 +31,7 @@ from engine import detector as det  # noqa: E402
 from engine import mathcheck as mc  # noqa: E402
 
 MAX_TURNS = 3
+STUDENT_MODEL: str | None = None  # set in main(); default LLM_MODEL
 
 STUDENT_SYS = """You play a 12-year-old maths student in a simulation. You hold this misconception:
 "{name}: {description}"
@@ -59,7 +63,7 @@ def student_answer(q: dict, mis: dict, examples: list[str], history: list[str], 
     sysmsg = STUDENT_SYS.format(name=mis["name_en"], description=mis.get("description", ""),
                                 examples="\n".join(f"- {e}" for e in examples))
     user = ("Conversation so far:\n" + "\n".join(history) + "\n\n" if history else "") + f"Question:\n{qtext(q)}"
-    d = llm.ask_json(sysmsg, user, purpose="bench_student", model=llm.eval_model(), temperature=0.7,
+    d = llm.ask_json(sysmsg, user, purpose="bench_student", model=STUDENT_MODEL, temperature=0.7,
                      seed_tag=f"run{run}_{step}", max_tokens=512) or {}
     opt = str(d.get("option", "")).strip().upper()[:1]
     return {"option": opt if opt in q["options"] else "", "explanation": str(d.get("explanation", ""))}
@@ -122,10 +126,20 @@ def summarise(rows: list[dict]) -> dict:
             "fallbacks_used": sum(r["fallbacks"] for r in rows)}
 
 
+def daily_cap_hit(since: float) -> bool:
+    con = llm._db()
+    n = con.execute("SELECT COUNT(*) FROM llm_calls WHERE ts >= ? AND error LIKE '%daily cap%'", (since,)).fetchone()[0]
+    con.close()
+    return n > 0
+
+
 def main():
+    global STUDENT_MODEL
     ap = argparse.ArgumentParser()
-    ap.add_argument("--runs", type=int, default=10)
+    ap.add_argument("--runs", type=int, default=5)
+    ap.add_argument("--student-model", default=None, help="default: LLM_MODEL")
     a = ap.parse_args()
+    STUDENT_MODEL = a.student_model or llm.default_model()
     t0 = time.time()
     llm.set_session("bench_tutor")
     bank = bayes.load_bank()
@@ -140,23 +154,34 @@ def main():
         tq = cand[((i // 4) + 1) % len(cand)]
         lab = df[df.label == h].sample(3, random_state=42 + i)
         plan.append((i, h, rq, tq, [str(e) for e in lab.StudentExplanation]))
-    rows = []
-    for cond in ("A", "B", "C"):
-        for i, h, rq, tq, ex in plan:
+    rows, stopped = [], None
+    for i, h, rq, tq, ex in plan:
+        if stopped:
+            break
+        trio = []
+        for cond in ("A", "B", "C"):
+            t_run = time.time()
             try:
                 r = run_one(cond, i, h, rq, tq, bank, names, ex)
             except Exception as e:  # noqa: BLE001
                 r = {"condition": cond, "run": i, "error": f"{type(e).__name__}: {str(e)[:160]}"}
-            rows.append(r)
+            if daily_cap_hit(t_run):
+                stopped = f"Groq daily token cap hit during run {i} ({cond}); runs from {i} on are not counted."
+                break
+            trio.append(r)
             print(f"{cond} run {i} {h} {rq['id']}->{tq['id']}: "
                   + (r.get("error") or f"solved_at={r['solved_at_turn']} transfer={r['transfer_correct']} "
                                        f"leaks={sum(bool(m['deterministic_leak']) for m in r['messages'])}"), flush=True)
+        if not stopped:
+            rows += trio  # only complete A/B/C trios are kept
     ok = [r for r in rows if "error" not in r]
     res = {"script": "eval/bench_tutor.py",
            "label": "SIMULATION PROXY: LLM-played students, small sample (free-tier limits)",
            "created": dt.datetime.now().isoformat(timespec="seconds"),
-           "runs_per_condition": a.runs, "max_tutor_turns": MAX_TURNS,
-           "models": {"tutor": llm.default_model(), "student": llm.eval_model(), "judge": guards._judge_model()},
+           "runs_per_condition_planned": a.runs,
+           "runs_per_condition_completed": len({r["run"] for r in rows}), "stopped_early": stopped,
+           "max_tutor_turns": MAX_TURNS,
+           "models": {"tutor": llm.default_model(), "student": STUDENT_MODEL, "judge": guards._judge_model()},
            "conditions": {"A": "plain tutor (no state machine, no guards)", "B": "TRACE state machine, no guards",
                           "C": "full TRACE (state machine + guards + fallback)"},
            "summary": {c: summarise([r for r in ok if r["condition"] == c]) for c in ("A", "B", "C")},

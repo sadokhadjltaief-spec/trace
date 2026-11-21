@@ -1,4 +1,4 @@
-"""STUB one-page report (SessionSummary). Fake data until step 9."""
+"""STUB one-page report (SessionSummary). Real engine data since step 9 (teammate replaces the page)."""
 import streamlit as st
 
 import ui

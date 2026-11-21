@@ -55,6 +55,12 @@ Any change to a field bumps `CONTRACT_VERSION` and updates this file, the schema
 `source` for Study Studio: `{"kind": "diagnosis"|"folder"|"pages", "folder": str?, "pages": [...]?}`.
 All functions return plain dicts (`model.model_dump()`), JSON-serialisable.
 
+## 2b. HTTP (for the Next.js frontend)
+`server/main.py` (FastAPI) exposes the same functions under `/api/v1` (one endpoint per function, contract
+models as responses, OpenAPI at `/openapi.json`). How to connect: `docs/TEAMMATE_INSTRUCTIONS.md`.
+The rules of section 1 apply to the Next.js app too: no LLM call from the frontend, render a SafeText only
+when `shown_allowed` is true, no diagnosis math.
+
 ## 3. Shapes
 
 ### SafeText (every displayable text)

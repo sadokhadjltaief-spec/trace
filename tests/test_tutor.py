@@ -229,3 +229,50 @@ def test_transfer_fails_loops_then_handoff(monkeypatch):
     tq = [x["question_id"] for x in s["outcome"]["transfers"]]
     assert all(s["by_id"][q]["target"] == "M1" for q in tq)   # transfer = same misconception only
     TutorTurn.model_validate(t)
+
+
+@pytest.mark.parametrize("text,ok", [
+    ("Note that 2/5 < 1/3.", False),
+    ("Note that 2/5 > 1/3.", True),
+    ("On obtient 2/5, qui est inférieur à 1/3.", False),
+    ("2/5 est plus petit que 1/2.", True),
+    ("2/5 is smaller than 1/3.", False),
+    ("2/5 أصغر من 1/3", False),
+    ("3/4 ≥ 2/3", True),
+])
+def test_inequality_check(text, ok):
+    assert (guards.math_check(text)[0] == "pass") == ok
+
+
+def test_judge_extracted_claims_are_verified_by_sympy():
+    # the FR demo case: "2/5, qui est inférieur à chaque fraction" (1/2 and 1/3)
+    claims = [{"lhs": "2/5", "op": "<", "rhs": "1/2"}, {"lhs": "2/5", "op": "<", "rhs": "1/3"}]
+    st, detail = guards.math_check("on obtient 2/5, qui est inférieur à chaque fraction", claims)
+    assert st == "fail" and "1/3" in detail
+    assert guards.math_check("x", [{"lhs": "1/2", "op": "<", "rhs": "2/3"}])[0] == "pass"
+    assert guards.math_check("x", [{"lhs": "a", "op": "<", "rhs": "b"}])[0] == "pass"  # unparseable: ignored
+
+
+@pytest.mark.skipif(not HAS_BANK, reason="bank.json is local-only")
+def test_summary_after_full_session(monkeypatch):
+    from engine.contract import SessionSummary
+    sid, t = _to_reconstruct(monkeypatch)
+    s = api._SESSIONS[sid]
+    t = api.tutor_reply(sid, choice=str(s["recon"]["error_step"]), text="they added the bottoms")
+    tq = s["by_id"][t["question"]["id"]]
+    api.tutor_reply(sid, choice=tq["correct"])
+    r = api.summary(sid)
+    SessionSummary.model_validate(r)
+    assert r["status"] == "mastered" and r["diagnosis"]["id"] == "M1"
+    assert r["tried"][0] == "DIAGNOSE" and r["tried"][-1] == "DONE" and "RECONSTRUCT" in r["tried"]
+    assert r["outcome"]["shown_allowed"] and r["next_step"]["shown_allowed"]
+    assert any("LLM" in e for e in r["evidence"])          # rubric grading is labelled in the evidence
+    assert r["calibration"]["sure_total"] == len(s["asked"])
+
+
+@pytest.mark.skipif(not HAS_BANK, reason="bank.json is local-only")
+def test_summary_mid_session(monkeypatch):
+    monkeypatch.setattr(llm, "ask_json", _fake_llm(lambda p, tag: "Look at the bottom numbers."))
+    sid = api.start_session({"name": "T", "lang": "en"}, detector_llm=False)["session_id"]
+    r = api.summary(sid)
+    assert r["status"] == "in_progress" and r["evidence"] == []

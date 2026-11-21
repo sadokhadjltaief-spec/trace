@@ -4,7 +4,8 @@
   LLM judge "does this reveal or trivialise the answer?".
 - congruency: the LLM judge checks the message against every misconception with posterior > threshold
   ("does this state, imply or exemplify misconception X?").
-- math: every simple 'a = b' claim is verified with SymPy (engine/mathcheck.py).
+- math: every 'a = b' and numeric comparison ('<', '>', 'smaller than', 'inférieur à', 'أصغر من') found by regex
+  is verified with SymPy; the judge also EXTRACTS claims written in words, which SymPy then verifies.
 - style: deterministic linter (engine/style.py) with the active profile's limits, plus a language check (the
   message must be in the student's language: fr / ar / en).
 Leak and congruency share ONE judge call (free tier: halves the request count). Every decision is logged to SQLite
@@ -29,8 +30,14 @@ You are a strict safety check, not a writer.
 2. For each listed misconception: true if the message states, implies, or gives an example that follows that
    wrong idea as if it were correct. NOT congruent: mentioning the wrong idea in order to question it, or a
    contrasting example that applies the wrong method to DIFFERENT numbers and says the result is wrong.
+3. claims: list EVERY equality or comparison between numbers that the message asserts as TRUE, written with
+   numbers only. Resolve words to the numbers they mean: "2/5 is smaller than each fraction" about 1/2 and 1/3
+   gives [{"lhs": "2/5", "op": "<", "rhs": "1/2"}, {"lhs": "2/5", "op": "<", "rhs": "1/3"}]. Do NOT list results
+   the message itself says are wrong. Do not judge whether the claims are true; just extract them.
+   op is one of "=", "<", ">", "<=", ">=".
 Return JSON: {"reveals_answer": true|false, "leak_reason": "...",
- "congruent": {"M1": true|false, ...}, "congruency_reason": "..."}"""
+ "congruent": {"M1": true|false, ...}, "congruency_reason": "...",
+ "claims": [{"lhs": "...", "op": "...", "rhs": "..."}]}"""
 
 
 def _judge_model() -> str:
@@ -75,14 +82,23 @@ def language_check(text: str, lang: str | None) -> str | None:
     return None
 
 
-def math_check(text: str) -> tuple[str, str]:
-    claims = mc.check_equalities(text)
+def math_check(text: str, extracted: list | None = None) -> tuple[str, str]:
+    """Deterministic: equalities + numeric comparisons found by regex (mathcheck). Plus claims the LLM judge
+    extracted from the wording (e.g. 'smaller than each fraction'): the LLM only extracts, SymPy decides."""
+    claims = mc.check_equalities(text) + mc.check_inequalities(text)
+    for c in extracted or []:
+        if not isinstance(c, dict):
+            continue
+        lhs, op, rhs = str(c.get("lhs", "")), str(c.get("op", "")).strip(), str(c.get("rhs", ""))
+        ok = mc.equal(lhs, rhs) if op == "=" else mc.compare(lhs, op, rhs)
+        if ok is not None:
+            claims.append({"claim": f"{lhs} {op} {rhs} (extracted)", "ok": ok})
     bad = [c["claim"] for c in claims if c["ok"] is False]
     if bad:
-        return "fail", f"false equalities: {bad}"
+        return "fail", f"false claims: {bad}"
     if claims:
-        return "pass", f"{len(claims)} equalities verified with SymPy"
-    return "pass", "no checkable equality"
+        return "pass", f"{len(claims)} claims verified with SymPy"
+    return "pass", "no checkable claim"
 
 
 def judge(text: str, q: dict, suspects: dict[str, str], purpose: str = "guard_judge") -> dict:
@@ -107,9 +123,6 @@ def check(text: str, q: dict, posterior: dict[str, float], names: dict[str, str]
     if wrong_lang:
         viol.append(wrong_lang)
     checks.append(Check(name="style", status="fail" if viol else "pass", detail="; ".join(viol)))
-    ms, md = math_check(text)
-    checks.append(Check(name="math", status=ms, detail=md))
-
     det = deterministic_leak(text, q)
     detail["deterministic_leak"] = det
     j = None
@@ -119,6 +132,8 @@ def check(text: str, q: dict, posterior: dict[str, float], names: dict[str, str]
         except Exception as e:  # noqa: BLE001  (CacheMiss in demo, API failure): fail closed
             detail["judge_error"] = f"{type(e).__name__}: {str(e)[:120]}"
     detail["judge"] = j
+    ms, md = math_check(text, (j or {}).get("claims"))
+    checks.append(Check(name="math", status=ms, detail=md))
     if det:
         checks.append(Check(name="leak", status="fail", detail="deterministic: " + "; ".join(det)))
     elif j is None:

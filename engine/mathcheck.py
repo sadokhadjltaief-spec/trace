@@ -90,6 +90,52 @@ def check_equalities(text: str) -> list[dict]:
     return out
 
 
+_OPS = {"<": lambda d: d < 0, ">": lambda d: d > 0, "<=": lambda d: d <= 0, ">=": lambda d: d >= 0}
+
+
+def compare(a: str, op: str, b: str) -> bool | None:
+    """Truth of 'a op b' for numeric a, b (op in < > <= >=); None if not both numeric."""
+    op = {"≤": "<=", "≥": ">=", "=<": "<=", "=>": ">="}.get(op, op)
+    va, vb = value(a), value(b)
+    if va is None or vb is None or op not in _OPS:
+        return None
+    try:
+        d = sp.nsimplify(va - vb)
+        if not d.is_real:
+            return None
+        return bool(_OPS[op](d))
+    except Exception:  # noqa: BLE001
+        return None
+
+
+# comparison words (EN / FR / AR) -> operator
+_WORD_OPS = [
+    (r"(?:is\s+)?(?:smaller|less|lower)\s+than", "<"), (r"(?:is\s+)?(?:bigger|greater|larger|more|higher)\s+than", ">"),
+    (r"(?:est\s+)?(?:plus\s+petite?s?|inf[ée]rieure?s?)\s+(?:que|à|a)", "<"),
+    (r"(?:est\s+)?(?:plus\s+grande?s?|sup[ée]rieure?s?)\s+(?:que|à|a)", ">"),
+    (r"(?:هو\s+|هي\s+)?(?:أصغر|اصغر|أقل|اقل)\s+من", "<"), (r"(?:هو\s+|هي\s+)?(?:أكبر|اكبر|أكثر|اكثر)\s+من", ">"),
+]
+_NUM = r"-?\d+(?:\.\d+)?(?:\s*/\s*\d+)?"
+_SYM_INEQ = re.compile(rf"(?<![\w/.])({_NUM})\s*(<=|>=|≤|≥|<|>)\s*({_NUM})(?![\w/])")
+_REL = r"(?:(?:qui|which|that|it|and|et|وهو|وهي|الذي|التي)\s+)?"
+_WORD_INEQ = [(re.compile(rf"(?<![\w/.])({_NUM})\s*,?\s*{_REL}{w}\s+({_NUM})(?![\w/])", re.I), op)
+              for w, op in _WORD_OPS]
+
+
+def check_inequalities(text: str) -> list[dict]:
+    """Find simple comparison claims between two numbers ('2/5 < 1/3', '2/5 est inférieur à 1/3',
+    '2/5 is smaller than 1/3', 'أصغر من') and verify each with SymPy. Claims about unnamed quantities
+    ('smaller than each fraction') are not visible here: the guard judge extracts those (guards.py)."""
+    t = latex_to_plain(text)
+    out = []
+    for m in _SYM_INEQ.finditer(t):
+        out.append({"claim": f"{m.group(1)} {m.group(2)} {m.group(3)}", "ok": compare(m.group(1), m.group(2), m.group(3))})
+    for rx, op in _WORD_INEQ:
+        for m in rx.finditer(t):
+            out.append({"claim": f"{m.group(1)} {op} {m.group(2)}", "ok": compare(m.group(1), op, m.group(2))})
+    return out
+
+
 def numeric_tokens(text: str) -> list[str]:
     return [m.group(0).strip() for m in _NUM_TOKEN.finditer(latex_to_plain(text))]
 

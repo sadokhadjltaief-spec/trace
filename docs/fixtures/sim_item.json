@@ -1,0 +1,22 @@
+{
+ "id": "S1",
+ "template": "free_fall",
+ "text": "Deux boules de même taille sont lâchées en même temps…",
+ "options": {
+  "A": "La boule b (5 kg)",
+  "B": "La boule a (1 kg)",
+  "C": "Les deux en même temps"
+ },
+ "runs_params": {
+  "a": {
+   "mass_kg": 1,
+   "height_m": 20
+  },
+  "b": {
+   "mass_kg": 5,
+   "height_m": 20
+  }
+ },
+ "transfer_of": null,
+ "requires_confidence": true
+}

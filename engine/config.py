@@ -12,7 +12,9 @@ from engine import ROOT
 
 @lru_cache(maxsize=1)
 def cfg() -> dict:
-    load_dotenv(ROOT / ".env")  # never overrides variables already set in the system env
+    # .env wins over the system environment (2026-11-21: a new GROQ_API_KEY was put in .env while an old one
+    # was still set as a Windows user variable)
+    load_dotenv(ROOT / ".env", override=True)
     with open(ROOT / "config.yaml", encoding="utf-8") as f:
         return yaml.safe_load(f)
 

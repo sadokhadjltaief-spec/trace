@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field
 from engine import api
 from engine.config import cfg
 from engine.contract import (CONTRACT_VERSION, CourseAnswer, MisconceptionView, NextQuestion, SessionState,
-                             SessionSummary, StudioOutput, TutorTurn)
+                             SessionSummary, SimItemView, SimRun, SimTurn, StudioOutput, TutorTurn)
 
 app = FastAPI(title="TRACE engine API", version=CONTRACT_VERSION,
               description="Thin HTTP wrapper over engine/api.py. Shapes: docs/INTERFACE.md.")
@@ -169,3 +169,42 @@ async def course_upload(files: list[UploadFile] = File(...)) -> dict:
         (dest / name).write_bytes(data)
         saved.append(name)
     return {"saved": saved, "index": _call(api.course_index, refresh=True)}
+
+
+class SimRunBody(BaseModel):
+    template: str
+    params: dict = Field(default_factory=dict)
+
+
+class SimPredictBody(BaseModel):
+    option: str
+    confidence: Literal["sure", "unsure"]
+
+
+class SimExplainBody(BaseModel):
+    text: str | None = None
+
+
+@app.get("/api/v1/sims/templates")
+def sim_templates() -> dict:
+    return _call(api.sim_templates)
+
+
+@app.post("/api/v1/sims/run", response_model=SimRun)
+def sim_run(body: SimRunBody):
+    return _call(api.sim_run, body.template, body.params)
+
+
+@app.get("/api/v1/sessions/{sid}/sims", response_model=list[SimItemView])
+def sim_items(sid: str):
+    return _call(api.sim_items, sid)
+
+
+@app.post("/api/v1/sessions/{sid}/sims/{item_id}/predict", response_model=SimTurn)
+def sim_predict(sid: str, item_id: str, body: SimPredictBody):
+    return _call(api.sim_predict, sid, item_id, body.option, body.confidence)
+
+
+@app.post("/api/v1/sessions/{sid}/sims/{item_id}/explain", response_model=SimTurn)
+def sim_explain(sid: str, item_id: str, body: SimExplainBody):
+    return _call(api.sim_explain, sid, item_id, body.text)

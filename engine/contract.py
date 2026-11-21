@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.2"  # 1.1: TutorTurn.explanation_evidence; 1.2: CourseAnswer (additive, non-breaking)
+CONTRACT_VERSION = "1.3"  # 1.1 explanation_evidence; 1.2 CourseAnswer; 1.3 simulations (all additive)
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]
@@ -261,3 +261,46 @@ class StudioOutput(_M):
         if self.refused and (self.files or self.items):
             raise ValueError("a refused output carries no files or items")
         return self
+
+
+# ---------------------------------------------------------------- simulations (since 1.3)
+class SimSeries(_M):
+    name: str                      # e.g. "height", "speed", "angle", "position"
+    unit: str
+    t: list[float]
+    y: list[float]
+
+
+class SimRun(_M):
+    """A computed simulation (numpy/scipy). Plot `series`; show `result` values with `units`."""
+    label: str = "a"               # "a" / "b" when two objects are compared
+    template: Literal["free_fall", "pendulum", "cart_force"]
+    params: dict
+    units: dict[str, str]
+    series: list[SimSeries]
+    result: dict
+
+
+class SimItemView(_M):
+    """A Predict question (no correct answer inside: it is computed by the engine after the prediction)."""
+    id: str
+    template: Literal["free_fall", "pendulum", "cart_force"]
+    text: str
+    options: dict[str, str]
+    runs_params: dict[str, dict]   # label -> parameters, to set the sliders / draw the setup
+    transfer_of: str | None = None
+    requires_confidence: bool = True
+
+
+class SimTurn(_M):
+    contract_version: str = CONTRACT_VERSION
+    item_id: str
+    stage: Literal["observe", "explain_saved", "transfer_result"]
+    grading: Grading               # method "simulation": the prediction against the computed result
+    observed: str                  # computed outcome, e.g. "same", "increases", "constant_speed"
+    result_text: SafeText | None = None
+    runs: list[SimRun] = []
+    posterior: list[HypProb]       # PHYSICS posterior (ids M0..M4 = the physics bank's slots, names given)
+    message: SafeText
+    expects: Literal["explanation", "transfer_answer", "none"]
+    next_item: SimItemView | None = None

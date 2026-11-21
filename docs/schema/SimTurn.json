@@ -1,0 +1,403 @@
+{
+ "$defs": {
+  "Check": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "enum": [
+      "leak",
+      "congruency",
+      "math",
+      "style"
+     ],
+     "title": "Name",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "not_applicable"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "detail": {
+     "default": "",
+     "title": "Detail",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "status"
+   ],
+   "title": "Check",
+   "type": "object"
+  },
+  "Grading": {
+   "additionalProperties": false,
+   "properties": {
+    "correct": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Correct"
+    },
+    "method": {
+     "enum": [
+      "answer_key",
+      "sympy",
+      "simulation",
+      "llm_rubric",
+      "none"
+     ],
+     "title": "Method",
+     "type": "string"
+    },
+    "label": {
+     "title": "Label",
+     "type": "string"
+    }
+   },
+   "required": [
+    "correct",
+    "method",
+    "label"
+   ],
+   "title": "Grading",
+   "type": "object"
+  },
+  "HypProb": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "enum": [
+      "M0",
+      "M1",
+      "M2",
+      "M3",
+      "M4"
+     ],
+     "title": "Id",
+     "type": "string"
+    },
+    "name_en": {
+     "title": "Name En",
+     "type": "string"
+    },
+    "prob": {
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Prob",
+     "type": "number"
+    }
+   },
+   "required": [
+    "id",
+    "name_en",
+    "prob"
+   ],
+   "title": "HypProb",
+   "type": "object"
+  },
+  "SafeText": {
+   "additionalProperties": false,
+   "description": "Every piece of text the frontend may display. Render ONLY if shown_allowed is true.",
+   "properties": {
+    "text": {
+     "title": "Text",
+     "type": "string"
+    },
+    "lang": {
+     "default": "en",
+     "enum": [
+      "fr",
+      "ar",
+      "en"
+     ],
+     "title": "Lang",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "llm",
+      "verified_bank",
+      "template"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "checks": {
+     "items": {
+      "$ref": "#/$defs/Check"
+     },
+     "title": "Checks",
+     "type": "array"
+    },
+    "shown_allowed": {
+     "title": "Shown Allowed",
+     "type": "boolean"
+    },
+    "fallback_used": {
+     "default": false,
+     "title": "Fallback Used",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "text",
+    "origin",
+    "checks",
+    "shown_allowed"
+   ],
+   "title": "SafeText",
+   "type": "object"
+  },
+  "SimItemView": {
+   "additionalProperties": false,
+   "description": "A Predict question (no correct answer inside: it is computed by the engine after the prediction).",
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "template": {
+     "enum": [
+      "free_fall",
+      "pendulum",
+      "cart_force"
+     ],
+     "title": "Template",
+     "type": "string"
+    },
+    "text": {
+     "title": "Text",
+     "type": "string"
+    },
+    "options": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Options",
+     "type": "object"
+    },
+    "runs_params": {
+     "additionalProperties": {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     "title": "Runs Params",
+     "type": "object"
+    },
+    "transfer_of": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Transfer Of"
+    },
+    "requires_confidence": {
+     "default": true,
+     "title": "Requires Confidence",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "id",
+    "template",
+    "text",
+    "options",
+    "runs_params"
+   ],
+   "title": "SimItemView",
+   "type": "object"
+  },
+  "SimRun": {
+   "additionalProperties": false,
+   "description": "A computed simulation (numpy/scipy). Plot `series`; show `result` values with `units`.",
+   "properties": {
+    "label": {
+     "default": "a",
+     "title": "Label",
+     "type": "string"
+    },
+    "template": {
+     "enum": [
+      "free_fall",
+      "pendulum",
+      "cart_force"
+     ],
+     "title": "Template",
+     "type": "string"
+    },
+    "params": {
+     "additionalProperties": true,
+     "title": "Params",
+     "type": "object"
+    },
+    "units": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Units",
+     "type": "object"
+    },
+    "series": {
+     "items": {
+      "$ref": "#/$defs/SimSeries"
+     },
+     "title": "Series",
+     "type": "array"
+    },
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "template",
+    "params",
+    "units",
+    "series",
+    "result"
+   ],
+   "title": "SimRun",
+   "type": "object"
+  },
+  "SimSeries": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "title": "Name",
+     "type": "string"
+    },
+    "unit": {
+     "title": "Unit",
+     "type": "string"
+    },
+    "t": {
+     "items": {
+      "type": "number"
+     },
+     "title": "T",
+     "type": "array"
+    },
+    "y": {
+     "items": {
+      "type": "number"
+     },
+     "title": "Y",
+     "type": "array"
+    }
+   },
+   "required": [
+    "name",
+    "unit",
+    "t",
+    "y"
+   ],
+   "title": "SimSeries",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "properties": {
+  "contract_version": {
+   "default": "1.3",
+   "title": "Contract Version",
+   "type": "string"
+  },
+  "item_id": {
+   "title": "Item Id",
+   "type": "string"
+  },
+  "stage": {
+   "enum": [
+    "observe",
+    "explain_saved",
+    "transfer_result"
+   ],
+   "title": "Stage",
+   "type": "string"
+  },
+  "grading": {
+   "$ref": "#/$defs/Grading"
+  },
+  "observed": {
+   "title": "Observed",
+   "type": "string"
+  },
+  "result_text": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/SafeText"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "runs": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/SimRun"
+   },
+   "title": "Runs",
+   "type": "array"
+  },
+  "posterior": {
+   "items": {
+    "$ref": "#/$defs/HypProb"
+   },
+   "title": "Posterior",
+   "type": "array"
+  },
+  "message": {
+   "$ref": "#/$defs/SafeText"
+  },
+  "expects": {
+   "enum": [
+    "explanation",
+    "transfer_answer",
+    "none"
+   ],
+   "title": "Expects",
+   "type": "string"
+  },
+  "next_item": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/SimItemView"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  }
+ },
+ "required": [
+  "item_id",
+  "stage",
+  "grading",
+  "observed",
+  "posterior",
+  "message",
+  "expects"
+ ],
+ "title": "SimTurn",
+ "type": "object"
+}

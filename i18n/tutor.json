@@ -1,41 +1,238 @@
 {
  "_note": "Fixed tutor/report strings (our wording). FR and AR translations by Claude Code: to be checked by a native speaker before real use. {step} is filled by code.",
- "answer_saved": {"en": "Thank you. Your answer is saved. Here is the next question.", "fr": "Merci. Ta réponse est enregistrée. Voici la question suivante.", "ar": "شكرًا. تم حفظ إجابتك. إليك السؤال التالي."},
- "answer_first": {"en": "Please answer this question. Then you will get help on it.", "fr": "Réponds d'abord à cette question. Ensuite, tu recevras de l'aide.", "ar": "أجب عن هذا السؤال أولًا. بعد ذلك ستحصل على مساعدة."},
- "recon_intro": {"en": "Here is a worked solution with one wrong step. Which step is wrong, and why?", "fr": "Voici une solution rédigée avec une seule étape fausse. Quelle étape est fausse, et pourquoi ?", "ar": "إليك حلًّا مكتوبًا فيه خطوة واحدة خاطئة. ما هي الخطوة الخاطئة، ولماذا؟"},
- "recon_retry": {"en": "Step {step} is correct. Look again: which step is wrong?", "fr": "L'étape {step} est juste. Regarde encore : quelle étape est fausse ?", "ar": "الخطوة {step} صحيحة. انظر مرة أخرى: ما هي الخطوة الخاطئة؟"},
- "recon_found": {"en": "Yes. You found the wrong step.", "fr": "Oui. Tu as trouvé l'étape fausse.", "ar": "نعم. لقد وجدت الخطوة الخاطئة."},
- "recon_reveal": {"en": "The wrong step was step {step}.", "fr": "L'étape fausse était l'étape {step}.", "ar": "الخطوة الخاطئة كانت الخطوة {step}."},
- "transfer_intro": {"en": "Here is a new question. Use what you checked in the last steps.", "fr": "Voici une nouvelle question. Utilise ce que tu as vérifié dans les étapes précédentes.", "ar": "إليك سؤالًا جديدًا. استعمل ما تحقّقت منه في الخطوات السابقة."},
- "no_more": {"en": "There are no more questions in the bank for this session.", "fr": "Il n'y a plus de questions dans la banque pour cette séance.", "ar": "لا توجد أسئلة أخرى في البنك لهذه الحصة."},
- "done_mastered": {"en": "Correct. You solved a new question of the same type. Your results are ready.", "fr": "Correct. Tu as résolu une nouvelle question du même type. Tes résultats sont prêts.", "ar": "صحيح. لقد حللت سؤالًا جديدًا من النوع نفسه. نتائجك جاهزة."},
- "done_plain": {"en": "Thank you. Your results are ready.", "fr": "Merci. Tes résultats sont prêts.", "ar": "شكرًا. نتائجك جاهزة."},
- "handoff": {"en": "Thank you for your work. This topic needs more time. Your teacher will look at it with you.", "fr": "Merci pour ton travail. Ce sujet demande plus de temps. Ton enseignant le reverra avec toi.", "ar": "شكرًا على عملك. هذا الموضوع يحتاج إلى وقت أطول. سيراجعه معك معلّمك."},
- "last_resort": {"en": "Look again at each step of your working. Check which step uses a rule you are not sure of.", "fr": "Relis chaque étape de ton travail. Vérifie l'étape où tu utilises une règle dont tu n'es pas sûr.", "ar": "راجع كل خطوة من حلّك. تحقّق من الخطوة التي تستعمل فيها قاعدة لست متأكدًا منها."},
- "why_rule": {"en": "I used a rule I remember.", "fr": "J'ai utilisé une règle dont je me souviens.", "ar": "استعملت قاعدة أتذكّرها."},
- "why_steps": {"en": "I worked it out step by step.", "fr": "J'ai calculé étape par étape.", "ar": "حسبتها خطوة بخطوة."},
- "why_example": {"en": "I compared it with an example.", "fr": "Je l'ai comparé avec un exemple.", "ar": "قارنتها بمثال."},
- "why_guess": {"en": "I guessed.", "fr": "J'ai deviné.", "ar": "خمّنت."},
- "agenda_next_question": {"en": "next question", "fr": "question suivante", "ar": "السؤال التالي"},
- "agenda_results": {"en": "your results", "fr": "tes résultats", "ar": "نتائجك"},
- "agenda_retry": {"en": "you try the question again", "fr": "tu refais la question", "ar": "تعيد محاولة السؤال"},
- "agenda_recon": {"en": "find the wrong step", "fr": "trouver l'étape fausse", "ar": "إيجاد الخطوة الخاطئة"},
- "agenda_transfer": {"en": "a new question", "fr": "une nouvelle question", "ar": "سؤال جديد"},
- "frame_situation": {"en": "Situation", "fr": "Situation", "ar": "الوضع"},
- "frame_task": {"en": "Your task", "fr": "Ta tâche", "ar": "مهمّتك"},
- "frame_next": {"en": "What happens next", "fr": "Ensuite", "ar": "ماذا بعد"},
- "task_answer": {"en": "Answer the question.", "fr": "Réponds à la question.", "ar": "أجب عن السؤال."},
- "task_retry": {"en": "Choose your answer again.", "fr": "Choisis de nouveau ta réponse.", "ar": "اختر إجابتك من جديد."},
- "task_error_step": {"en": "Choose the wrong step and say why.", "fr": "Choisis l'étape fausse et dis pourquoi.", "ar": "اختر الخطوة الخاطئة وقل لماذا."},
- "task_transfer_answer": {"en": "Answer the new question.", "fr": "Réponds à la nouvelle question.", "ar": "أجب عن السؤال الجديد."},
- "task_explanation": {"en": "Explain your answer.", "fr": "Explique ta réponse.", "ar": "اشرح إجابتك."},
- "task_none": {"en": "Nothing more. You can read your results.", "fr": "Rien de plus. Tu peux lire tes résultats.", "ar": "لا شيء آخر. يمكنك قراءة نتائجك."},
- "outcome_mastered": {"en": "The student found the wrong step and solved a new question of the same type.", "fr": "L'élève a trouvé l'étape fausse et a résolu une nouvelle question du même type.", "ar": "وجد التلميذ الخطوة الخاطئة وحلّ سؤالًا جديدًا من النوع نفسه."},
- "outcome_in_progress": {"en": "The work on this misconception is not finished yet.", "fr": "Le travail sur cette erreur type n'est pas encore terminé.", "ar": "لم ينتهِ العمل على هذا الخطأ النمطي بعد."},
- "outcome_handoff": {"en": "The student still makes this mistake after the hints. A teacher should take over.", "fr": "L'élève fait encore cette erreur après les indices. Un enseignant doit prendre le relais.", "ar": "ما زال التلميذ يرتكب هذا الخطأ بعد التلميحات. يجب أن يتولّى المعلّم الأمر."},
- "outcome_no_misconception": {"en": "No misconception from the list was found, and the student solved a new question.", "fr": "Aucune erreur type de la liste n'a été trouvée. L'élève a résolu une nouvelle question.", "ar": "لم يُعثر على أي خطأ نمطي من القائمة، وحلّ التلميذ سؤالًا جديدًا."},
- "next_mastered": {"en": "Check this topic again in a few days with one new question.", "fr": "Revoir ce sujet dans quelques jours avec une nouvelle question.", "ar": "مراجعة هذا الموضوع بعد بضعة أيام بسؤال جديد."},
- "next_in_progress": {"en": "Continue the session to finish the hints, the worked solution and the new question.", "fr": "Continuer la séance pour finir les indices, la solution rédigée et la nouvelle question.", "ar": "مواصلة الحصة لإنهاء التلميحات والحلّ المكتوب والسؤال الجديد."},
- "next_handoff": {"en": "Work on this topic with the student in person. Use the note below.", "fr": "Travailler ce sujet avec l'élève en personne. Utiliser la note ci-dessous.", "ar": "العمل على هذا الموضوع مع التلميذ مباشرة. استعمل الملاحظة أدناه."},
- "next_no_misconception": {"en": "Move on to the next topic.", "fr": "Passer au sujet suivant.", "ar": "الانتقال إلى الموضوع التالي."}
+ "answer_saved": {
+  "en": "Thank you. Your answer is saved. Here is the next question.",
+  "fr": "Merci. Ta réponse est enregistrée. Voici la question suivante.",
+  "ar": "شكرًا. تم حفظ إجابتك. إليك السؤال التالي."
+ },
+ "answer_first": {
+  "en": "Please answer this question. Then you will get help on it.",
+  "fr": "Réponds d'abord à cette question. Ensuite, tu recevras de l'aide.",
+  "ar": "أجب عن هذا السؤال أولًا. بعد ذلك ستحصل على مساعدة."
+ },
+ "recon_intro": {
+  "en": "Here is a worked solution with one wrong step. Which step is wrong, and why?",
+  "fr": "Voici une solution rédigée avec une seule étape fausse. Quelle étape est fausse, et pourquoi ?",
+  "ar": "إليك حلًّا مكتوبًا فيه خطوة واحدة خاطئة. ما هي الخطوة الخاطئة، ولماذا؟"
+ },
+ "recon_retry": {
+  "en": "Step {step} is correct. Look again: which step is wrong?",
+  "fr": "L'étape {step} est juste. Regarde encore : quelle étape est fausse ?",
+  "ar": "الخطوة {step} صحيحة. انظر مرة أخرى: ما هي الخطوة الخاطئة؟"
+ },
+ "recon_found": {
+  "en": "Yes. You found the wrong step.",
+  "fr": "Oui. Tu as trouvé l'étape fausse.",
+  "ar": "نعم. لقد وجدت الخطوة الخاطئة."
+ },
+ "recon_reveal": {
+  "en": "The wrong step was step {step}.",
+  "fr": "L'étape fausse était l'étape {step}.",
+  "ar": "الخطوة الخاطئة كانت الخطوة {step}."
+ },
+ "transfer_intro": {
+  "en": "Here is a new question. Use what you checked in the last steps.",
+  "fr": "Voici une nouvelle question. Utilise ce que tu as vérifié dans les étapes précédentes.",
+  "ar": "إليك سؤالًا جديدًا. استعمل ما تحقّقت منه في الخطوات السابقة."
+ },
+ "no_more": {
+  "en": "There are no more questions in the bank for this session.",
+  "fr": "Il n'y a plus de questions dans la banque pour cette séance.",
+  "ar": "لا توجد أسئلة أخرى في البنك لهذه الحصة."
+ },
+ "done_mastered": {
+  "en": "Correct. You solved a new question of the same type. Your results are ready.",
+  "fr": "Correct. Tu as résolu une nouvelle question du même type. Tes résultats sont prêts.",
+  "ar": "صحيح. لقد حللت سؤالًا جديدًا من النوع نفسه. نتائجك جاهزة."
+ },
+ "done_plain": {
+  "en": "Thank you. Your results are ready.",
+  "fr": "Merci. Tes résultats sont prêts.",
+  "ar": "شكرًا. نتائجك جاهزة."
+ },
+ "handoff": {
+  "en": "Thank you for your work. This topic needs more time. Your teacher will look at it with you.",
+  "fr": "Merci pour ton travail. Ce sujet demande plus de temps. Ton enseignant le reverra avec toi.",
+  "ar": "شكرًا على عملك. هذا الموضوع يحتاج إلى وقت أطول. سيراجعه معك معلّمك."
+ },
+ "last_resort": {
+  "en": "Look again at each step of your working. Check which step uses a rule you are not sure of.",
+  "fr": "Relis chaque étape de ton travail. Vérifie l'étape où tu utilises une règle dont tu n'es pas sûr.",
+  "ar": "راجع كل خطوة من حلّك. تحقّق من الخطوة التي تستعمل فيها قاعدة لست متأكدًا منها."
+ },
+ "why_rule": {
+  "en": "I used a rule I remember.",
+  "fr": "J'ai utilisé une règle dont je me souviens.",
+  "ar": "استعملت قاعدة أتذكّرها."
+ },
+ "why_steps": {
+  "en": "I worked it out step by step.",
+  "fr": "J'ai calculé étape par étape.",
+  "ar": "حسبتها خطوة بخطوة."
+ },
+ "why_example": {
+  "en": "I compared it with an example.",
+  "fr": "Je l'ai comparé avec un exemple.",
+  "ar": "قارنتها بمثال."
+ },
+ "why_guess": {
+  "en": "I guessed.",
+  "fr": "J'ai deviné.",
+  "ar": "خمّنت."
+ },
+ "agenda_next_question": {
+  "en": "next question",
+  "fr": "question suivante",
+  "ar": "السؤال التالي"
+ },
+ "agenda_results": {
+  "en": "your results",
+  "fr": "tes résultats",
+  "ar": "نتائجك"
+ },
+ "agenda_retry": {
+  "en": "you try the question again",
+  "fr": "tu refais la question",
+  "ar": "تعيد محاولة السؤال"
+ },
+ "agenda_recon": {
+  "en": "find the wrong step",
+  "fr": "trouver l'étape fausse",
+  "ar": "إيجاد الخطوة الخاطئة"
+ },
+ "agenda_transfer": {
+  "en": "a new question",
+  "fr": "une nouvelle question",
+  "ar": "سؤال جديد"
+ },
+ "frame_situation": {
+  "en": "Situation",
+  "fr": "Situation",
+  "ar": "الوضع"
+ },
+ "frame_task": {
+  "en": "Your task",
+  "fr": "Ta tâche",
+  "ar": "مهمّتك"
+ },
+ "frame_next": {
+  "en": "What happens next",
+  "fr": "Ensuite",
+  "ar": "ماذا بعد"
+ },
+ "task_answer": {
+  "en": "Answer the question.",
+  "fr": "Réponds à la question.",
+  "ar": "أجب عن السؤال."
+ },
+ "task_retry": {
+  "en": "Choose your answer again.",
+  "fr": "Choisis de nouveau ta réponse.",
+  "ar": "اختر إجابتك من جديد."
+ },
+ "task_error_step": {
+  "en": "Choose the wrong step and say why.",
+  "fr": "Choisis l'étape fausse et dis pourquoi.",
+  "ar": "اختر الخطوة الخاطئة وقل لماذا."
+ },
+ "task_transfer_answer": {
+  "en": "Answer the new question.",
+  "fr": "Réponds à la nouvelle question.",
+  "ar": "أجب عن السؤال الجديد."
+ },
+ "task_explanation": {
+  "en": "Explain your answer.",
+  "fr": "Explique ta réponse.",
+  "ar": "اشرح إجابتك."
+ },
+ "task_none": {
+  "en": "Nothing more. You can read your results.",
+  "fr": "Rien de plus. Tu peux lire tes résultats.",
+  "ar": "لا شيء آخر. يمكنك قراءة نتائجك."
+ },
+ "outcome_mastered": {
+  "en": "The student found the wrong step and solved a new question of the same type.",
+  "fr": "L'élève a trouvé l'étape fausse et a résolu une nouvelle question du même type.",
+  "ar": "وجد التلميذ الخطوة الخاطئة وحلّ سؤالًا جديدًا من النوع نفسه."
+ },
+ "outcome_in_progress": {
+  "en": "The work on this misconception is not finished yet.",
+  "fr": "Le travail sur cette erreur type n'est pas encore terminé.",
+  "ar": "لم ينتهِ العمل على هذا الخطأ النمطي بعد."
+ },
+ "outcome_handoff": {
+  "en": "The student still makes this mistake after the hints. A teacher should take over.",
+  "fr": "L'élève fait encore cette erreur après les indices. Un enseignant doit prendre le relais.",
+  "ar": "ما زال التلميذ يرتكب هذا الخطأ بعد التلميحات. يجب أن يتولّى المعلّم الأمر."
+ },
+ "outcome_no_misconception": {
+  "en": "No misconception from the list was found, and the student solved a new question.",
+  "fr": "Aucune erreur type de la liste n'a été trouvée. L'élève a résolu une nouvelle question.",
+  "ar": "لم يُعثر على أي خطأ نمطي من القائمة، وحلّ التلميذ سؤالًا جديدًا."
+ },
+ "next_mastered": {
+  "en": "Check this topic again in a few days with one new question.",
+  "fr": "Revoir ce sujet dans quelques jours avec une nouvelle question.",
+  "ar": "مراجعة هذا الموضوع بعد بضعة أيام بسؤال جديد."
+ },
+ "next_in_progress": {
+  "en": "Continue the session to finish the hints, the worked solution and the new question.",
+  "fr": "Continuer la séance pour finir les indices, la solution rédigée et la nouvelle question.",
+  "ar": "مواصلة الحصة لإنهاء التلميحات والحلّ المكتوب والسؤال الجديد."
+ },
+ "next_handoff": {
+  "en": "Work on this topic with the student in person. Use the note below.",
+  "fr": "Travailler ce sujet avec l'élève en personne. Utiliser la note ci-dessous.",
+  "ar": "العمل على هذا الموضوع مع التلميذ مباشرة. استعمل الملاحظة أدناه."
+ },
+ "next_no_misconception": {
+  "en": "Move on to the next topic.",
+  "fr": "Passer au sujet suivant.",
+  "ar": "الانتقال إلى الموضوع التالي."
+ },
+ "sim_observe": {
+  "en": "Watch the simulation. Compare the result with your prediction.",
+  "fr": "Regarde la simulation. Compare le résultat avec ta prédiction.",
+  "ar": "شاهد المحاكاة. قارن النتيجة بتوقّعك."
+ },
+ "sim_explain_prompt": {
+  "en": "Explain the result. What happened, and why?",
+  "fr": "Explique le résultat. Que s'est-il passé, et pourquoi ?",
+  "ar": "اشرح النتيجة. ماذا حدث، ولماذا؟"
+ },
+ "sim_transfer": {
+  "en": "Thank you. Now predict a new case.",
+  "fr": "Merci. Maintenant, prédis un nouveau cas.",
+  "ar": "شكرًا. الآن توقّع حالة جديدة."
+ },
+ "sim_done": {
+  "en": "Thank you. This simulation is finished.",
+  "fr": "Merci. Cette simulation est terminée.",
+  "ar": "شكرًا. انتهت هذه المحاكاة."
+ },
+ "sim_res_landing": {
+  "en": "Ball a: {a} s. Ball b: {b} s.",
+  "fr": "Boule a : {a} s. Boule b : {b} s.",
+  "ar": "الكرة a: {a} s. الكرة b: {b} s."
+ },
+ "sim_res_period": {
+  "en": "Period of a: {a} s. Period of b: {b} s.",
+  "fr": "Période de a : {a} s. Période de b : {b} s.",
+  "ar": "دور a: {a} s. دور b: {b} s."
+ },
+ "sim_res_push": {
+  "en": "Speed at the end of the push: {v} m/s.",
+  "fr": "Vitesse à la fin de la poussée : {v} m/s.",
+  "ar": "السرعة في نهاية الدفع: {v} m/s."
+ },
+ "sim_res_after": {
+  "en": "Speed after the push: {v} m/s at the end.",
+  "fr": "Vitesse après la poussée : {v} m/s à la fin.",
+  "ar": "السرعة بعد الدفع: {v} m/s في النهاية."
+ },
+ "grade_simulation": {
+  "en": "Checked against the computed simulation",
+  "fr": "Vérifié avec la simulation calculée",
+  "ar": "تمّ التحقّق بالمحاكاة المحسوبة"
+ }
 }

@@ -46,7 +46,7 @@ detector:
 live:
   # Only human-verified bank items are used live. While the review is pending, dev mode may use
   # unverified questions; the session then carries a visible warning. Set to false for the real demo.
-  allow_unverified_dev: true
+  allow_unverified_dev: False
 
 seed: 42
 demo_mode: false

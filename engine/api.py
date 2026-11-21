@@ -23,7 +23,7 @@ from engine import safetext
 from engine.config import cfg
 from engine.contract import (AnswerRecord, Agenda, Calibration, CourseAnswer, CourseHit, Cost, ExplanationEvidence,
                              Grading, HypProb, LabelProb, LessonRef, MisconceptionView, NextQuestion, QuestionView,
-                             SessionState, SessionSummary, TutorTurn)
+                             SessionState, SessionSummary, SimItemView, SimRun, SimTurn, TutorTurn)
 
 _SESSIONS: dict[str, dict] = {}
 _BANK: dict | None = None
@@ -350,6 +350,108 @@ def _lesson_refs(mv: dict, k: int = 2) -> list[LessonRef]:
                           source_url=h["source_url"]) for h in rag.index().search(query, k) if h["relevant"]]
     except Exception:  # noqa: BLE001  retrieval must never break the report
         return []
+
+
+# ---------------------------------------------------------------- simulations (step 13, no LLM)
+def _phys(s: dict):
+    """The session's physics posterior (separate from the maths one; same Bayesian engine)."""
+    from engine.sims import poe
+    if "phys" not in s:
+        its = poe.live_items(cfg().get("live", {}).get("allow_unverified_dev", False))
+        s["phys"] = {"items": {i["id"]: i for i in its}, "diag": bayes.Diagnoser(poe.table(its)), "log": []}
+    return s["phys"]
+
+
+def _phys_posterior(ph) -> list[HypProb]:
+    from engine.sims import poe
+    names = {m["id"]: m["name_en"] for m in poe.misconceptions()}
+    return [HypProb(id=h, name_en=names[h], prob=round(p, 6)) for h, p in ph["diag"].as_dict().items()]
+
+
+def _sim_view(it: dict, lang: str) -> SimItemView:
+    return SimItemView(id=it["id"], template=it["template"], text=it["text"].get(lang) or it["text"]["en"],
+                       options={k: o["text"].get(lang) or o["text"]["en"] for k, o in it["options"].items()},
+                       runs_params=it["runs"], transfer_of=it.get("transfer_of"))
+
+
+def sim_templates() -> dict:
+    """Parameter schemas (ranges + units) of the whitelisted templates, for sliders."""
+    from engine import sims
+    return sims.schemas()
+
+
+def sim_run(template: str, params: dict) -> dict:
+    """Free exploration (Observe with sliders). Out-of-range parameters raise ValueError (schema)."""
+    from pydantic import ValidationError
+
+    from engine import sims
+    try:
+        r = sims.run(template, params)
+    except ValidationError as e:
+        raise ValueError(str(e)) from None
+    return SimRun(label="a", **r).model_dump()
+
+
+def sim_items(session_id: str) -> list[dict]:
+    s = _SESSIONS[session_id]
+    return [_sim_view(i, _lang(s)).model_dump() for i in _phys(s)["items"].values() if not i.get("transfer_of")]
+
+
+def _sim_result_text(it: dict, runs: dict, lang: str):
+    k = it["kind"]
+    if k == "compare_landing":
+        txt = tr("sim_res_landing", lang, a=runs["a"]["result"]["time_to_ground_s"], b=runs["b"]["result"]["time_to_ground_s"])
+    elif k == "compare_period":
+        txt = tr("sim_res_period", lang, a=runs["a"]["result"]["period_s"], b=runs["b"]["result"]["period_s"])
+    elif k == "during_push":
+        txt = tr("sim_res_push", lang, v=runs["a"]["result"]["speed_end_of_push_m_s"])
+    else:
+        txt = tr("sim_res_after", lang, v=runs["a"]["result"]["speed_at_end_m_s"])
+    return safetext.static(txt, lang=lang)
+
+
+def sim_predict(session_id: str, item_id: str, option: str, confidence: str | None) -> dict:
+    """Predict -> Observe: grade the prediction against the computed simulation; update the physics posterior."""
+    from engine.sims import poe
+    s = _SESSIONS[session_id]
+    ph = _phys(s)
+    it = ph["items"][item_id]
+    if option not in it["options"]:
+        raise ValueError(f"unknown option {option!r}")
+    if confidence not in ("sure", "unsure"):
+        raise ValueError("confidence tap is required: 'sure' or 'unsure'")
+    lang = _lang(s)
+    runs = poe.runs(it)
+    correct = option == it["correct"]
+    ph["diag"].observe_answer(item_id, option, confidence)
+    ph["log"].append({"item": item_id, "option": option, "confidence": confidence, "correct": correct})
+    is_transfer = bool(it.get("transfer_of"))
+    nxt = None
+    if is_transfer:
+        stage, expects, msg = "transfer_result", "none", tutor.txt(s, "sim_done")
+    else:
+        stage, expects, msg = "observe", "explanation", safetext.static(
+            tr("sim_observe", lang) + " " + tr("sim_explain_prompt", lang), lang=lang)
+    return SimTurn(item_id=item_id, stage=stage, observed=it["observed"],
+                   grading=Grading(correct=correct, method="simulation", label=tr("grade_simulation", lang)),
+                   result_text=_sim_result_text(it, runs, lang),
+                   runs=[SimRun(label=k, **v) for k, v in runs.items()], posterior=_phys_posterior(ph),
+                   message=msg, expects=expects, next_item=nxt).model_dump()
+
+
+def sim_explain(session_id: str, item_id: str, text: str | None = None) -> dict:
+    """Explain: stored for the teacher (no LLM grading), then the transfer prediction."""
+    s = _SESSIONS[session_id]
+    ph = _phys(s)
+    it = ph["items"][item_id]
+    lang = _lang(s)
+    ph["log"].append({"item": item_id, "explanation": (text or "")[:500]})
+    nxt_id = it.get("transfer")
+    nxt = _sim_view(ph["items"][nxt_id], lang) if nxt_id in ph["items"] else None
+    return SimTurn(item_id=item_id, stage="explain_saved", observed=it["observed"],
+                   grading=Grading(correct=None, method="none", label=""), posterior=_phys_posterior(ph),
+                   message=tutor.txt(s, "sim_transfer" if nxt else "sim_done"),
+                   expects="transfer_answer" if nxt else "none", next_item=nxt).model_dump()
 
 
 def studio_generate(session_id: str, tool: str, source: dict) -> dict:

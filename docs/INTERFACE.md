@@ -2,6 +2,7 @@
 
 **Changelog.** 1.1 (2026-11-21): added optional `TutorTurn.explanation_evidence` (additive; 1.0 code keeps working).
 1.2 (2026-11-21): added `CourseAnswer` / `CourseHit` (Course Q&A) and real `SessionSummary.lesson_refs` (additive).
+1.3 (2026-11-21): added simulations: `SimItemView`, `SimRun`, `SimTurn` (additive).
 No shape change in step 6: `tutor_reply` became real for hints. After the diagnosis stops, `submit_answer` raises
 `ValueError`; the page must switch to `tutor_reply` when `TutorTurn.state != "DIAGNOSE"`. A retry has
 `question.requires_confidence = false`. Step 8: RECONSTRUCT shows `reconstruction.steps` (numbered from 1); its
@@ -129,6 +130,16 @@ If `found` is false, show `note` and nothing else (TRACE never answers from memo
 HTTP: `POST /api/v1/courses/search {query, k}`, `POST /api/v1/courses/index`, `POST /api/v1/courses/upload`
 (multipart `files`, up to 10 files, 50 MB each, PDF/TXT/MD; saved to `data/courses/uploads/`).
 `SessionSummary.lesson_refs` is now filled from the course files (lesson pages for the diagnosed misconception).
+
+### Simulations: `docs/fixtures/sim_item.json`, `sim_turn.json` (since 1.3)
+Predict → Observe → Explain. `GET /api/v1/sessions/{id}/sims` → `[SimItemView]` (no correct answer inside).
+`POST …/sims/{item}/predict {option, confidence}` → `SimTurn` (stage `observe`): `grading.method = "simulation"`,
+`runs` = computed series to plot (`series[].t`, `series[].y`, unit), `result_text` (show it), `posterior` =
+PHYSICS posterior (ids M0..M4 are the physics bank's slots; names given). Then `POST …/sims/{item}/explain {text}`
+→ `SimTurn` (stage `explain_saved`) with `next_item` = the transfer prediction; predicting it gives stage
+`transfer_result`. Free exploration with sliders: `GET /api/v1/sims/templates` (JSON schema: min, max, unit per
+parameter) and `POST /api/v1/sims/run {template, params}` → `SimRun` (400 if out of range). Plot with Plotly; no
+animation in clear mode (`no_timers_no_animation`).
 
 ### GuardEvent, Cost
 `GuardEvent {ts, check, status "pass|fail", action "shown|regenerated|fallback", summary}`.

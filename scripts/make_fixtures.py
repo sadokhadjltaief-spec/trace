@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from engine import ROOT  # noqa: E402
 from engine import safetext  # noqa: E402
 from engine.contract import (Agenda, AnswerRecord, Calibration, Check, Cost, CourseAnswer, CourseHit,  # noqa: E402
-                             ExplanationEvidence,
+                             ExplanationEvidence, SimItemView, SimRun, SimTurn,
                              GuardEvent, Grading, HypProb, LabelProb,
                              LessonRef, MisconceptionView, NextQuestion, OutputFile, QuestionView, Reconstruction,
                              SessionState, SessionSummary, Source, StudioOutput, TutorTurn)
@@ -114,17 +114,34 @@ course_none = CourseAnswer(query="photosynthèse", found=False, hits=[],
                            note="Nothing relevant was found in your course files. TRACE does not answer from memory.",
                            retrieval="BM25 + intfloat/multilingual-e5-small (reciprocal rank fusion)")
 
+from engine import sims as _sims  # noqa: E402  (real computed physics; only the posterior below is FAKE)
+_runs = [SimRun(label=k, **_sims.run("free_fall", {"mass_kg": m, "height_m": 20})) for k, m in (("a", 1), ("b", 5))]
+sim_item = SimItemView(id="S1", template="free_fall", text="Deux boules de même taille sont lâchées en même temps…",
+                       options={"A": "La boule b (5 kg)", "B": "La boule a (1 kg)", "C": "Les deux en même temps"},
+                       runs_params={"a": {"mass_kg": 1, "height_m": 20}, "b": {"mass_kg": 5, "height_m": 20}})
+sim_turn = SimTurn(item_id="S1", stage="observe", observed="same",
+                   grading=Grading(correct=False, method="simulation", label="Vérifié avec la simulation calculée"),
+                   result_text=safetext.static("Boule a : 2.0193 s. Boule b : 2.0193 s.", lang="fr"), runs=_runs,
+                   posterior=[HypProb(id=h, name_en=n, prob=p) for h, n, p in (
+                       ("M0", "No physics misconception found", 0.1), ("M1", "Thinks heavier objects always fall faster", 0.6),
+                       ("M2", "Thinks a pendulum's period depends on its mass", 0.1),
+                       ("M3", "Thinks a constant force gives a constant speed", 0.1),
+                       ("M4", "Thinks an object stops as soon as the force stops", 0.1))],
+                   message=safetext.static("Regarde la simulation. Compare le résultat avec ta prédiction.", lang="fr"),
+                   expects="explanation")
+
 OUT = ROOT / "docs" / "fixtures"
 OUT.mkdir(parents=True, exist_ok=True)
 for name, obj in {"session_state": state, "tutor_turn": turn, "tutor_turn_reconstruct": turn_recon,
                   "next_question": NQ, "session_summary": summ, "studio_output": studio,
-                  "studio_output_refused": refused, "course_answer": course, "course_answer_none": course_none}.items():
+                  "studio_output_refused": refused, "course_answer": course, "course_answer_none": course_none,
+                  "sim_item": sim_item, "sim_turn": sim_turn}.items():
     (OUT / f"{name}.json").write_text(json.dumps(obj.model_dump(), ensure_ascii=False, indent=1), encoding="utf-8")
     print("wrote", f"docs/fixtures/{name}.json")
 
 # JSON Schema for each contract object (for the frontend teammate / editor tooling)
 SCH = ROOT / "docs" / "schema"
 SCH.mkdir(parents=True, exist_ok=True)
-for model in (SessionState, TutorTurn, NextQuestion, SessionSummary, StudioOutput, CourseAnswer):
+for model in (SessionState, TutorTurn, NextQuestion, SessionSummary, StudioOutput, CourseAnswer, SimItemView, SimTurn):
     (SCH / f"{model.__name__}.json").write_text(json.dumps(model.model_json_schema(), indent=1), encoding="utf-8")
     print("wrote", f"docs/schema/{model.__name__}.json")

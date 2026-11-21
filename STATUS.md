@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-21 ~22:30, step 11 (course RAG, no LLM).
+Last update: 2026-11-21 ~23:30, step 13 (simulations). New Groq key in .env (quota restored).
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [ ] Set `live.allow_unverified_dev: false` in `config.yaml` (now true = dev mode). Claude reminds the human at
@@ -38,6 +38,31 @@ Last update: 2026-11-21 ~22:30, step 11 (course RAG, no LLM).
   DOCX/PPTX uploads are refused for now (no parser installed). Folder picker: web app uses the upload zone.
 - **No course PDFs in `data/courses/` yet**: the team adds them (own notes; Najahni free PDFs by hand).
 - 125 tests pass (`tests/test_rag.py`: report, citations, nothing-relevant, Arabic fixes, lesson refs, embeddings).
+
+## New Groq key (2026-11-21 ~23:00) and development restarted (team decision)
+- The team put a new `GROQ_API_KEY` in `.env`, but the old key was still a Windows user variable, which took
+  precedence. `engine/config.py` now loads `.env` with `override=True`. Checked (key never printed): the engine uses
+  the `.env` key; both models answer (120b 927/1000 requests left today, 20b 999/1000).
+
+## Step 13: simulations with Predict-Observe-Explain (`engine/sims/`), 0 LLM calls
+- Whitelisted templates with pydantic parameter schemas (ranges + units; unknown or out-of-range parameters are
+  refused) and scipy `solve_ivp` solvers: `free_fall` (optional quadratic air drag), `pendulum` (exact nonlinear
+  equation), `cart_force` (constant force for a while, optional kinetic/static friction).
+- Physics tests against analytic solutions (`tests/test_sims.py`): t = sqrt(2h/g) and v^2 = 2gh for any mass;
+  with drag the heavier ball lands first; small-angle period 2 pi sqrt(L/g) within 0.1 % and independent of mass;
+  energy conserved; large swings slower; v = F t / m; friction stop time = v / (mu g); push below static friction
+  does not move the cart.
+- `data/bank/physics.json`: 4 physics misconceptions (heavier always falls faster; period depends on mass;
+  constant force gives constant speed; stops when the force stops), 4 prediction items + 4 transfer items,
+  original wording EN/FR/AR. **The correct option is computed by running the simulation**, never stored.
+  **Waiting for HUMAN review**: tick items in `data/bank/physics_review.md` (generated; 0/8 ticked). Until then
+  the items are only live with `allow_unverified_dev: true`.
+- POE flow: predict (+ confidence) -> separate PHYSICS posterior with the same Bayesian engine -> observe (computed
+  runs + result text, grading method `simulation`) -> explain (stored for the teacher, not graded) -> transfer
+  prediction. Contract 1.3 (additive): `SimItemView`, `SimRun`, `SimTurn`; HTTP `/api/v1/sims/{templates,run}`,
+  `/api/v1/sessions/{id}/sims/...`. Frontend instructions in `docs/TEAMMATE_INSTRUCTIONS.md` 6c.
+- Not done: the LLM picking a template from a course chunk (optional in the brief); simulations 4-7.
+- 146 tests pass.
 
 ## Demo recordings (final, 2026-11-21)
 - FR default and AR default: full session, replay offline 8/8 cached, 0 fallbacks.

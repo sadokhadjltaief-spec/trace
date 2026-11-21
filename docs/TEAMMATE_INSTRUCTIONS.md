@@ -155,6 +155,14 @@ A different path in demo mode falls back to verified bank text (still correct, j
   "file, p. N" and its `source_url`. If `found` is false, show `note` only.
 - The folder picker of the brief is a desktop dialog; in the web app, use the upload zone instead.
 
+## 6c. Simulations (since contract 1.3)
+
+Simulations page: list `GET /engine/sessions/{id}/sims`; for each item show the text, the options and the Sure /
+Not sure tap → `POST /engine/sessions/{id}/sims/{item}/predict`. Then plot `runs[*].series` (Plotly, one line per
+object a/b), show `result_text` and `grading.label`, ask "why?" → `POST …/explain {text}` → show `next_item` (the
+transfer prediction) and predict it the same way. Sliders: `GET /engine/sims/templates` gives min/max/unit per
+parameter; `POST /engine/sims/run` recomputes. Never compute physics in the frontend.
+
 ## 7. Other endpoints
 
 `GET /engine/misconceptions` (names FR/AR/EN), `GET /engine/results` and `/engine/results/{name}` (read-only

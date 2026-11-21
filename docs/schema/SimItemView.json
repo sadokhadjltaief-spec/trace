@@ -1,0 +1,64 @@
+{
+ "additionalProperties": false,
+ "description": "A Predict question (no correct answer inside: it is computed by the engine after the prediction).",
+ "properties": {
+  "id": {
+   "title": "Id",
+   "type": "string"
+  },
+  "template": {
+   "enum": [
+    "free_fall",
+    "pendulum",
+    "cart_force"
+   ],
+   "title": "Template",
+   "type": "string"
+  },
+  "text": {
+   "title": "Text",
+   "type": "string"
+  },
+  "options": {
+   "additionalProperties": {
+    "type": "string"
+   },
+   "title": "Options",
+   "type": "object"
+  },
+  "runs_params": {
+   "additionalProperties": {
+    "additionalProperties": true,
+    "type": "object"
+   },
+   "title": "Runs Params",
+   "type": "object"
+  },
+  "transfer_of": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Transfer Of"
+  },
+  "requires_confidence": {
+   "default": true,
+   "title": "Requires Confidence",
+   "type": "boolean"
+  }
+ },
+ "required": [
+  "id",
+  "template",
+  "text",
+  "options",
+  "runs_params"
+ ],
+ "title": "SimItemView",
+ "type": "object"
+}

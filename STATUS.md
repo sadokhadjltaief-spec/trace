@@ -1,10 +1,28 @@
 # STATUS
 
-Last update: 2026-11-21, step 5 committed; starting step 6.
+Last update: 2026-11-21, step 6 committed.
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [ ] Set `live.allow_unverified_dev: false` in `config.yaml` (now true = dev mode). Claude reminds the human at
       the start of step 6 and before the demo rehearsal.
+
+## Step 6: tutor state machine + guards (`engine/tutor.py`, `engine/guards.py`)
+- Code decides state and message type: DIAGNOSE -> HINT_1 -> HINT_2 -> HINT_3 -> RECONSTRUCT (correct retry skips
+  to RECONSTRUCT; M0 -> TRANSFER). Two LLM calls per hint: structured error diagnosis (misconception fixed by
+  bayes.py), then the hint of the allowed level, in the student's language. Retries graded by answer key; they do
+  not update the posterior.
+- Guards (pulled forward from step 7): deterministic leak (option letter, option text, SymPy value) + SymPy math
+  check + style linter + ONE LLM judge call (judge model = EVAL_MODEL) for leak and congruency (misconceptions with
+  posterior > 0.2). Fail closed. On failure: regenerate once, then the verified bank hint, then a template.
+  Every decision logged in SQLite `guard_log`. **Judges NOT validated** (needs `eval/guard_labels.csv`, step 7).
+- Demo mode: `scripts/demo_session.py --record` (live) then `scripts/demo_session.py` (offline). Checked:
+  replay = 7/7 calls from cache, 0 tokens, 0 fallbacks; live recording = 7 calls, 2,778 + 1,010 tokens.
+- Not done yet (step 8): RECONSTRUCT and TRANSFER grading, loops, HANDOFF. Tutor templates are English only
+  (i18n = step 15), so a French student sees French LLM hints but English template lines.
+- Found: reconstruction R_M1_1 step 2 says "(incorrectly) adding": the worked solution gives away the wrong step.
+  Needs a bank fix (human review) before the demo.
+- 75 tests pass (`tests/test_tutor.py`: leak, math, fail-closed judge, hint flow, regenerate-then-fallback,
+  demo cache miss -> fallback).
 
 ## Bank review (done by the human, 2026-11-21)
 - Verified: 13 questions (Q1–Q9, Q11–Q14), 8/8 reconstruction items, FR/AR names M1–M4.
@@ -121,3 +139,4 @@ Will resume if time permits.
 
 ## Time spent
 - Step 1: ~25 min. Step 2: ~50 min. Step 2 fixes + step 3: ~45 min. Step 4 (contract + stubs): ~40 min.
+- Step 5: ~1.5 h (mostly the rate-limited LLM eval). Step 6: ~35 min.

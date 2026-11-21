@@ -47,3 +47,6 @@ live:
 
 seed: 42
 demo_mode: false
+
+guards:
+  congruency_threshold: 0.2     # check the message against every misconception above this posterior

@@ -1,6 +1,9 @@
 # TRACE frontend ↔ engine interface (contract v1.1)
 
 **Changelog.** 1.1 (2026-11-21): added optional `TutorTurn.explanation_evidence` (additive; 1.0 code keeps working).
+No shape change in step 6: `tutor_reply` became real for hints. After the diagnosis stops, `submit_answer` raises
+`ValueError`; the page must switch to `tutor_reply` when `TutorTurn.state != "DIAGNOSE"`. A retry has
+`question.requires_confidence = false`.
 
 This is the contract between the engine (built by Claude Code) and the frontend pages (built by the teammate).
 The source of truth is **`engine/contract.py`** (pydantic models). This file explains it.
@@ -39,8 +42,8 @@ Any change to a field bumps `CONTRACT_VERSION` and updates this file, the schema
 | `start_session(student, profile=None, demo=False)` | `SessionState` | real |
 | `get_state(session_id)` | `SessionState` | real |
 | `next_question(session_id)` | `NextQuestion` | real |
-| `submit_answer(session_id, question_id, option, confidence, explanation=None)` | `TutorTurn` | real (diagnosis phase) |
-| `tutor_reply(session_id, text=None, choice=None)` | `TutorTurn` | fake until step 6–8 |
+| `submit_answer(session_id, question_id, option, confidence, explanation=None)` | `TutorTurn` | real; the last diagnosis answer returns the first tutor turn (`HINT_1`, or `TRANSFER` if M0) |
+| `tutor_reply(session_id, text=None, choice=None)` | `TutorTurn` | real for `HINT_1..3` (`choice` = retried option); RECONSTRUCT/TRANSFER replies raise NotImplementedError until step 8 |
 | `summary(session_id)` | `SessionSummary` | fake until step 9 |
 | `studio_generate(session_id, tool, source)` | `StudioOutput` | fake until step 12 |
 | `misconceptions()` | `list[MisconceptionView]` | real |

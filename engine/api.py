@@ -3,9 +3,10 @@
 Every function returns plain dicts that validate against engine/contract.py.
 State is held in memory per Streamlit server process (sessions dict).
 
-Implemented for real now (step 4): sessions, diagnosis loop (answers + confidence), next-question
-selection, cost, results reading. Tutor hints, summaries and Study Studio arrive in later steps;
-until then those functions raise NotImplementedError and the stub pages use engine/api_fake.py.
+Real: sessions, diagnosis loop (answers + confidence + explanation detector), next-question selection,
+tutor hints HINT_1..3 with guards (step 6), entry into RECONSTRUCT / TRANSFER, cost, results reading.
+RECONSTRUCT/TRANSFER grading, HANDOFF (step 8), summaries (step 9) and Study Studio (P1) raise NotImplementedError;
+the stub pages use engine/api_fake.py for those.
 """
 from __future__ import annotations
 
@@ -15,7 +16,7 @@ import re
 import time
 import uuid
 
-from engine import ROOT, bayes, llm
+from engine import ROOT, bayes, llm, tutor
 from engine import safetext
 from engine.config import cfg
 from engine.contract import (AnswerRecord, Agenda, Cost, ExplanationEvidence, Grading, HypProb, LabelProb,
@@ -110,11 +111,18 @@ def _state(sid: str) -> SessionState:
     names = _names()
     top_h, top_p = d.top()
     nq = _next(d, s["pool"])
-    cur = s["by_id"].get(nq.question_id) if not nq.stop else None
+    if s["state"] == "DIAGNOSE":
+        cur = s["by_id"].get(nq.question_id) if not nq.stop else None
+        cur_view = _qview(cur, s["profile"]) if cur else None
+    else:
+        qid = s.get("repair_q") if s["state"].startswith("HINT") else (
+            s.get("transfer_q") if s["state"] == "TRANSFER" else None)
+        cur_view = tutor.qview(s["by_id"][qid]) if qid else None
     return SessionState(session_id=sid, student=s["student"], profile=s["profile"], demo_mode=s["demo"],
-                        state=s["state"], agenda=_agenda(s), posterior=_posterior(d),
+                        state=s["state"], agenda=_agenda(s) if s["state"] == "DIAGNOSE" else tutor.agenda(s["state"]),
+                        posterior=_posterior(d),
                         top=HypProb(id=top_h, name_en=names[top_h], prob=round(top_p, 6)),
-                        asked=s["asked"], current_question=_qview(cur, s["profile"]) if cur else None,
+                        asked=s["asked"], current_question=cur_view,
                         next_question=nq, fragile=list(d.fragile), guard_events=s["guard_events"],
                         cost=_cost(sid), warnings=s["warnings"])
 
@@ -149,6 +157,8 @@ def submit_answer(session_id: str, question_id: str, option: str, confidence: st
                   explanation: str | None = None) -> dict:
     """Record a diagnosis answer. Grading is deterministic (answer key); the posterior update is bayes.py."""
     s = _SESSIONS[session_id]
+    if s["state"] != "DIAGNOSE":
+        raise ValueError(f"diagnosis is over (state {s['state']}); use tutor_reply")
     q = s["by_id"][question_id]
     if option not in q["options"]:
         raise ValueError(f"unknown option {option!r}")
@@ -170,21 +180,43 @@ def submit_answer(session_id: str, question_id: str, option: str, confidence: st
                                    correct=correct, explanation=explanation))
     s["turn"] += 1
     nq = _next(d, s["pool"])
-    if nq.stop:
-        msg = "Thank you. That was the last diagnosis question. Your results are ready."
-        expects, nxt = "none", None
-    else:
-        msg = "Thank you. Your answer is saved. Here is the next question."
-        expects, nxt = "answer", _qview(s["by_id"][nq.question_id], s["profile"])
-    turn = TutorTurn(session_id=session_id, turn_id=s["turn"], state=s["state"], message=safetext.static(msg),
-                     expects=expects, agenda=_agenda(s), question=nxt,
-                     grading=Grading(correct=correct, method="answer_key", label="Checked against the answer key"),
-                     posterior=_posterior(d), next_question=nq, guard_events=[], explanation_evidence=evidence)
+    grading = Grading(correct=correct, method="answer_key", label="Checked against the answer key")
+    if nq.stop:  # diagnosis over: the state machine takes over (code decides the state and message type)
+        h = d.top()[0]
+        f = tutor.begin(s, h, _names(), _mis(h), d.as_dict())
+        s["guard_events"] += f.get("guard_events", [])
+        turn = TutorTurn(session_id=session_id, turn_id=s["turn"], grading=grading, posterior=_posterior(d),
+                         next_question=nq, explanation_evidence=evidence, **f)
+        return turn.model_dump()
+    msg = "Thank you. Your answer is saved. Here is the next question."
+    turn = TutorTurn(session_id=session_id, turn_id=s["turn"], state=s["state"],
+                     message=safetext.static(msg, style_kwargs=tutor.style_kwargs(s["profile"])),
+                     expects="answer", agenda=_agenda(s), question=_qview(s["by_id"][nq.question_id], s["profile"]),
+                     grading=grading, posterior=_posterior(d), next_question=nq, guard_events=[],
+                     explanation_evidence=evidence)
     return turn.model_dump()
 
 
+def _mis(h: str) -> dict | None:
+    return next((m for m in _bank()["misconceptions"] if m["id"] == h), None)
+
+
 def tutor_reply(session_id: str, text: str | None = None, choice: str | None = None) -> dict:
-    raise NotImplementedError("tutor turns arrive in step 6 (use engine.api_fake for the stub pages)")
+    """Student reply after a tutor turn. HINT_k: `choice` = the retried option (graded by answer key)."""
+    s = _SESSIONS[session_id]
+    d: bayes.Diagnoser = s["diag"]
+    st = s["state"]
+    if st.startswith("HINT"):
+        if not choice:
+            raise ValueError("a retry needs `choice` (the option letter)")
+        s["turn"] += 1
+        f, grading = tutor.on_retry(s, choice, _names(), _mis(s["target"]), d.as_dict(), _bank())
+        s["guard_events"] += f.get("guard_events", [])
+        return TutorTurn(session_id=session_id, turn_id=s["turn"], grading=grading, posterior=_posterior(d),
+                         **f).model_dump()
+    if st in ("RECONSTRUCT", "TRANSFER"):
+        raise NotImplementedError(f"{st} grading arrives in step 8")
+    raise ValueError(f"no tutor reply expected in state {st}")
 
 
 def summary(session_id: str) -> dict:

@@ -385,7 +385,8 @@ def enter_handoff(s: dict, names: dict) -> dict:
     found = any(r["found"] for r in o["reconstruct"])
     hints = sum(1 for e in s.get("tutor_log", []) if e["state"].startswith("HINT") and e.get("detail"))
     wrong = [t["question_id"] for t in o["transfers"] if not t["correct"]]
-    # 3-line note for a human tutor, built by code from session data (no LLM text)
+    # 3-line note for a human tutor, built by code from session data (no LLM text); rendered per language by api
+    s["handoff_data"] = {"h": h, "hints": hints, "loops": s["loops"], "found": found, "wrong": wrong}
     s["handoff_note"] = (f"Likely misconception: {names.get(h, h)}.\n"
                          f"Tried: {hints} hints, {s['loops']} repair loops, find-the-mistake "
                          f"({'found' if found else 'not found'}).\n"

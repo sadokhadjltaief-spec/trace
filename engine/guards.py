@@ -76,7 +76,7 @@ def language_check(text: str, lang: str | None) -> str | None:
     if not lang:
         return None
     # 1-2 letter Latin tokens are labels, units or variables (a, b, x, A, s, m, kg, N), not language
-    words_only = re.sub(r"(?<![A-Za-zÀ-ÿ])[A-Za-z]{1,2}(?![A-Za-zÀ-ÿ])", " ", text)
+    words_only = re.sub(r"(?<![A-Za-zÀ-ÿ])(?:[A-Za-z]{1,2}|[A-Z]{2,})(?![A-Za-zÀ-ÿ])", " ", text)  # + acronyms
     ar, lat = len(_AR_LETTER.findall(text)), len(_LAT_LETTER.findall(words_only))
     if lang == "ar":
         return None if ar and ar / (ar + lat) >= 0.6 else f"not in Arabic ({ar} Arabic vs {lat} Latin letters)"

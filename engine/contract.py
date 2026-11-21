@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.4"  # 1.1 explanation_evidence; 1.2 CourseAnswer; 1.3 simulations; 1.4 game (additive)
+CONTRACT_VERSION = "1.5"  # 1.1 explanation_evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report files
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]
@@ -334,3 +334,11 @@ class GameTurn(_M):
     done: bool
     message: SafeText
     posterior: list[HypProb]       # maths posterior (a wrong reason is evidence)
+
+
+class ReportExport(_M):
+    """The one-page report as files (since 1.5): Markdown + PDF (with the calibration chart) in one language."""
+    contract_version: str = CONTRACT_VERSION
+    session_id: str
+    lang: Lang
+    files: list[OutputFile]

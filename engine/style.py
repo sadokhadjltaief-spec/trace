@@ -14,6 +14,7 @@ import yaml
 
 from engine import ROOT
 
+_CAPS_OK = {"TRACE"}  # the product name is not shouting
 _EMOJI = re.compile("[\U0001F300-\U0001FAFF\U00002600-\U000027BF\U0001F1E6-\U0001F1FF]")
 _SENT = re.compile(r"(?<=[.!?؟])\s+|\n+")
 
@@ -96,7 +97,8 @@ def lint(text: str, *, max_words_per_sentence: int = 25, neutral: bool = True, m
             v.append(f"sentence has {n} words (max {max_words_per_sentence})")
     if _EMOJI.search(text):
         v.append("contains emoji")
-    if re.search(r"\b[A-Z]{4,}\b", re.sub(r"\\\(.*?\\\)", "", text)):
+    caps = set(re.findall(r"\b[A-Z]{4,}\b", re.sub(r"\\\(.*?\\\)", "", text))) - _CAPS_OK
+    if caps:
         v.append("contains ALL-CAPS word")
     if neutral and "!" in text:
         v.append("exclamation mark in neutral mode")

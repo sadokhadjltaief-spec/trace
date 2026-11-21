@@ -24,7 +24,7 @@ from engine.config import cfg
 from engine.contract import (AnswerRecord, Agenda, Calibration, CourseAnswer, CourseHit, Cost, ExplanationEvidence,
                              Grading, HypProb, LabelProb, LessonRef, MisconceptionView, NextQuestion, QuestionView,
                              SessionState, SessionSummary, SimItemView, SimRun, SimTurn, TutorTurn,
-                             GameFeedback, GameRoundView, GameTurn)
+                             GameFeedback, GameRoundView, GameTurn, OutputFile, ReportExport)
 
 _SESSIONS: dict[str, dict] = {}
 _BANK: dict | None = None
@@ -253,42 +253,57 @@ def _track(s: dict) -> None:
 
 
 
-def summary(session_id: str) -> dict:
-    """One-page report data, built by code from the session (no LLM text). Lesson references need RAG (P1)."""
+def _handoff_text(s: dict, lang: str, names: dict) -> str | None:
+    hd = s.get("handoff_data")
+    if not hd:
+        return s.get("handoff_note")
+    mv = next((m for m in misconceptions() if m["id"] == hd["h"]), None) or {}
+    name = mv.get({"fr": "name_fr", "ar": "name_ar"}.get(lang, "name_en")) or names.get(hd["h"], hd["h"])
+    return "\n".join([tr("handoff_1", lang, m=name),
+                      tr("handoff_2", lang, hints=hd["hints"], loops=hd["loops"],
+                         found=tr("found_yes" if hd["found"] else "found_no", lang)),
+                      tr("handoff_3", lang, qs=", ".join(hd["wrong"]) or "-")])
+
+
+def summary(session_id: str, lang: str | None = None) -> dict:
+    """One-page report data, built by code from the session (no LLM text), in `lang` (default: the student's)."""
     s = _SESSIONS[session_id]
     d: bayes.Diagnoser = s["diag"]
     names = _names()
+    lang = lang_of(lang or _lang(s))
     h = s.get("target") or d.top()[0]
     h = h if h in names else d.top()[0]
     mv = next(m for m in misconceptions() if m["id"] == h)
     status = tutor.mastery_status(s) if "outcome" in s else "in_progress"
     by_id = s["by_id"]
+
+    def res(ok):
+        return tr("res_correct" if ok else "res_wrong", lang)
     ev = []
     for a in s["asked"]:
         q = by_id[a.question_id]
-        line = f"{a.question_id}: chose {a.option} ({a.confidence}), {'correct' if a.correct else 'wrong'}"
+        line = tr("ev_answer", lang, q=a.question_id, opt=a.option,
+                  conf=tr("conf_sure" if a.confidence == "sure" else "conf_unsure", lang), res=res(a.correct))
         m = q.get("option_misconception", {}).get(a.option)
         if m:
-            line += f"; this option is typical of {m}"
+            line += "; " + tr("ev_typical", lang, m=m)
         if a.explanation:
-            line += f"; explanation: '{a.explanation[:120]}'"
+            line += "; " + tr("ev_why", lang, x=a.explanation[:120])
         ev.append(line)
     for r in s.get("retries", []):
-        ev.append(f"{r['state']} retry on {r['question_id']}: {r['option']} "
-                  f"({'correct' if r['correct'] else 'wrong'})")
+        ev.append(tr("ev_retry", lang, q=r["question_id"], opt=r["option"], res=res(r["correct"])))
     o = s.get("outcome", {"reconstruct": [], "transfers": []})
     for r in o["reconstruct"]:
-        line = f"Find-the-mistake {r['item']}: chose step {r['step']} ({'right' if r['found'] else 'not the wrong step'})"
+        line = tr("ev_recon", lang, item=r["item"], step=r["step"], res=res(r["found"]))
         if r.get("rubric"):
-            line += f"; explanation graded by the LLM: {r['rubric']['verdict']}"
+            line += "; " + tr("ev_rubric", lang, v=tr(f"verdict_{r['rubric']['verdict']}", lang))
         ev.append(line)
     for x in o["transfers"]:
-        ev.append(f"New question {x['question_id']}: {x['option']} ({'correct' if x['correct'] else 'wrong'})")
+        ev.append(tr("ev_transfer", lang, q=x["question_id"], opt=x["option"], res=res(x["correct"])))
     sure = [a for a in s["asked"] if a.confidence == "sure"]
     unsure = [a for a in s["asked"] if a.confidence == "unsure"]
-    lang = _lang(s)
     kw = tutor.style_kwargs(s["profile"], lang)
-    note = s.get("handoff_note")
+    note = _handoff_text(s, lang, names)
     return SessionSummary(
         session_id=session_id, diagnosis=HypProb(id=h, name_en=names[h], prob=round(float(d.as_dict()[h]), 6)),
         diagnosis_names=MisconceptionView(**mv), status=status, evidence=ev,
@@ -296,10 +311,90 @@ def summary(session_id: str) -> dict:
         outcome=safetext.static(tr(f"outcome_{status}", lang), lang=lang, style_kwargs=kw),
         next_step=safetext.static(tr(f"next_{status}", lang), lang=lang, style_kwargs=kw),
         lesson_refs=_lesson_refs(mv),
-        handoff_note=safetext.static(note, style_kwargs=kw) if note else None,
+        handoff_note=safetext.static(note, lang=lang, style_kwargs={**kw, "max_words_per_sentence": 40})
+        if note else None,
         calibration=Calibration(sure_correct=sum(a.correct for a in sure), sure_total=len(sure),
                                 unsure_correct=sum(a.correct for a in unsure), unsure_total=len(unsure)),
         cost=_cost(session_id)).model_dump()
+
+
+def report(session_id: str, lang: str | None = None) -> dict:
+    """The one-page teacher / parent report as Markdown + PDF (FR / AR / EN), with the calibration chart.
+    Built by code from summary(); no LLM."""
+    from engine.studio import export_dir, rel
+    from engine.studio.pdf import Doc
+    s = _SESSIONS[session_id]
+    lang = lang_of(lang or _lang(s))
+    r = summary(session_id, lang)
+    out = export_dir(session_id)
+    name_key = {"fr": "name_fr", "ar": "name_ar"}.get(lang, "name_en")
+    mname = r["diagnosis_names"].get(name_key) or r["diagnosis_names"]["name_en"]
+    c = r["calibration"]
+    chart = _calibration_chart(c, out / "calibration.png", lang)
+    sections = [
+        (tr("rep_title", lang), None),
+        (f"{tr('rep_student', lang)}: {s['student'].get('name', '')} ({s['student'].get('level', '')})", "p"),
+        (tr("rep_found", lang), "h"), (f"{mname} ({tr('rep_prob', lang)} {r['diagnosis']['prob']:.2f})", "p"),
+        (tr("rep_evidence", lang), "h"), *[(f"- {e}", "p") for e in r["evidence"]],
+        (tr("rep_tried", lang), "h"), (" -> ".join(tr(f"state_{x}", lang) for x in r["tried"]), "p"),
+        (tr("rep_outcome", lang), "h"), (r["outcome"]["text"], "p"),
+        (tr("rep_next", lang), "h"), (r["next_step"]["text"], "p"),
+    ]
+    if r["lesson_refs"]:
+        sections += [(tr("rep_lesson", lang), "h")] + [
+            (f"- {x['file']}, p. {x['page']}" + (f" ({x['source_url']})" if x.get("source_url") else ""), "p")
+            for x in r["lesson_refs"]]
+    if r["handoff_note"]:
+        sections += [(tr("rep_handoff", lang), "h"), (r["handoff_note"]["text"], "p")]
+    sections += [(tr("rep_calibration", lang), "h"),
+                 (tr("rep_cal_line", lang, a=c["sure_correct"], b=c["sure_total"], c=c["unsure_correct"],
+                     d=c["unsure_total"]), "p"), ("[chart]", "img"), (tr("rep_footer", lang), "p")]
+    md = []
+    for text, kind in sections:
+        md.append(f"# {text}" if kind is None else f"## {text}" if kind == "h" else
+                  f"![calibration](calibration.png)" if kind == "img" else text)
+    mdp = out / f"report_{lang}.md"
+    mdp.write_text("\n\n".join(md), encoding="utf-8")
+    doc = Doc(tr("rep_title", lang))
+    for text, kind in sections:
+        if kind is None:
+            doc.title(text)
+        elif kind == "h":
+            doc.heading(text)
+        elif kind == "img":
+            doc.image(chart, w=110)
+        else:
+            doc.text(text, size=10, gap=1)
+    pdf = doc.save(out / f"report_{lang}.pdf")
+    return ReportExport(session_id=session_id, lang=lang,
+                        files=[OutputFile(path=rel(mdp), mime="text/markdown"),
+                               OutputFile(path=rel(pdf), mime="application/pdf"),
+                               OutputFile(path=rel(chart), mime="image/png")]).model_dump()
+
+
+def _calibration_chart(c: dict, path, lang: str):
+    """Bar chart: share of right answers when the student said 'sure' vs 'not sure' (counts on the bars)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    labels = ["sure", "not sure"] if lang == "ar" else [tr("conf_sure", lang), tr("conf_unsure", lang)]
+    tot = [c["sure_total"], c["unsure_total"]]
+    ok = [c["sure_correct"], c["unsure_correct"]]
+    share = [o / n if n else 0 for o, n in zip(ok, tot)]
+    fig, ax = plt.subplots(figsize=(4.5, 2.6), dpi=150)
+    bars = ax.bar(labels, share, color=["#0f766e", "#94a3b8"], width=0.5)
+    for b, o, n in zip(bars, ok, tot):
+        ax.text(b.get_x() + b.get_width() / 2, b.get_height() + 0.03, f"{o}/{n}", ha="center", fontsize=10)
+    ax.set_ylim(0, 1.15)
+    ax.set_yticks([0, 0.5, 1])
+    ax.set_yticklabels(["0%", "50%", "100%"])
+    for sp in ("top", "right"):
+        ax.spines[sp].set_visible(False)
+    fig.tight_layout()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(path)
+    plt.close(fig)
+    return path
 
 
 # ---------------------------------------------------------------- course folders (step 11, no LLM)

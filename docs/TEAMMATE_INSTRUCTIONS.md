@@ -177,6 +177,12 @@ download links `GET /engine/exports/{session_id}/{file}` (file = last part of `f
 screen: list `GET /engine/sessions/{id}/cards`, approve / reject with `POST /engine/cards/{card_id}/verify`;
 study verified cards with `…/cards?verified_only=true` and `POST /engine/sessions/{id}/cards/{card_id}/review`.
 
+## 6f. Report (since contract 1.5)
+
+Report page: `GET /engine/sessions/{id}/summary?lang=fr` (data to display, incl. `calibration` for a Plotly bar
+chart) and a "Download PDF" button → `POST /engine/sessions/{id}/report?lang=fr` then
+`GET /engine/exports/{id}/report_fr.pdf`. Offer FR / AR / EN for parents.
+
 ## 7. Other endpoints
 
 `GET /engine/misconceptions` (names FR/AR/EN), `GET /engine/results` and `/engine/results/{name}` (read-only

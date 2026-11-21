@@ -19,7 +19,8 @@ from pydantic import BaseModel, Field
 from engine import api
 from engine.config import cfg
 from engine.contract import (CONTRACT_VERSION, CourseAnswer, MisconceptionView, NextQuestion, SessionState,
-                             SessionSummary, SimItemView, SimRun, SimTurn, StudioOutput, TutorTurn, GameTurn)
+                             SessionSummary, SimItemView, SimRun, SimTurn, StudioOutput, TutorTurn, GameTurn,
+                             ReportExport)
 
 app = FastAPI(title="TRACE engine API", version=CONTRACT_VERSION,
               description="Thin HTTP wrapper over engine/api.py. Shapes: docs/INTERFACE.md.")
@@ -104,8 +105,13 @@ def tutor_reply(sid: str, body: ReplyBody):
 
 
 @app.get("/api/v1/sessions/{sid}/summary", response_model=SessionSummary)
-def summary(sid: str):
-    return _call(api.summary, sid)
+def summary(sid: str, lang: Literal["fr", "ar", "en"] | None = None):
+    return _call(api.summary, sid, lang)
+
+
+@app.post("/api/v1/sessions/{sid}/report", response_model=ReportExport)
+def report(sid: str, lang: Literal["fr", "ar", "en"] | None = None):
+    return _call(api.report, sid, lang)
 
 
 @app.post("/api/v1/sessions/{sid}/studio", response_model=StudioOutput)

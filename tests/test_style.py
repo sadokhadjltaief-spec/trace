@@ -48,7 +48,8 @@ def test_i18n_complete():
         if k.startswith("_"):
             continue
         assert set(row) == {"en", "fr", "ar"} and all(row.values()), k
-        assert guards.language_check(row["ar"], "ar") is None, k
+        filled = row["ar"].format_map(collections.defaultdict(lambda: "2"))
+        assert guards.language_check(filled, "ar") is None, k
         for lg in ("en", "fr", "ar"):  # every fixed string passes the clear-mode linter
             assert style.lint(row[lg].format_map(collections.defaultdict(lambda: "2")), lang=lg, max_words_per_sentence=15, max_questions=1,
                               literal=True, no_praise=True) == [], (k, lg)

@@ -223,3 +223,42 @@ def game_start(sid: str):
 @app.post("/api/v1/sessions/{sid}/game/answer", response_model=GameTurn)
 def game_answer(sid: str, body: GameAnswerBody):
     return _call(api.game_answer, sid, body.step, body.reason)
+
+
+class CardVerifyBody(BaseModel):
+    ok: bool
+
+
+class CardReviewBody(BaseModel):
+    rating: Literal["again", "hard", "good", "easy"]
+
+
+@app.get("/api/v1/sessions/{sid}/cards")
+def studio_cards(sid: str, verified_only: bool = False) -> list[dict]:
+    return _call(api.studio_cards, sid, verified_only)
+
+
+@app.post("/api/v1/cards/{card_id}/verify")
+def studio_card_verify(card_id: str, body: CardVerifyBody) -> dict:
+    return _call(api.studio_card_verify, card_id, body.ok)
+
+
+@app.post("/api/v1/sessions/{sid}/cards/{card_id}/review")
+def studio_card_review(sid: str, card_id: str, body: CardReviewBody) -> dict:
+    return _call(api.studio_card_review, sid, card_id, body.rating)
+
+
+@app.get("/api/v1/exports/{sid}/{name}")
+def export_file(sid: str, name: str):
+    """Download a generated file (exports/<session>/<name>)."""
+    import re as _re
+
+    from fastapi.responses import FileResponse
+
+    from engine.studio import EXPORTS
+    if not (_re.fullmatch(r"[0-9a-f]{12}", sid) and _re.fullmatch(r"[\w.-]+", name)):
+        raise HTTPException(400, "bad path")
+    p = EXPORTS / sid / name
+    if not p.is_file():
+        raise HTTPException(404, "no such file")
+    return FileResponse(p)

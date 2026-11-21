@@ -49,7 +49,8 @@ Any change to a field bumps `CONTRACT_VERSION` and updates this file, the schema
 | `submit_answer(session_id, question_id, option, confidence, explanation=None)` | `TutorTurn` | real; the last diagnosis answer returns the first tutor turn (`HINT_1`, or `TRANSFER` if M0) |
 | `tutor_reply(session_id, text=None, choice=None)` | `TutorTurn` | real. `HINT_1..3`: `choice` = retried option. `RECONSTRUCT`: `choice` = number of the wrong step ("1", "2", …), `text` = why. `TRANSFER`: `choice` = option. `DONE`/`HANDOFF`: no reply (ValueError) |
 | `summary(session_id)` | `SessionSummary` | fake until step 9 |
-| `studio_generate(session_id, tool, source)` | `StudioOutput` | fake until step 12 |
+| `studio_generate(session_id, tool, source)` | `StudioOutput` | real (step 12): flashcards, summary, quiz, slides, pdf, diagram |
+| `studio_cards(session_id, verified_only)` / `studio_card_verify(card_id, ok)` / `studio_card_review(session_id, card_id, rating)` | cards / review result | real |
 | `misconceptions()` | `list[MisconceptionView]` | real |
 | `course_index(refresh=False)` | indexing report (files, chunks, unreadable pages, flags) | real (no LLM) |
 | `course_search(query, k=3)` | `CourseAnswer` | real, extractive (no LLM) |
@@ -147,6 +148,17 @@ animation in clear mode (`no_timers_no_animation`).
 (1-based) and picks a reason letter → `POST …/game/answer {step, reason}` → `GameTurn` with `feedback` for that
 round and the next `round` (`done` and `round = null` at the end). Show `points` / `streak` unless `calm_theme`
 is on; never a timer in clear mode. A wrong reason updates the maths `posterior` (show it in the teacher view).
+
+### Study Studio (real since step 12; StudioOutput shape unchanged)
+`POST /api/v1/sessions/{id}/studio {"tool": "...", "source": {"kind": "diagnosis"}}` → `StudioOutput`.
+Tools: `flashcards`, `summary`, `quiz`, `slides`, `pdf`, `diagram` (others → 501). Show **"Targeted at: <name>"**
+from `targeted_at` (in the student's language: `name_fr` / `name_ar`), list `sources`, offer `files` for download
+(`GET /api/v1/exports/{session_id}/{file name}`). If `refused` is set, show it and nothing else.
+Flashcards are drafted UNVERIFIED: review screen `GET /api/v1/sessions/{id}/cards` → approve or reject each with
+`POST /api/v1/cards/{card_id}/verify {"ok": true|false}`; study the deck with
+`GET /api/v1/sessions/{id}/cards?verified_only=true` and `POST /api/v1/sessions/{id}/cards/{card_id}/review
+{"rating": "again|hard|good|easy"}` (Leitner; no timer in clear mode). An item `{"dropped_by_guards": n}` in
+`items` says how many drafts the guards removed.
 
 ### GuardEvent, Cost
 `GuardEvent {ts, check, status "pass|fail", action "shown|regenerated|fallback", summary}`.

@@ -505,8 +505,57 @@ def game_answer(session_id: str, step: int, reason: str) -> dict:
     return _game_turn(s, fb, lead)
 
 
-def studio_generate(session_id: str, tool: str, source: dict) -> dict:
-    raise NotImplementedError("Study Studio arrives in P1 step 12 (use engine.api_fake)")
+def _diagnosed(s: dict) -> str | None:
+    """The misconception to target: the tutor's target, else the top hypothesis if it is a misconception
+    above 0.5. None = no diagnosis yet."""
+    if s.get("target") and s["target"] != "M0":
+        return s["target"]
+    h, p = s["diag"].top()
+    return h if h != "M0" and p >= 0.5 else None
+
+
+def studio_generate(session_id: str, tool: str, source: dict | None = None) -> dict:
+    """Study Studio (step 12). `source` = {"kind": "diagnosis"} (default) | {"kind": "folder", "folder": name} |
+    {"kind": "pages", "pages": [{"file", "page"}]}. Targets the diagnosed misconception first."""
+    from engine.studio import TOOLS, tools
+    if tool not in TOOLS:
+        raise NotImplementedError(f"Study Studio tool {tool!r} is not built (built: {', '.join(TOOLS)})")
+    s = _SESSIONS[session_id]
+    lang = _lang(s)
+    h = _diagnosed(s)
+    mv = next((m for m in misconceptions() if m["id"] == h), None) if h else None
+    names = _names()
+    post = s["diag"].as_dict()
+    thr = cfg().get("guards", {}).get("congruency_threshold", 0.2)
+    suspects = {k: names[k] for k, p in post.items() if k != "M0" and (p > thr or k == h)}
+    return tools.generate(s, session_id, tool, source or {"kind": "diagnosis"}, mv, _mis(h) if h else None, lang,
+                          tutor.style_kwargs(s["profile"], lang), _bank(), suspects)
+
+
+def studio_cards(session_id: str, verified_only: bool = False) -> list[dict]:
+    """Drafted flashcards (review screen: verified_only=False) or the deck (verified_only=True)."""
+    from engine.studio import flashcards
+    return flashcards.rows(session_id, verified_only)
+
+
+def studio_card_verify(card_id: str, ok: bool) -> dict:
+    """Human review of a drafted card: ok=True approves it, ok=False deletes it."""
+    from engine.studio import flashcards
+    flashcards.verify(card_id, ok)
+    return {"id": card_id, "verified": bool(ok), "deleted": not ok}
+
+
+def studio_card_review(session_id: str, card_id: str, rating: str) -> dict:
+    """Leitner review (again / hard / good / easy). A lapse on a misconception card is evidence for it."""
+    from engine.studio import flashcards
+    s = _SESSIONS[session_id]
+    r = flashcards.review(card_id, rating)
+    if r["lapse"] and r["misconception"] in bayes.H and r["misconception"] != "M0":
+        import numpy as np
+        lik = np.ones(len(bayes.H))
+        lik[bayes.H.index(r["misconception"])] = 1.5
+        s["diag"].update_lik(lik ** s["diag"].p["tau"], "flashcard_lapse", {"card": card_id})
+    return {**r, "posterior": [p.model_dump() for p in _posterior(s["diag"])]}
 
 
 def list_results() -> list[str]:

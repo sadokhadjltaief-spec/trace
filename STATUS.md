@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-21, step 14 (game). New Groq key in .env (quota restored).
+Last update: 2026-11-21, step 12 (Study Studio). New Groq key in .env (quota restored).
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [x] `live.allow_unverified_dev: false` set by the team in `config.yaml` (committed 2026-11-21). Consequence:
@@ -43,6 +43,30 @@ Last update: 2026-11-21, step 14 (game). New Groq key in .env (quota restored).
 - The team put a new `GROQ_API_KEY` in `.env`, but the old key was still a Windows user variable, which took
   precedence. `engine/config.py` now loads `.env` with `override=True`. Checked (key never printed): the engine uses
   the `.env` key; both models answer (120b 927/1000 requests left today, 20b 999/1000).
+
+## Step 12: Study Studio part A (`engine/studio/`)
+- Tools: **flashcards** (LLM drafts targeted at the diagnosed misconception, or definition cards from course
+  passages with citation; guarded; **stored unverified until a human approves them**; Leitner boxes in SQLite;
+  a lapse on a misconception card is evidence for it; export Anki `.apkg` + TSV), **summary** (LLM revision sheet,
+  every section guarded; Markdown + PDF; from course passages it cites file + page), **quiz** (verified bank only;
+  worksheet PDF with the answer key on page 2), **slides** (python-pptx, 6-10 slides: targeted-at, key idea,
+  mistake + diagram, worked solution with the wrong step marked, example, practice, formulas, sources; Arabic
+  right-to-left), **pdf** (sheet + diagram + worksheet), **diagram** (matplotlib, exact: fraction bars / number
+  line contrasting the wrong idea and the correct one).
+- Every output: "Targeted at: <name>" when a diagnosis exists, sources, student's language, style profile.
+  Folders with `allow_derivatives: false` are refused; no diagnosis and no course pages → refused with a message.
+- Guards for studio texts: `guards.check_studio` = ONE judge call per batch (claims extracted -> SymPy; congruency
+  with the suspected misconceptions), style + language per text; fail closed. Each flashcard is judged as one text
+  (question + answer). New rule for all guards: a false equality inside a sentence that itself says it is wrong
+  ("…= 2/4, ce qui est faux", "Vrai ou faux : …") is a quote, not a claim. Language check now rejects only on
+  positive evidence of another language (short or formula-only texts passed wrongly as "English" before).
+- Fonts: Noto Sans + Noto Naskh Arabic (OFL) via `scripts/fetch_fonts.py` (gitignored; licence in
+  `assets/fonts/README.md`). Packages: python-pptx 1.0.2, fpdf2 2.9.0, arabic-reshaper 3.1.0, python-bidi 0.6.12,
+  matplotlib 3.11.2, genanki 0.13.1 (installed and import-checked).
+- Live check (FR, M1): 4 flashcards (all correct, all passed), summary, slides, worksheet, sheet PDF: 10 LLM calls,
+  ~4.5k tokens. Not built: mind map, video, podcast (P2). Exports go to `exports/<session>/` (gitignored).
+- 165 tests pass (`tests/test_studio.py`: guards drop a false card, human review, Leitner, lapse evidence, every
+  file written, answer key on page 2, Arabic RTL slides, Najahni refusal).
 
 ## Step 14: game "Chasse aux erreurs" (`engine/game.py`, `games.yaml`), 0 LLM calls
 - 5 rounds from the 8 human-verified worked solutions (diagnosed misconception first), in the student's language

@@ -276,3 +276,15 @@ def test_summary_mid_session(monkeypatch):
     sid = api.start_session({"name": "T", "lang": "en"}, detector_llm=False)["session_id"]
     r = api.summary(sid)
     assert r["status"] == "in_progress" and r["evidence"] == []
+
+
+@pytest.mark.parametrize("text,ok", [
+    ("Your rule gives 1/2 + 1/2 = 2/4, which is wrong.", True),          # quoted wrong claim: not asserted
+    ("Cela donne 1/2 + 1/2 = 2/4, ce qui est faux.", True),
+    ("Vrai ou faux : 1/2 + 1/2 = 2/4 ?", True),
+    ("هذا يعطي 1/2 + 1/2 = 2/4 وهو خطأ.", True),
+    ("So 1/2 + 1/2 = 2/4. Now look again.", False),                       # asserted false claim
+    ("1/5 + 2/5 = 4/5.", False),
+])
+def test_negated_false_claims_are_quotes(text, ok):
+    assert (guards.math_check(text)[0] == "pass") == ok

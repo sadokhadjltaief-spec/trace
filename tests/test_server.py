@@ -71,7 +71,7 @@ def test_full_session_over_http(monkeypatch):
     r = c.get(f"/api/v1/sessions/{sid}/summary").json()
     SessionSummary.model_validate(r)
     assert r["status"] == "mastered"
-    assert c.post(f"/api/v1/sessions/{sid}/studio", json={"tool": "flashcards"}).status_code == 501
+    assert c.post(f"/api/v1/sessions/{sid}/studio", json={"tool": "video"}).status_code == 501  # not built (P2)
     assert len(c.get("/api/v1/misconceptions").json()) == 5
 
 

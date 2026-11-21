@@ -64,6 +64,13 @@ _AR_LETTER = re.compile(r"[ء-ي]")
 _LAT_LETTER = re.compile(r"[A-Za-zÀ-ÿ]")
 
 
+_EN_HINT = {"the", "is", "and", "because", "it", "you", "your", "what", "which", "look", "at", "of", "to", "then",
+            "with", "this", "that", "are", "do", "does", "how", "many", "add", "same", "they", "true", "false"}
+_FR_HINT = {"le", "la", "les", "des", "est", "et", "que", "je", "il", "on", "une", "un", "du", "tu", "ta", "ton",
+            "tes", "quel", "quelle", "combien", "font", "vaut", "avec", "pour", "dans", "même", "donc", "regarde",
+            "vrai", "faux", "écrit", "additionne", "fraction", "fractions", "dénominateur", "numérateur"}
+
+
 def language_check(text: str, lang: str | None) -> str | None:
     """Reason the text is not in the requested language (None = ok). Deterministic, part of the style check."""
     if not lang:
@@ -77,17 +84,32 @@ def language_check(text: str, lang: str | None) -> str | None:
         return f"contains Arabic script, expected {lang}"
     from engine.detector import detect_language  # lazy: same deterministic detector as the explanation path
     got = detect_language(text)
-    if lang == "fr" and got != "fr":
-        return f"expected French, detected {got}"
-    if lang == "en" and got == "fr":
-        return "expected English, detected French"
+    words = re.findall(r"[\w']+", text.lower())
+    en = sum(w in _EN_HINT for w in words)
+    fr = sum(w in _FR_HINT for w in words) + len(re.findall(r"[éèêàçùâîôœ]", text.lower()))
+    # reject only on positive evidence: very short or formula-only texts have no language words at all
+    if lang == "fr" and (got == "darija" or en > fr):
+        return f"expected French, detected {'darija' if got == 'darija' else 'English'}"
+    if lang == "en" and (got == "darija" or fr > en):
+        return f"expected English, detected {'darija' if got == 'darija' else 'French'}"
     return None
+
+
+_NEGATED = re.compile(
+    r"(?i)\b(?:wrong|incorrect|false|not\s+(?:true|correct|equal)|is\s+not|isn't|faux|fausse|incorrecte?|"
+    r"n'est\s+pas|n’est\s+pas|vrai\s+ou\s+faux|true\s+or\s+false|impossible)\b|خطأ|خاطئ|غير\s+صحيح|ليس|≠")
 
 
 def math_check(text: str, extracted: list | None = None) -> tuple[str, str]:
     """Deterministic: equalities + numeric comparisons found by regex (mathcheck). Plus claims the LLM judge
     extracted from the wording (e.g. 'smaller than each fraction'): the LLM only extracts, SymPy decides."""
-    claims = mc.check_equalities(text) + mc.check_inequalities(text)
+    claims = []
+    for sent in re.split(r"(?<=[.!?؟;])\s+|\n+", text):
+        found = mc.check_equalities(sent) + mc.check_inequalities(sent)
+        if any(c["ok"] is False for c in found) and _NEGATED.search(sent):
+            # the sentence itself says the statement is wrong ("1/2 + 1/2 = 2/4, which is wrong"): quoted, not asserted
+            found = [{**c, "ok": None if c["ok"] is False else c["ok"]} for c in found]
+        claims += found
     for c in extracted or []:
         if not isinstance(c, dict):
             continue
@@ -156,6 +178,49 @@ def check(text: str, q: dict, posterior: dict[str, float], names: dict[str, str]
                             detail=(f"congruent with {hit}: " if hit else "") + str(j.get("congruency_reason", ""))[:300]))
     _log(text, checks, detail)
     return checks, detail
+
+
+STUDIO_JUDGE_SYS = """You check short texts written for a maths student (flashcards, summary lines). You are a strict
+checker, not a writer. For EACH text:
+1. congruent: list the ids of the misconceptions below that the text states, implies or uses as if correct.
+   Showing a wrong idea in order to say it is wrong is NOT congruent.
+2. claims: every equality or comparison between numbers the text asserts as TRUE, numbers only, e.g.
+   {"lhs": "1/2+1/4", "op": "=", "rhs": "3/4"}. Do not list results the text itself says are wrong.
+Return JSON: {"texts": [{"id": "...", "congruent": ["M1"], "claims": [{"lhs": "...", "op": "...", "rhs": "..."}]}]}"""
+
+
+def check_studio(texts: dict[str, str], suspects: dict[str, str], lang: str, style_kwargs: dict | None = None,
+                 purpose: str = "studio_judge") -> dict[str, list[Check]]:
+    """Four checks for Study Studio texts (no graded question, so 'leak' = not applicable), with ONE judge call
+    for the whole batch. Fails closed when the judge is unavailable."""
+    mis = "\n".join(f"{k}: {v}" for k, v in suspects.items()) or "(none)"
+    user = f"Misconceptions:\n{mis}\n\nTexts:\n" + "\n".join(f"[{k}] {v}" for k, v in texts.items())
+    try:
+        j = llm.ask_json(STUDIO_JUDGE_SYS, user, purpose=purpose, model=_judge_model(), max_tokens=2048) or {}
+        verdict = {str(x.get("id", "")).strip("[]"): x for x in j.get("texts", []) if isinstance(x, dict)}
+        err = None
+    except Exception as e:  # noqa: BLE001
+        verdict, err = {}, f"{type(e).__name__}: {str(e)[:100]}"
+    out = {}
+    for k, text in texts.items():
+        viol = style.lint(text, **(style_kwargs or {}))
+        wl = language_check(text, lang)
+        if wl:
+            viol.append(wl)
+        v = verdict.get(k)
+        ms, md = math_check(text, (v or {}).get("claims"))
+        checks = [Check(name="leak", status="not_applicable", detail="no graded question"),
+                  Check(name="math", status=ms, detail=md),
+                  Check(name="style", status="fail" if viol else "pass", detail="; ".join(viol))]
+        if v is None:
+            checks.append(Check(name="congruency", status="fail", detail=f"judge unavailable ({err or 'no verdict'})"))
+        else:
+            hit = [h for h in (v.get("congruent") or []) if h in suspects]
+            checks.append(Check(name="congruency", status="fail" if hit else "pass",
+                                detail=f"congruent with {hit}" if hit else "checked"))
+        out[k] = checks
+        _log(text, checks, {"studio": True, "suspects": list(suspects)})
+    return out
 
 
 def events(checks: list[Check], action: str) -> list[GuardEvent]:

@@ -5,7 +5,8 @@
 - congruency: the LLM judge checks the message against every misconception with posterior > threshold
   ("does this state, imply or exemplify misconception X?").
 - math: every simple 'a = b' claim is verified with SymPy (engine/mathcheck.py).
-- style: deterministic linter (engine/style.py) with the active profile's limits.
+- style: deterministic linter (engine/style.py) with the active profile's limits, plus a language check (the
+  message must be in the student's language: fr / ar / en).
 Leak and congruency share ONE judge call (free tier: halves the request count). Every decision is logged to SQLite
 (table guard_log in .cache/trace.db). The judges are NOT validated yet: eval/eval_guards.py needs human labels.
 """
@@ -26,7 +27,8 @@ You are a strict safety check, not a writer.
 1. reveals_answer: true if the message states the final answer, names the correct option, or does so much of the
    work that only a trivial step is left (that trivialises the question).
 2. For each listed misconception: true if the message states, implies, or gives an example that follows that
-   wrong idea as if it were correct. Mentioning the wrong idea in order to question it is NOT congruent.
+   wrong idea as if it were correct. NOT congruent: mentioning the wrong idea in order to question it, or a
+   contrasting example that applies the wrong method to DIFFERENT numbers and says the result is wrong.
 Return JSON: {"reveals_answer": true|false, "leak_reason": "...",
  "congruent": {"M1": true|false, ...}, "congruency_reason": "..."}"""
 
@@ -51,6 +53,28 @@ def deterministic_leak(text: str, q: dict) -> list[str]:
     return why
 
 
+_AR_LETTER = re.compile(r"[ء-ي]")
+_LAT_LETTER = re.compile(r"[A-Za-zÀ-ÿ]")
+
+
+def language_check(text: str, lang: str | None) -> str | None:
+    """Reason the text is not in the requested language (None = ok). Deterministic, part of the style check."""
+    if not lang:
+        return None
+    ar, lat = len(_AR_LETTER.findall(text)), len(_LAT_LETTER.findall(text))
+    if lang == "ar":
+        return None if ar and ar / (ar + lat) >= 0.6 else f"not in Arabic ({ar} Arabic vs {lat} Latin letters)"
+    if ar:
+        return f"contains Arabic script, expected {lang}"
+    from engine.detector import detect_language  # lazy: same deterministic detector as the explanation path
+    got = detect_language(text)
+    if lang == "fr" and got != "fr":
+        return f"expected French, detected {got}"
+    if lang == "en" and got == "fr":
+        return "expected English, detected French"
+    return None
+
+
 def math_check(text: str) -> tuple[str, str]:
     claims = mc.check_equalities(text)
     bad = [c["claim"] for c in claims if c["ok"] is False]
@@ -70,7 +94,7 @@ def judge(text: str, q: dict, suspects: dict[str, str], purpose: str = "guard_ju
 
 
 def check(text: str, q: dict, posterior: dict[str, float], names: dict[str, str],
-          style_kwargs: dict | None = None, use_llm: bool = True) -> tuple[list[Check], dict]:
+          style_kwargs: dict | None = None, use_llm: bool = True, lang: str | None = None) -> tuple[list[Check], dict]:
     """Run all four checks. Returns (checks, detail). A check that could not run is reported as 'fail'
     (fail closed), so the SafeText is not shown and the caller regenerates or falls back."""
     thr = cfg().get("guards", {}).get("congruency_threshold", 0.2)
@@ -79,6 +103,9 @@ def check(text: str, q: dict, posterior: dict[str, float], names: dict[str, str]
     checks: list[Check] = []
 
     viol = style.lint(text, **(style_kwargs or {}))
+    wrong_lang = language_check(text, lang)
+    if wrong_lang:
+        viol.append(wrong_lang)
     checks.append(Check(name="style", status="fail" if viol else "pass", detail="; ".join(viol)))
     ms, md = math_check(text)
     checks.append(Check(name="math", status=ms, detail=md))

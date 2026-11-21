@@ -25,6 +25,9 @@ llm:
   batch_workers: 2           # concurrent workers for bulk evals; the throttle still applies
   reasoning_effort: low      # gpt-oss models on Groq accept low / medium / high
   max_tokens: 2048
+  # guard judge model. EVAL_MODEL (20b) hit Groq's free-tier DAILY token cap (200k TPD per model) on
+  # 2026-11-21 after the detector eval, so the judge runs on LLM_MODEL. Empty = EVAL_MODEL.
+  judge_model: openai/gpt-oss-120b
   cache_dir: .cache/llm
   log_db: .cache/trace.db
   # Groq free tier (rate-limited). Prices stay null on purpose; cost.json reports tokens only.

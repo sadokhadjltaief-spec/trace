@@ -54,6 +54,8 @@ def _fake_llm(hint_text):
             return {"error": "added across", "faulty_step": "adding denominators", "correct_idea": "same size parts"}
         if purpose.startswith("tutor_hint"):
             return {"message": hint_text(purpose, kw.get("seed_tag", ""))}
+        if purpose == "tutor_recon_rubric":
+            return {"verdict": "correct", "reason": "names the error"}
         if purpose.startswith("detector"):
             raise llm.LLMError("not in this test")
         raise AssertionError(purpose)
@@ -120,3 +122,110 @@ def test_demo_cache_miss_falls_back(monkeypatch):
     sid = api.start_session({"name": "T", "lang": "en"}, detector_llm=False)["session_id"]
     t = _diagnose_as(sid, "M1")
     assert t["state"] == "HINT_1" and t["message"]["fallback_used"] and t["message"]["shown_allowed"]
+
+
+@pytest.mark.parametrize("text,lang,ok", [
+    ("Regarde les dénominateurs. Que représentent-ils ?", "fr", True),
+    ("Look at the bottom numbers. What do they tell you?", "fr", False),
+    ("انظر إلى المقامات. ماذا يعني العدد 3 في 1/3؟", "ar", True),
+    ("Regarde les dénominateurs.", "ar", False),
+    ("Look at the bottom numbers.", "en", True),
+])
+def test_language_check(text, lang, ok):
+    assert (guards.language_check(text, lang) is None) == ok
+
+
+def test_wrong_language_fails_style(monkeypatch):
+    monkeypatch.setattr(llm, "ask_json", _judge())
+    post = {"M0": 0.1, "M1": 0.8, "M2": 0.05, "M3": 0.03, "M4": 0.02}
+    checks, _ = guards.check("Look at the bottom numbers.", Q1, post, NAMES, lang="fr")
+    assert {c.name: c.status for c in checks}["style"] == "fail"
+
+
+def test_recon_giveaway_neutralised():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("build_bank", ROOT / "eval" / "build_bank.py")
+    bb = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(bb)
+    steps, changed = bb.neutralise_steps(["Add by (incorrectly) adding tops: 8/12 + 3/12 = 11/24.",
+                                          "(Incorrect) Multiply the denominator by 4 as well.", "Write 3/4."])
+    assert steps == ["Add by adding tops: 8/12 + 3/12 = 11/24.", "Multiply the denominator by 4 as well.", "Write 3/4."]
+    assert changed == [1, 2]
+    assert bb.GIVEAWAY_WORD.search("this step is wrong") and not bb.GIVEAWAY_WORD.search("Write the result")
+
+
+@pytest.mark.skipif(not HAS_BANK, reason="bank.json is local-only")
+@pytest.mark.parametrize("lang", ["fr", "ar"])
+def test_fallback_stays_in_student_language(monkeypatch, lang):
+    def miss(*a, **k):
+        raise llm.CacheMiss("not cached")
+    monkeypatch.setattr(llm, "ask_json", miss)
+    sid = api.start_session({"name": "T", "lang": lang}, detector_llm=False)["session_id"]
+    t = _diagnose_as(sid, "M1")
+    assert t["message"]["fallback_used"] and t["message"]["lang"] == lang and t["message"]["shown_allowed"]
+    assert guards.language_check(t["message"]["text"], lang) is None
+
+
+def _to_reconstruct(monkeypatch):
+    monkeypatch.setattr(llm, "ask_json", _fake_llm(lambda p, tag: "Look at the bottom numbers. What size are the parts?"))
+    sid = api.start_session({"name": "T", "lang": "en"}, detector_llm=False)["session_id"]
+    t = _diagnose_as(sid, "M1")
+    rq = api._SESSIONS[sid]["by_id"][t["question"]["id"]]
+    t = api.tutor_reply(sid, choice=rq["correct"])
+    assert t["state"] == "RECONSTRUCT"
+    return sid, t
+
+
+@pytest.mark.skipif(not HAS_BANK, reason="bank.json is local-only")
+def test_full_path_to_mastered(monkeypatch):
+    from engine import tutor
+    sid, t = _to_reconstruct(monkeypatch)
+    s = api._SESSIONS[sid]
+    t = api.tutor_reply(sid, choice=str(s["recon"]["error_step"]), text="they added the bottoms")
+    assert t["grading"]["method"] == "llm_rubric" and "LLM" in t["grading"]["label"]
+    assert t["state"] == "TRANSFER" and t["expects"] == "transfer_answer"
+    tq = s["by_id"][t["question"]["id"]]
+    assert tq["target"] == "M1" and tq["id"] not in {a.question_id for a in s["asked"]}
+    n_before = len(s["diag"].history)
+    t = api.tutor_reply(sid, choice=tq["correct"])
+    assert t["state"] == "DONE" and t["grading"]["method"] == "answer_key"
+    assert len(s["diag"].history) == n_before + 1          # transfer answer is Bayes evidence
+    assert tutor.mastery_status(s) == "mastered"
+    with pytest.raises(ValueError):
+        api.tutor_reply(sid, choice="A")
+
+
+@pytest.mark.skipif(not HAS_BANK, reason="bank.json is local-only")
+def test_reconstruct_wrong_twice_then_transfer(monkeypatch):
+    sid, t = _to_reconstruct(monkeypatch)
+    s = api._SESSIONS[sid]
+    wrong = 1 if s["recon"]["error_step"] != 1 else 2
+    t = api.tutor_reply(sid, choice=str(wrong))
+    assert t["state"] == "RECONSTRUCT" and t["grading"]["correct"] is False
+    t = api.tutor_reply(sid, choice=str(wrong))
+    assert t["state"] == "TRANSFER" and f"step {s['recon']['error_step']}" in t["message"]["text"]
+
+
+@pytest.mark.skipif(not HAS_BANK, reason="bank.json is local-only")
+def test_transfer_fails_loops_then_handoff(monkeypatch):
+    sid, t = _to_reconstruct(monkeypatch)
+    s = api._SESSIONS[sid]
+    states = []
+    for _ in range(12):
+        if t["state"] == "RECONSTRUCT":
+            t = api.tutor_reply(sid, choice=str(s["recon"]["error_step"]), text="x")
+        elif t["state"] == "TRANSFER":
+            q = s["by_id"][t["question"]["id"]]
+            t = api.tutor_reply(sid, choice=next(o for o in q["options"] if o != q["correct"]))
+        elif t["state"].startswith("HINT"):
+            q = s["by_id"][t["question"]["id"]]
+            t = api.tutor_reply(sid, choice=q["correct"])
+        else:
+            break
+        states.append(t["state"])
+    assert t["state"] == "HANDOFF"
+    assert 1 <= states.count("HINT_1") <= 2
+    assert len(s["handoff_note"].splitlines()) == 3
+    tq = [x["question_id"] for x in s["outcome"]["transfers"]]
+    assert all(s["by_id"][q]["target"] == "M1" for q in tq)   # transfer = same misconception only
+    TutorTurn.model_validate(t)

@@ -28,8 +28,8 @@ def show(t: dict) -> None:
             print(f"     guard: {e['summary']} -> {e['action']}")
 
 
-def run(demo: bool) -> int:
-    s = api.start_session({"name": "Amira", "level": "7e", "lang": "fr"}, demo=demo)
+def run(demo: bool, lang: str = "fr") -> int:
+    s = api.start_session({"name": "Amira", "level": "7e", "lang": lang}, demo=demo)
     sid = s["session_id"]
     fallbacks, first = 0, True
     t = None
@@ -61,6 +61,19 @@ def run(demo: bool) -> int:
     if t.get("reconstruction"):
         for i, st in enumerate(t["reconstruction"]["steps"], 1):
             print(f"     {i}. {st}")
+        r = api._SESSIONS[sid]["recon"]  # script only: the student finds the wrong step
+        why = {"fr": "on ne peut pas additionner les dénominateurs", "ar": "لا يمكن جمع المقامات",
+               "en": "you cannot add the denominators"}[lang]
+        t = api.tutor_reply(sid, choice=str(r["error_step"]), text=why)
+        print(f"reconstruct: step {r['error_step']} + '{why}' -> {t['grading']['label']}")
+        show(t)
+    if t["state"] == "TRANSFER":
+        tq = api._SESSIONS[sid]["by_id"][t["question"]["id"]]
+        t = api.tutor_reply(sid, choice=tq["correct"])
+        print(f"transfer {tq['id']}: correct option -> {t['grading']['label']}: correct={t['grading']['correct']}")
+        show(t)
+    from engine import tutor
+    print(f"final state {t['state']}, mastery: {tutor.mastery_status(api._SESSIONS[sid])}")
     c = api.get_state(sid)["cost"]
     print(f"cost: {c['calls']} calls ({c['cached_calls']} cached), {c['prompt_tokens']}+{c['completion_tokens']} "
           f"tokens, {c['label']}; hint fallbacks: {fallbacks}")
@@ -70,8 +83,9 @@ def run(demo: bool) -> int:
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--record", action="store_true", help="live LLM calls (fills the cache)")
+    ap.add_argument("--lang", default="fr", choices=["fr", "ar", "en"], help="student language (default fr)")
     a = ap.parse_args()
-    n = run(demo=not a.record)
+    n = run(demo=not a.record, lang=a.lang)
     if not a.record and n:
         print(f"WARNING: {n} hint turn(s) used a fallback in demo mode (cache gap?)")
     llm.set_demo_mode(False)

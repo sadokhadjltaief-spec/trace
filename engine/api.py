@@ -202,7 +202,9 @@ def _mis(h: str) -> dict | None:
 
 
 def tutor_reply(session_id: str, text: str | None = None, choice: str | None = None) -> dict:
-    """Student reply after a tutor turn. HINT_k: `choice` = the retried option (graded by answer key)."""
+    """Student reply after a tutor turn.
+    HINT_k: `choice` = the retried option. RECONSTRUCT: `choice` = number of the wrong step, `text` = why.
+    TRANSFER: `choice` = the option. DONE / HANDOFF: no reply expected (ValueError)."""
     s = _SESSIONS[session_id]
     d: bayes.Diagnoser = s["diag"]
     st = s["state"]
@@ -214,9 +216,19 @@ def tutor_reply(session_id: str, text: str | None = None, choice: str | None = N
         s["guard_events"] += f.get("guard_events", [])
         return TutorTurn(session_id=session_id, turn_id=s["turn"], grading=grading, posterior=_posterior(d),
                          **f).model_dump()
-    if st in ("RECONSTRUCT", "TRANSFER"):
-        raise NotImplementedError(f"{st} grading arrives in step 8")
-    raise ValueError(f"no tutor reply expected in state {st}")
+    if st == "RECONSTRUCT":
+        s["turn"] += 1
+        f, grading = tutor.on_reconstruct(s, choice, text)
+    elif st == "TRANSFER":
+        if not choice:
+            raise ValueError("a transfer answer needs `choice` (the option letter)")
+        s["turn"] += 1
+        f, grading = tutor.on_transfer(s, choice, _names(), _bank(), d)
+    else:
+        raise ValueError(f"no tutor reply expected in state {st}")
+    s["guard_events"] += f.get("guard_events", [])
+    return TutorTurn(session_id=session_id, turn_id=s["turn"], grading=grading, posterior=_posterior(d),
+                     **f).model_dump()
 
 
 def summary(session_id: str) -> dict:

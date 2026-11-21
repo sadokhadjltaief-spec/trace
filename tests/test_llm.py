@@ -71,3 +71,25 @@ def test_token_budget_throttle_waits(monkeypatch):
     llm._throttle("m", 300)
     assert llm.time.monotonic() - t0 >= 0.15
     llm._tok_window.pop("m", None)
+
+
+def test_daily_cap_fails_fast(monkeypatch, tmp_path):
+    import httpx
+    from groq import RateLimitError
+    calls = []
+
+    class Fake:
+        class chat:
+            class completions:
+                @staticmethod
+                def create(**kw):
+                    calls.append(1)
+                    r = httpx.Response(429, request=httpx.Request("POST", "https://x"), headers={"retry-after": "31"})
+                    raise RateLimitError("Rate limit reached ... on tokens per day (TPD): Limit 200000",
+                                         response=r, body=None)
+    monkeypatch.setattr(llm, "_groq", lambda: Fake)
+    monkeypatch.setattr(llm, "_cache_dir", lambda: tmp_path)
+    monkeypatch.setattr(llm, "_throttle", lambda *a, **k: None)
+    with pytest.raises(llm.LLMError, match="daily cap"):
+        llm.chat(llm.Request(messages=[{"role": "user", "content": "x"}], purpose="test_tpd"))
+    assert len(calls) == 1

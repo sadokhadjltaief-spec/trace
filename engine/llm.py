@@ -276,6 +276,9 @@ def chat(req: Request) -> Response:
             _log(req, model, resp, attempts)
             return resp
         except RateLimitError as e:
+            if "per day" in str(e):  # daily cap (TPD/RPD): retrying for minutes cannot help; caller falls back
+                last_err = f"429 daily cap: {str(e)[:160]}"
+                break
             wait = _retry_after(e) or min(c["backoff_max_s"], c["backoff_base_s"] * 2 ** attempts)
             wait += random.uniform(0, 1)
             last_err = f"429: waited {wait:.1f}s"

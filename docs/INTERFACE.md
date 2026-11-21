@@ -3,7 +3,8 @@
 **Changelog.** 1.1 (2026-11-21): added optional `TutorTurn.explanation_evidence` (additive; 1.0 code keeps working).
 No shape change in step 6: `tutor_reply` became real for hints. After the diagnosis stops, `submit_answer` raises
 `ValueError`; the page must switch to `tutor_reply` when `TutorTurn.state != "DIAGNOSE"`. A retry has
-`question.requires_confidence = false`.
+`question.requires_confidence = false`. Step 8: RECONSTRUCT shows `reconstruction.steps` (numbered from 1); its
+`grading.method` is `llm_rubric` when the "why" was graded: show the label ("graded by the LLM").
 
 This is the contract between the engine (built by Claude Code) and the frontend pages (built by the teammate).
 The source of truth is **`engine/contract.py`** (pydantic models). This file explains it.
@@ -43,7 +44,7 @@ Any change to a field bumps `CONTRACT_VERSION` and updates this file, the schema
 | `get_state(session_id)` | `SessionState` | real |
 | `next_question(session_id)` | `NextQuestion` | real |
 | `submit_answer(session_id, question_id, option, confidence, explanation=None)` | `TutorTurn` | real; the last diagnosis answer returns the first tutor turn (`HINT_1`, or `TRANSFER` if M0) |
-| `tutor_reply(session_id, text=None, choice=None)` | `TutorTurn` | real for `HINT_1..3` (`choice` = retried option); RECONSTRUCT/TRANSFER replies raise NotImplementedError until step 8 |
+| `tutor_reply(session_id, text=None, choice=None)` | `TutorTurn` | real. `HINT_1..3`: `choice` = retried option. `RECONSTRUCT`: `choice` = number of the wrong step ("1", "2", …), `text` = why. `TRANSFER`: `choice` = option. `DONE`/`HANDOFF`: no reply (ValueError) |
 | `summary(session_id)` | `SessionSummary` | fake until step 9 |
 | `studio_generate(session_id, tool, source)` | `StudioOutput` | fake until step 12 |
 | `misconceptions()` | `list[MisconceptionView]` | real |

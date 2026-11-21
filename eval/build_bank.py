@@ -238,6 +238,22 @@ def fmt_flags(flags) -> str:
     return "; ".join(f"{'BLOCK' if f.get('level', 'block') == 'block' else 'warn'}: {f['msg']}" for f in flags)
 
 
+GIVEAWAY = re.compile(r"(?i)\s*\((?:incorrect(?:ly)?|wrong(?:ly)?|mistaken(?:ly)?|error)\)")
+GIVEAWAY_WORD = re.compile(r"(?i)\b(?:incorrect(?:ly)?|wrong(?:ly)?|mistake[ns]?|mistakenly|erroneous(?:ly)?|error)\b")
+
+
+def neutralise_steps(steps: list[str]) -> tuple[list[str], list[int]]:
+    """Remove labels like '(incorrectly)' that give away the error step (human review, 2026-11-21: R_M1_1)."""
+    out, changed = [], []
+    for i, s in enumerate(steps, 1):
+        n = re.sub(r"\s{2,}", " ", GIVEAWAY.sub("", s)).strip()
+        n = n[:1].upper() + n[1:] if n else n
+        if n != s:
+            changed.append(i)
+        out.append(n)
+    return out, changed
+
+
 def check_recon(r: dict) -> list[dict]:
     flags = []
     steps, es = r.get("steps", []), r.get("error_step")
@@ -349,8 +365,12 @@ def main():
                 r, flags, t2 = draft_recon(m, v, done, feedback=redraft[rid], previous=r)
                 tries += t2
             done.append(r.get("problem", ""))
+            shown, neutralised = neutralise_steps([s.get("text", "") for s in r.get("steps", [])])
+            for i, s in enumerate(shown, 1):
+                if GIVEAWAY_WORD.search(s):
+                    flags.append({"level": "block", "msg": f"step {i} text gives the error away: '{s}'"})
             item = {"id": rid, "misconception": m["id"], "problem": r.get("problem", ""),
-                    "worked_solution": [s.get("text", "") for s in r.get("steps", [])],
+                    "worked_solution": shown, "neutralised_steps": neutralised,
                     "step_math": [s.get("math", "") for s in r.get("steps", [])],
                     "error_step": r.get("error_step"), "expected_explanation": r.get("expected_explanation", ""),
                     "correct_answer": r.get("correct_answer", ""), "sympy_flags": flags, "draft_tries": tries,

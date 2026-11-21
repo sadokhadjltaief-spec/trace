@@ -1,10 +1,41 @@
 # STATUS
 
-Last update: 2026-11-21, step 6 committed.
+Last update: 2026-11-21, steps 7-8 committed (bench_tutor not run).
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [ ] Set `live.allow_unverified_dev: false` in `config.yaml` (now true = dev mode). Claude reminds the human at
       the start of step 6 and before the demo rehearsal.
+
+## ⚠ Groq free-tier DAILY token cap (found 2026-11-21, 19:00)
+- Besides 1000 requests/day and 8000 tokens/min, Groq caps **200,000 tokens/day per model** (rolling window).
+- gpt-oss-20b: ~244k tokens logged in 3 h (detector eval) -> capped until about 15:00 on 22 Nov (after the deadline).
+- gpt-oss-120b: ~75k logged in 24 h -> ~125k left. Guard judge moved to 120b (`llm.judge_model`).
+- `engine/llm.py` now fails fast on a daily-cap 429 (the caller falls back) instead of retrying for minutes.
+
+## Step 7: guard labels (`eval/guard_labels.csv`, `eval/eval_guards.py`)
+- 30 messages we wrote (safe hints, explicit leaks, near-trivial scaffolds, misconception-endorsing messages,
+  contrasting examples; EN/FR/AR; the 4 MAP questions). **Waiting for HUMAN labels** (`human_reveals_answer`
+  yes/no, `human_congruent` M1..M4 or none). `eval_guards.py` writes `results/guards.json` only once rows are
+  labelled. Until then the guards are NOT validated and the UI must not say they are.
+
+## Step 8: RECONSTRUCT, TRANSFER, mastery, HANDOFF
+- RECONSTRUCT: wrong step graded deterministically; the "why" by an LLM rubric (method `llm_rubric`, labelled).
+  2 attempts, then the step is shown. TRANSFER: a fresh question for the SAME misconception, answer key, and it
+  updates the posterior. Failed -> HINT_1 on it (max 2 loops) -> HANDOFF with a 3-line note built by code (no LLM).
+  M0 -> TRANSFER directly. Mastery = wrong step found AND a transfer solved.
+- Reconstruction give-away fixed: 4 items said "(incorrect)" on the wrong step (R_M1_1, R_M1_2, R_M2_1, R_M2_2).
+  `build_bank.py` now strips such labels and blocks any step text with "wrong/incorrect/mistake/error".
+  The 4 items kept their human tick (text-only change, maths unchanged).
+- Hint language: deterministic language check inside the style guard (fr / ar / en); prompts say "write ONLY in";
+  non-English fallback = verified hint translated by the LLM and guarded, else a fixed FR/AR template
+  (our wording; **needs a native-speaker check**).
+- Full demo session (diagnosis -> 2 hints -> RECONSTRUCT -> TRANSFER -> DONE, mastered) recorded in FR and AR and
+  replayed offline: 8/8 calls from cache, 0 tokens, 0 fallbacks (`scripts/demo_session.py --lang fr|ar`).
+- **Known gap seen in the FR demo**: hint 2 says 2/5 is "inférieur à chaque fraction" (false: 2/5 > 1/3).
+  The math guard verifies equalities only, not comparisons in words; the LLM judge did not catch it.
+- `eval/bench_tutor.py` written (A plain / B no guards / C full; 10 runs per condition planned) but **NOT run**:
+  it needs ~160k tokens on 120b with 20b capped. Waiting for a team decision.
+- 88 tests pass.
 
 ## Step 6: tutor state machine + guards (`engine/tutor.py`, `engine/guards.py`)
 - Code decides state and message type: DIAGNOSE -> HINT_1 -> HINT_2 -> HINT_3 -> RECONSTRUCT (correct retry skips

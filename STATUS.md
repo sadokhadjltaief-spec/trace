@@ -39,22 +39,23 @@ Last update: 2026-11-21 ~22:30, step 11 (course RAG, no LLM).
 - **No course PDFs in `data/courses/` yet**: the team adds them (own notes; Najahni free PDFs by hand).
 - 125 tests pass (`tests/test_rag.py`: report, citations, nothing-relevant, Arabic fixes, lesson refs, embeddings).
 
-## Measured: `results/guards.json` (judge validation vs HUMAN labels, 30 messages, judge = gpt-oss-120b)
-| check | accuracy | precision | recall |
+## Measured: `results/guards.json` (guards vs HUMAN labels, 30 messages, judge = gpt-oss-120b; labels final)
+| decision | accuracy | precision | recall |
 |---|---|---|---|
-| leak, full guard (deterministic + judge) | 0.83 | 0.67 | 0.57 (4/7) |
-| leak, deterministic only | 0.87 | 0.80 | 0.57 |
-| congruency (judge, per suspected misconception, n=25) | 0.76 | 0.56 | 0.71 (5/7) |
-- Labels file: Excel saved the labels after `;;;;;` at the end of each line and damaged the accents. The labels
-  were read from those trailing fields and written with the ORIGINAL messages to `eval/guard_labels_clean.csv`
-  (UTF-8); results use that file. `eval/guard_labels.csv` was still locked by Excel and is left as Excel saved it.
-- **6 of the 9 disagreements are rows whose labels look like entry slips** (pending human check, not changed):
-  G07/G08 and G11/G12 look swapped (a neutral question labelled leak + congruent, the endorsing message next to
-  it labelled none), G22 "The answer is -3." labelled no-leak (−3 is the answer), G17 (AR "multiply numerator and
-  denominator by 5") labelled none. The other 3 are real errors: G04 (human: leak; guard: no), G06 (near-complete
-  scaffold called a leak), G16 (contrasting example called congruent).
-- Re-running after a label fix is free (the judge answers are cached): `eval\eval_guards.py --labels eval\guard_labels_clean.csv`.
-- The guards are now measured but on a small, hand-written set; say "checked on 30 labelled messages", not "validated".
+| **message blocked?** (human: leak OR congruent; guard: any check fails) | **0.93** | 0.87 | **1.00 (13/13)** |
+| leak, full guard (deterministic + judge) | 0.87 | 0.83 | 0.63 (5/8) |
+| leak, deterministic only | 0.90 | 1.00 | 0.63 |
+| congruency (judge, per suspected misconception, n=25) | 0.96 | 0.89 | 1.00 (8/8) |
+- Every message the team labelled unsafe was blocked (13/13); 2 of 17 safe messages were blocked too (G06, a
+  near-complete scaffold judged a leak; G16, a contrasting example judged congruent): over-cautious, not unsafe.
+- The 3 "leak" misses (G04, G08, G12) are messages that tell the student to use the WRONG method; the team labelled
+  them as revealing the answer, the leak check does not, but the congruency check blocks all three.
+- Labels: the team corrected G07/G08, G11/G12 (swapped), G17 (M2), G22 (leak) on 2026-11-21. Excel saves the
+  labels at the end of each line after `;;;;;`; they were read from there into `eval/guard_labels_clean.csv`
+  (UTF-8, original messages), which the results use. Run (0 tokens, judge answers cached):
+  `.\.venv\Scripts\python.exe eval\eval_guards.py --labels eval\guard_labels_clean.csv`
+- Honest claim: "checked against 30 messages labelled by the team; every unsafe one blocked". Small, hand-written
+  set (our own messages); not a general validation.
 
 ## Step 10: clear and structured mode (`engine/profiles.yaml`, `engine/style.py`)
 - 12 toggles (defaults off) + preset `clear_structured` (toggles 1-6: literal language, one question, 15 words per

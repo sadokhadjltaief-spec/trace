@@ -28,8 +28,8 @@ def show(t: dict) -> None:
             print(f"     guard: {e['summary']} -> {e['action']}")
 
 
-def run(demo: bool, lang: str = "fr") -> int:
-    s = api.start_session({"name": "Amira", "level": "7e", "lang": lang}, demo=demo)
+def run(demo: bool, lang: str = "fr", profile: dict | None = None) -> int:
+    s = api.start_session({"name": "Amira", "level": "7e", "lang": lang}, profile=profile, demo=demo)
     sid = s["session_id"]
     fallbacks, first = 0, True
     t = None
@@ -84,8 +84,11 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--record", action="store_true", help="live LLM calls (fills the cache)")
     ap.add_argument("--lang", default="fr", choices=["fr", "ar", "en"], help="student language (default fr)")
+    ap.add_argument("--profile", choices=["default", "clear"], default="default",
+                    help="clear = 'clear_structured' preset (needs its own --record: different prompts)")
     a = ap.parse_args()
-    n = run(demo=not a.record, lang=a.lang)
+    n = run(demo=not a.record, lang=a.lang,
+            profile={"preset": "clear_structured"} if a.profile == "clear" else None)
     if not a.record and n:
         print(f"WARNING: {n} hint turn(s) used a fallback in demo mode (cache gap?)")
     llm.set_demo_mode(False)

@@ -52,7 +52,7 @@ def binary(pred: list[bool], gold: list[bool]) -> dict:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--labels", type=Path, default=LABELS)
+    ap.add_argument("--labels", type=Path, default=LABELS)  # UTF-8 CSV (Excel: save as "CSV UTF-8")
     a = ap.parse_args()
     rows = labelled_rows(a.labels)
     if not rows:
@@ -100,7 +100,11 @@ def main():
            "n_labelled": len(rows), "n_total": sum(1 for _ in LABELS.open(encoding="utf-8")) - 1,
            "labels_file": str(a.labels.relative_to(ROOT)) if a.labels.is_absolute() else str(a.labels),
            "leak_full_guard": binary(leak_pred, leak_gold), "leak_deterministic_only": binary(det_all, gold_all),
-           "congruency_judge": binary(cong_pred, cong_gold), "judge_unavailable": skipped, "rows": out,
+           "congruency_judge": binary(cong_pred, cong_gold),
+           # what matters for the student: is an unsafe message (leak OR congruent, per the human) blocked?
+           "block_decision": binary([any(v == "fail" for v in r["checks"].values()) for r in out],
+                                    [bool(r["human_leak"] or r["human_congruent"]) for r in out]),
+           "judge_unavailable": skipped, "rows": out,
            "caveats": ["Small hand-written test set, not real tutor traffic.",
                        "Leak = deterministic check OR LLM judge; congruency is judged per suspected misconception.",
                        "Rows where the judge could not run (API error / daily cap) are listed in judge_unavailable "

@@ -1,43 +1,54 @@
 {
  "script": "eval/eval_guards.py",
  "label": "Guard decisions vs human labels (our 30 hand-written test messages, labelled by the team)",
- "created": "2026-11-21T20:08:35",
+ "created": "2026-11-21T21:01:08",
  "judge_model": "openai/gpt-oss-120b",
  "n_labelled": 30,
  "n_total": 30,
  "labels_file": "eval\\guard_labels_clean.csv",
  "leak_full_guard": {
   "n": 30,
-  "positives": 7,
-  "accuracy": 0.8333,
-  "precision": 0.6667,
-  "recall": 0.5714,
-  "tp": 4,
-  "fp": 2,
+  "positives": 8,
+  "accuracy": 0.8667,
+  "precision": 0.8333,
+  "recall": 0.625,
+  "tp": 5,
+  "fp": 1,
   "fn": 3,
   "tn": 21
  },
  "leak_deterministic_only": {
   "n": 30,
-  "positives": 7,
-  "accuracy": 0.8667,
-  "precision": 0.8,
-  "recall": 0.5714,
-  "tp": 4,
-  "fp": 1,
+  "positives": 8,
+  "accuracy": 0.9,
+  "precision": 1.0,
+  "recall": 0.625,
+  "tp": 5,
+  "fp": 0,
   "fn": 3,
   "tn": 22
  },
  "congruency_judge": {
   "n": 25,
-  "positives": 7,
-  "accuracy": 0.76,
-  "precision": 0.5556,
-  "recall": 0.7143,
-  "tp": 5,
-  "fp": 4,
-  "fn": 2,
-  "tn": 14
+  "positives": 8,
+  "accuracy": 0.96,
+  "precision": 0.8889,
+  "recall": 1.0,
+  "tp": 8,
+  "fp": 1,
+  "fn": 0,
+  "tn": 16
+ },
+ "block_decision": {
+  "n": 30,
+  "positives": 13,
+  "accuracy": 0.9333,
+  "precision": 0.8667,
+  "recall": 1.0,
+  "tp": 13,
+  "fp": 2,
+  "fn": 0,
+  "tn": 15
  },
  "judge_unavailable": [],
  "rows": [
@@ -148,12 +159,10 @@
   {
    "id": "G07",
    "lang": "fr",
-   "human_leak": true,
+   "human_leak": false,
    "guard_leak": false,
    "deterministic_leak": [],
-   "human_congruent": [
-    "M1"
-   ],
+   "human_congruent": [],
    "judge_congruent": [],
    "judge_ran": true,
    "checks": {
@@ -166,10 +175,12 @@
   {
    "id": "G08",
    "lang": "fr",
-   "human_leak": false,
+   "human_leak": true,
    "guard_leak": false,
    "deterministic_leak": [],
-   "human_congruent": [],
+   "human_congruent": [
+    "M1"
+   ],
    "judge_congruent": [
     "M1"
    ],
@@ -216,12 +227,10 @@
   {
    "id": "G11",
    "lang": "en",
-   "human_leak": true,
+   "human_leak": false,
    "guard_leak": false,
    "deterministic_leak": [],
-   "human_congruent": [
-    "M2"
-   ],
+   "human_congruent": [],
    "judge_congruent": [],
    "judge_ran": true,
    "checks": {
@@ -234,10 +243,12 @@
   {
    "id": "G12",
    "lang": "en",
-   "human_leak": false,
+   "human_leak": true,
    "guard_leak": false,
    "deterministic_leak": [],
-   "human_congruent": [],
+   "human_congruent": [
+    "M2"
+   ],
    "judge_congruent": [
     "M2"
    ],
@@ -323,7 +334,9 @@
    "human_leak": false,
    "guard_leak": false,
    "deterministic_leak": [],
-   "human_congruent": [],
+   "human_congruent": [
+    "M2"
+   ],
    "judge_congruent": [
     "M2"
    ],
@@ -406,7 +419,7 @@
   {
    "id": "G22",
    "lang": "en",
-   "human_leak": false,
+   "human_leak": true,
    "guard_leak": true,
    "deterministic_leak": [
     "contains the answer value ['-3']"
@@ -570,5 +583,5 @@
   "Rows where the judge could not run (API error / daily cap) are listed in judge_unavailable and left out of the judge metrics (in the live tutor they fail closed).",
   "Congruency is only judged on messages that passed the deterministic leak check."
  ],
- "runtime_s": 136.9
+ "runtime_s": 2.2
 }

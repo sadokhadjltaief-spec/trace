@@ -484,5 +484,30 @@
   "en": "Here is what your course says:",
   "fr": "Voici ce que dit ton cours :",
   "ar": "إليك ما يقوله درسك:"
+ },
+ "plan_fallback_title": {
+  "en": "Study plan (one page per day)",
+  "fr": "Plan d'étude (une page par jour)",
+  "ar": "خطة مراجعة (صفحة في كل يوم)"
+ },
+ "plan_fallback_summary": {
+  "en": "A simple plan built from your pages. Read one page each day.",
+  "fr": "Un plan simple construit à partir de tes pages. Lis une page chaque jour.",
+  "ar": "خطة بسيطة مبنية على صفحاتك. اقرأ صفحة واحدة كل يوم."
+ },
+ "plan_task_read": {
+  "en": "Read page {page} carefully.",
+  "fr": "Lis attentivement la page {page}.",
+  "ar": "اقرأ الصفحة {page} بانتباه."
+ },
+ "plan_task_examples": {
+  "en": "Redo the examples of the page without looking.",
+  "fr": "Refais les exemples de la page sans regarder.",
+  "ar": "أعد حلّ أمثلة الصفحة دون النظر إليها."
+ },
+ "plan_task_explain": {
+  "en": "Explain the rule in your own words.",
+  "fr": "Explique la règle avec tes mots.",
+  "ar": "اشرح القاعدة بكلماتك."
  }
 }

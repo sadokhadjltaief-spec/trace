@@ -75,7 +75,8 @@ def _call(fn, *a, **kw):
 
 @app.get("/api/v1/health")
 def health() -> dict:
-    return {"ok": True, "contract_version": CONTRACT_VERSION,
+    from engine import llm
+    return {"ok": True, "contract_version": CONTRACT_VERSION, "demo_mode": llm.demo_mode(),
             "allow_unverified_dev": bool(cfg().get("live", {}).get("allow_unverified_dev", False))}
 
 

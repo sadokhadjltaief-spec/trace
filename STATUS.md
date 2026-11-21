@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-21, study plan from uploaded files on the engine.
+Last update: 2026-11-22, chat + study plan connected to the Next.js app; offline demo mode for all features.
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [x] `live.allow_unverified_dev: false` set by the team in `config.yaml` (committed 2026-11-21). Consequence:
@@ -43,6 +43,18 @@ Last update: 2026-11-21, study plan from uploaded files on the engine.
 - The team put a new `GROQ_API_KEY` in `.env`, but the old key was still a Windows user variable, which took
   precedence. `engine/config.py` now loads `.env` with `override=True`. Checked (key never printed): the engine uses
   the `.env` key; both models answer (120b 927/1000 requests left today, 20b 999/1000).
+
+## Offline demo mode for every feature (2026-11-22)
+- `TRACE_DEMO=1` (environment variable, set before starting the server) forces cache-only mode for every LLM call
+  (diagnosis, chat, study plan, Study Studio). `/api/v1/health` shows `demo_mode`.
+- Study plan without the LLM (not cached / offline): a plan built by code from the pages (one page per day, fixed
+  tasks in FR/AR/EN), so the screen never fails.
+- Checked on a separate engine (port 8001, TRACE_DEMO=1): chat (2 answers with citations + 1 refusal) and the study
+  plan for `docs/demo/cours_fractions_relatifs.pdf` → 7/7 LLM calls from the cache, 0 misses.
+- Next.js app (`C:\TRACE_frontend_temp`, not a git repo; originals in `_backup_avant_trace/*.bak`): free questions in
+  the tutor (outside a diagnosis step) go to `/api/v1/chat` (route `app/api/chat` action `ask`); new proxy route
+  `app/api/study-plan`; `PreparationExperience` calls it for the study plan (progress waits at 90 % until the plan
+  arrives) and shows the plan with the existing classes. Quiz screen unchanged. `npx tsc`: 0 errors.
 
 ## Study plan from uploaded files (`engine/study_plan.py`, `POST /api/v1/study-plan`)
 - Upload PDF/TXT/MD → saved to `data/courses/uploads/` (a file identical to an existing course file is reused, not

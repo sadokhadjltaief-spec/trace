@@ -57,6 +57,27 @@ def save_uploads(files: list[tuple[str, bytes]]) -> list:
     return out
 
 
+def fallback_plan(pages: list[tuple[str, int, str]], lang: str, kw: dict, mis_view: dict | None,
+                  unread: list[str]) -> dict:
+    """No LLM: one day per page, titled with the page's first line, with fixed tasks (i18n). Always available."""
+    from engine import safetext
+    from engine.i18n import t as tr
+
+    def st(x: str):
+        return safetext.static(x, lang=lang, style_kwargs={**kw, "max_words_per_sentence": 40, "max_questions": 3})
+    days = []
+    for i, (f, n, txt) in enumerate(pages[:7], 1):
+        head = next((ln.strip() for ln in txt.splitlines() if ln.strip()), f"{f} p.{n}")[:80]
+        days.append(PlanDay(day=i, title=st(head), goals=[],
+                            tasks=[st(tr("plan_task_read", lang, page=n)), st(tr("plan_task_examples", lang)),
+                                   st(tr("plan_task_explain", lang))],
+                            sources=[Source(file=f, page=n)]))
+    return StudyPlan(title=st(tr("plan_fallback_title", lang)), summary=st(tr("plan_fallback_summary", lang)),
+                     days=days, check_questions=[], sources=[Source(file=f, page=n) for f, n, _ in pages],
+                     targeted_at=MisconceptionView(**mis_view) if mis_view else None, dropped_by_guards=0,
+                     unreadable_pages=unread, plan_id="fallback").model_dump()
+
+
 def make(files: list[tuple[str, bytes]], details: str, lang: str, kw: dict, suspects: dict[str, str],
          mis_view: dict | None, mis: dict | None) -> dict:
     lang = lang_of(lang)
@@ -79,9 +100,12 @@ def make(files: list[tuple[str, bytes]], details: str, lang: str, kw: dict, susp
             f"pages about it first." if mis else "")
     days_rule = ("Follow the student's request: " + details.strip()[:300] + ". ") if details.strip() else \
         "Plan 3 to 5 days."
-    d = llm.ask_json(PLAN_SYS.format(lang=LANG[lang], goal=goal, days_rule=days_rule,
-                                     max_words=kw["max_words_per_sentence"]),
-                     f"Course pages:\n{text}", purpose="study_plan", max_tokens=3000) or {}
+    try:
+        d = llm.ask_json(PLAN_SYS.format(lang=LANG[lang], goal=goal, days_rule=days_rule,
+                                         max_words=kw["max_words_per_sentence"]),
+                         f"Course pages:\n{text}", purpose="study_plan", max_tokens=3000) or {}
+    except Exception:  # noqa: BLE001  (offline / not cached / API error): plan built by code from the pages
+        return fallback_plan(pages, lang, kw, mis_view, unread)
     valid = {(f, n) for f, n, _ in pages}
     texts: dict[str, str] = {}
     if d.get("title"):

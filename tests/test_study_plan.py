@@ -72,3 +72,14 @@ def test_study_plan_http(env):
     r = c.post("/api/v1/study-plan", files=[("files", (NOTES.name, NOTES.read_bytes(), "application/pdf"))],
                data={"details": "", "lang": "fr"})
     assert r.status_code == 200 and r.json()["days"]
+
+
+def test_offline_fallback_plan(env, monkeypatch):
+    def miss(*a, **k):
+        raise llm.CacheMiss("not cached (demo mode)")
+    monkeypatch.setattr(llm, "ask_json", miss)
+    r = api.study_plan([(NOTES.name, NOTES.read_bytes())], "", "fr")
+    StudyPlan.model_validate(r)
+    assert r["plan_id"] == "fallback" and len(r["days"]) == 4 and not r["refused"]
+    assert r["days"][0]["title"]["text"].startswith("Chapitre 1") and r["days"][0]["sources"][0]["page"] == 1
+    assert all(t["shown_allowed"] for d in r["days"] for t in d["tasks"])

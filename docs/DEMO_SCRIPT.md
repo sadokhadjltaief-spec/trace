@@ -17,7 +17,8 @@ Say "simulation" when a number comes from simulated students. Video and podcast 
   ```
 - [x] Clear mode recorded (2026-11-21, ~6.2k tokens): hint 1 LLM-written; hint 2 = safe fallback (style guard).
       Check its replay: `.\.venv\Scripts\python.exe scripts\demo_session.py --lang fr --profile clear`
-- [ ] Engine up: `.\.venv\Scripts\python.exe -m uvicorn server.main:app --host 127.0.0.1 --port 8000`
+- [ ] Engine up in offline demo mode: `$env:TRACE_DEMO="1"` then
+      `.\.venv\Scripts\python.exe -m uvicorn server.main:app --host 127.0.0.1 --port 8000`
       (check `http://127.0.0.1:8000/api/v1/health`), then the Next.js app (`pnpm dev`).
 - [ ] Start the session with **`demo: true`** (LLM answers replayed from cache: works with no network).
 - [ ] Course PDFs (own notes, or Najahni free PDFs downloaded by hand with URLs in `SOURCES.md`) in
@@ -127,6 +128,17 @@ All offline: the Study Studio outputs for Amira (FR, M1) are cached; simulations
   **Needs the physics items ticked in `data/bank/physics_review.md`** (allow_unverified_dev is false).
 - Chasse aux erreurs: one round, click the wrong line, choose the reason.
 - Report → PDF in French and Arabic, with the confidence chart.
+
+## Optional · "Demander au tuteur" and "Plan d'étude" (offline, cached)
+
+- In the tutor, on a NEW conversation (not during a diagnosis), type:
+  `Comment additionner deux fractions ?` → answer from the course with "(cours_fractions_relatifs.pdf p.1)".
+  `Qui va gagner la Coupe du monde de football ?` → "Je suis un tuteur éducatif, je ne peux répondre qu'aux
+  questions sur tes cours."
+- Plan d'étude → upload `C:\TRACE\docs\demo\cours_fractions_relatifs.pdf`, leave the details empty, confirm →
+  4 days, one per chapter, each with its pages, and 5 self-check questions.
+- Exact wording matters for the cache: other questions still work offline but fall back (course passages instead of
+  a written answer; a plan built by code, one page per day).
 
 ## 4:15 – 4:40 · Results slide (read from `results/`)
 

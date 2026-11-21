@@ -27,6 +27,11 @@ from engine.contract import (AnswerRecord, Agenda, Calibration, CourseAnswer, Co
                              GameFeedback, GameRoundView, GameTurn, OutputFile, ReportExport)
 
 _SESSIONS: dict[str, dict] = {}
+# TRACE_DEMO=1 (set before starting the server): every LLM call of every feature replays from the cache (offline)
+import os as _os  # noqa: E402
+FORCED_DEMO = _os.environ.get("TRACE_DEMO") == "1"
+if FORCED_DEMO:
+    llm.set_demo_mode(True)
 _BANK: dict | None = None
 _RESULTS_NAME = re.compile(r"^[a-z_]+$")
 
@@ -141,7 +146,7 @@ def start_session(student: dict, profile: dict | None = None, demo: bool = False
                   detector_llm: bool = True) -> dict:
     sid = uuid.uuid4().hex[:12]
     llm.set_session(sid)
-    llm.set_demo_mode(demo)
+    llm.set_demo_mode(demo or FORCED_DEMO)
     pool, warnings = _live_questions()
     table = bayes.build_table(pool) if pool else bayes.build_table([])
     _SESSIONS[sid] = {"student": {"name": student.get("name", ""), "level": student.get("level", ""),

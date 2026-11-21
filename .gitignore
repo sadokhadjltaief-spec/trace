@@ -9,6 +9,7 @@ data/courses/**
 !data/courses/*/
 !data/courses/najahni/SOURCES.md
 !data/courses/*/meta.yaml
+!data/courses/trace_notes/*.pdf
 exports/
 *.db
 *.sqlite

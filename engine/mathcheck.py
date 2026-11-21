@@ -63,7 +63,10 @@ def equal(a: str, b: str) -> bool | None:
     if va is None or vb is None:
         return None
     try:
-        return bool(sp.simplify(va - vb) == 0)
+        d = sp.simplify(va - vb)
+        if d != 0 and d.free_symbols:  # an equation with an unknown (A/10 = 9/15) is not a false claim
+            return None
+        return bool(d == 0)
     except Exception:  # noqa: BLE001
         return None
 
@@ -101,7 +104,7 @@ def compare(a: str, op: str, b: str) -> bool | None:
         return None
     try:
         d = sp.nsimplify(va - vb)
-        if not d.is_real:
+        if d.free_symbols or not d.is_real:
             return None
         return bool(_OPS[op](d))
     except Exception:  # noqa: BLE001

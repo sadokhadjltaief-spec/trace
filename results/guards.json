@@ -1,7 +1,7 @@
 {
  "script": "eval/eval_guards.py",
  "label": "Guard decisions vs human labels (our 30 hand-written test messages, labelled by the team)",
- "created": "2026-11-21T22:10:30",
+ "created": "2026-11-21T23:52:27",
  "judge_model": "openai/gpt-oss-120b",
  "n_labelled": 30,
  "n_total": 30,
@@ -583,5 +583,5 @@
   "Rows where the judge could not run (API error / daily cap) are listed in judge_unavailable and left out of the judge metrics (in the live tutor they fail closed).",
   "Congruency is only judged on messages that passed the deterministic leak check."
  ],
- "runtime_s": 2.3
+ "runtime_s": 2.2
 }

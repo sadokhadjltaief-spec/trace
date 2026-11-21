@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-21, Next.js frontend connected to the engine (demo mode), steps 12-15 done.
+Last update: 2026-11-21, course chat (Ask the tutor) on the engine.
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [x] `live.allow_unverified_dev: false` set by the team in `config.yaml` (committed 2026-11-21). Consequence:
@@ -43,6 +43,22 @@ Last update: 2026-11-21, Next.js frontend connected to the engine (demo mode), s
 - The team put a new `GROQ_API_KEY` in `.env`, but the old key was still a Windows user variable, which took
   precedence. `engine/config.py` now loads `.env` with `override=True`. Checked (key never printed): the engine uses
   the `.env` key; both models answer (120b 927/1000 requests left today, 20b 999/1000).
+
+## Course chat "Ask the tutor" (`engine/chat.py`, `POST /api/v1/chat`)
+- Topic gate: maths / course vocabulary or a relevant course passage → on topic; otherwise one cached LLM judge;
+  judge unavailable → refused (fail closed). Off topic → fixed polite refusal (FR/AR/EN).
+- On topic → retrieval in the course files; the LLM answers ONLY from the passages with "(file p.N)" citations
+  (generic "(file p.N)" fixed by code), checked by the guards; on a guard failure → the passages themselves.
+  Arabic question + French course → the question is translated to French for the search only.
+  Not in the course files → "I do not answer from memory".
+- Demo course: `scripts/make_course_notes.py` writes our own 4-page French notes (fractions, ×, negatives,
+  equivalent fractions; every equality checked with SymPy) to `data/courses/trace_notes/` (committed: our content)
+  and `docs/demo/` (file to upload in the Study Plan demo).
+- **Guard bug fixed**: an equation with an unknown ("A/10 = 9/15") was judged a FALSE claim (SymPy could not reduce
+  it to 0). `mathcheck.equal/compare` now return "not checkable" when a variable remains. Guard eval re-run (cached):
+  unchanged (13/13 unsafe blocked, 2 over-blocked).
+- Live check: addition, A/10 = 9/15 and an Arabic question answered with page citations; "Comment vas-tu ?" and a
+  football question refused. 178 tests pass (`tests/test_chat.py`).
 
 ## Next.js frontend connected (C:\TRACE_frontend_temp, at the team's request, 2026-11-21)
 - Not a git repository: the original files are kept in `C:\TRACE_frontend_temp\_backup_avant_trace\*.bak`.

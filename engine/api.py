@@ -431,6 +431,19 @@ def course_search(query: str, k: int = 3) -> dict:
                                         score=h["score"]) for h in hits]).model_dump()
 
 
+def ask(question: str, lang: str = "fr", session_id: str | None = None) -> dict:
+    """Course chat: school questions answered from the course files with citations; anything else refused."""
+    from engine import chat, style
+    s = _SESSIONS.get(session_id) if session_id else None
+    lang = lang_of(_lang(s) if s and not lang else lang)
+    kw = tutor.style_kwargs(s["profile"] if s else {}, lang)
+    suspects = {}
+    if s:
+        names = _names()
+        suspects = {h: names[h] for h, p in s["diag"].as_dict().items() if h != "M0" and p > 0.2}
+    return chat.answer(question, lang, kw, suspects)
+
+
 def _lesson_refs(mv: dict, k: int = 2) -> list[LessonRef]:
     """Curriculum-grounded remediation: lesson pages for the diagnosed misconception (only if courses exist)."""
     if mv["id"] == "M0":

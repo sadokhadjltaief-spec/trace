@@ -288,3 +288,11 @@ def test_summary_mid_session(monkeypatch):
 ])
 def test_negated_false_claims_are_quotes(text, ok):
     assert (guards.math_check(text)[0] == "pass") == ok
+
+
+def test_equations_with_an_unknown_are_not_false_claims():
+    # regression: "A/10 = 9/15" (an equation to solve) was judged a FALSE claim because A is a symbol
+    assert guards.math_check("x", [{"lhs": "A/10", "op": "=", "rhs": "9/15"},
+                                   {"lhs": "A", "op": "=", "rhs": "10*(9/15)"}])[0] == "pass"
+    assert guards.math_check("x", [{"lhs": "A", "op": "<", "rhs": "7"}])[0] == "pass"
+    assert guards.math_check("x", [{"lhs": "6/10", "op": "=", "rhs": "4/10"}])[0] == "fail"   # numbers still checked

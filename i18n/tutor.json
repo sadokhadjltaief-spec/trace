@@ -469,5 +469,20 @@
   "en": "Step checked against the answer key. Explanation graded by the LLM: {v}.",
   "fr": "Étape vérifiée avec le corrigé. Explication notée par le LLM : {v}.",
   "ar": "تمّ التحقّق من الخطوة بالإجابة الصحيحة. التفسير قيّمه النموذج اللغوي (LLM): {v}."
+ },
+ "chat_refusal": {
+  "en": "I am an educational tutor. I can only answer questions about your courses.",
+  "fr": "Je suis un tuteur éducatif, je ne peux répondre qu'aux questions sur tes cours.",
+  "ar": "أنا معلّم تربوي، ولا يمكنني الإجابة إلا عن الأسئلة المتعلّقة بدروسك."
+ },
+ "chat_not_found": {
+  "en": "I did not find this in your course files. I do not answer from memory. You can start a diagnosis.",
+  "fr": "Je n'ai pas trouvé ce point dans tes fichiers de cours. Je ne réponds pas de mémoire. Tu peux commencer un diagnostic.",
+  "ar": "لم أجد هذه النقطة في ملفات دروسك. لا أجيب من الذاكرة. يمكنك بدء التشخيص."
+ },
+ "chat_extractive": {
+  "en": "Here is what your course says:",
+  "fr": "Voici ce que dit ton cours :",
+  "ar": "إليك ما يقوله درسك:"
  }
 }

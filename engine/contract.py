@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.5"  # 1.1 explanation_evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report files
+CONTRACT_VERSION = "1.6"  # 1.1 explanation_evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]
@@ -342,3 +342,14 @@ class ReportExport(_M):
     session_id: str
     lang: Lang
     files: list[OutputFile]
+
+
+class ChatAnswer(_M):
+    """Course chat ("Ask the tutor", since 1.6). Render `answer` only if shown_allowed; list `citations`."""
+    contract_version: str = CONTRACT_VERSION
+    question: str
+    on_topic: bool
+    method: Literal["rag_llm", "rag_extractive", "not_found", "refusal"]
+    topic_reason: str              # keywords | course passage | llm judge | judge unavailable
+    answer: SafeText
+    citations: list[CourseHit]

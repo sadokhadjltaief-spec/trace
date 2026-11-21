@@ -20,7 +20,7 @@ from engine import api
 from engine.config import cfg
 from engine.contract import (CONTRACT_VERSION, CourseAnswer, MisconceptionView, NextQuestion, SessionState,
                              SessionSummary, SimItemView, SimRun, SimTurn, StudioOutput, TutorTurn, GameTurn,
-                             ReportExport)
+                             ReportExport, ChatAnswer)
 
 app = FastAPI(title="TRACE engine API", version=CONTRACT_VERSION,
               description="Thin HTTP wrapper over engine/api.py. Shapes: docs/INTERFACE.md.")
@@ -268,3 +268,15 @@ def export_file(sid: str, name: str):
     if not p.is_file():
         raise HTTPException(404, "no such file")
     return FileResponse(p)
+
+
+class ChatBody(BaseModel):
+    question: str
+    lang: Literal["fr", "ar", "en"] = "fr"
+    session_id: str | None = None
+
+
+@app.post("/api/v1/chat", response_model=ChatAnswer)
+def chat(body: ChatBody):
+    """Ask the tutor: course questions answered from the course files with citations; off-topic refused."""
+    return _call(api.ask, body.question, body.lang, body.session_id)

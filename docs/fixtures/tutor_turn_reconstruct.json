@@ -1,0 +1,85 @@
+{
+ "contract_version": "1.0",
+ "session_id": "fake0000demo",
+ "turn_id": 6,
+ "state": "RECONSTRUCT",
+ "message": {
+  "text": "Here is a worked solution with one wrong step. Which step is wrong?",
+  "lang": "en",
+  "origin": "llm",
+  "checks": [
+   {
+    "name": "leak",
+    "status": "pass",
+    "detail": "FAKE"
+   },
+   {
+    "name": "congruency",
+    "status": "pass",
+    "detail": "FAKE"
+   },
+   {
+    "name": "math",
+    "status": "pass",
+    "detail": "FAKE"
+   },
+   {
+    "name": "style",
+    "status": "pass",
+    "detail": "FAKE"
+   }
+  ],
+  "shown_allowed": true,
+  "fallback_used": false
+ },
+ "expects": "error_step",
+ "agenda": {
+  "step": 6,
+  "total": 7,
+  "next": "a new question"
+ },
+ "question": null,
+ "reconstruction": {
+  "id": "R_M1_1",
+  "problem": "Add the fractions 2/3 and 1/4.",
+  "steps": [
+   "2/3 + 1/4 = 8/12 + 3/12",
+   "8/12 + 3/12 = 11/24",
+   "The answer is 11/24."
+  ]
+ },
+ "grading": {
+  "correct": null,
+  "method": "none",
+  "label": "Not graded yet"
+ },
+ "posterior": [
+  {
+   "id": "M0",
+   "name_en": "No misconception found (none of M1-M4)",
+   "prob": 0.08
+  },
+  {
+   "id": "M1",
+   "name_en": "Adds numerators and adds denominators",
+   "prob": 0.71
+  },
+  {
+   "id": "M2",
+   "name_en": "Multiplies both numerator and denominator by the whole number",
+   "prob": 0.07
+  },
+  {
+   "id": "M3",
+   "name_en": "Thinks 'two negatives make a positive' always applies",
+   "prob": 0.06
+  },
+  {
+   "id": "M4",
+   "name_en": "Makes equivalent fractions by adding instead of multiplying",
+   "prob": 0.08
+  }
+ ],
+ "next_question": null,
+ "guard_events": []
+}

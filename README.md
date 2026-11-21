@@ -10,3 +10,11 @@ Copy-Item .env.example .env   # then fill in GROQ_API_KEY and LLM_MODEL
 .\.venv\Scripts\python.exe scripts\fetch_data.py
 ```
 Dataset sources and licences: `data/raw/README.md`.
+
+## Frontend
+The pages in `app.py` / `pages/` are stubs. The frontend contract (shapes + rules) is in `docs/INTERFACE.md`;
+fake data for building pages is in `docs/fixtures/`. Run:
+```powershell
+.\.venv\Scripts\python.exe -m streamlit run app.py
+```
+Tests: `.\.venv\Scripts\python.exe -m pytest -q tests`

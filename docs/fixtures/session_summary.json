@@ -1,0 +1,108 @@
+{
+ "contract_version": "1.0",
+ "session_id": "fake0000demo",
+ "diagnosis": {
+  "id": "M1",
+  "name_en": "Adds numerators and adds denominators",
+  "prob": 0.91
+ },
+ "diagnosis_names": {
+  "id": "M1",
+  "name_en": "Adds numerators and adds denominators",
+  "name_fr": "Additionne les numérateurs et additionne les dénominateurs",
+  "name_ar": "يضيف البسط ويضيف المقام"
+ },
+ "status": "mastered",
+ "evidence": [
+  "Q1: chose 3/8 (sure), explanation '1+2 is 3 and 3+5 is 8'",
+  "Q2: chose 3/12 (sure)"
+ ],
+ "tried": [
+  "DIAGNOSE",
+  "HINT_1",
+  "HINT_2",
+  "RECONSTRUCT",
+  "TRANSFER",
+  "DONE"
+ ],
+ "outcome": {
+  "text": "The student found the wrong step and solved a new question correctly.",
+  "lang": "en",
+  "origin": "template",
+  "checks": [
+   {
+    "name": "leak",
+    "status": "not_applicable",
+    "detail": "template text"
+   },
+   {
+    "name": "congruency",
+    "status": "not_applicable",
+    "detail": "template text"
+   },
+   {
+    "name": "math",
+    "status": "not_applicable",
+    "detail": "template text"
+   },
+   {
+    "name": "style",
+    "status": "pass",
+    "detail": ""
+   }
+  ],
+  "shown_allowed": true,
+  "fallback_used": false
+ },
+ "next_step": {
+  "text": "Practise adding fractions with different denominators.",
+  "lang": "en",
+  "origin": "template",
+  "checks": [
+   {
+    "name": "leak",
+    "status": "not_applicable",
+    "detail": "template text"
+   },
+   {
+    "name": "congruency",
+    "status": "not_applicable",
+    "detail": "template text"
+   },
+   {
+    "name": "math",
+    "status": "not_applicable",
+    "detail": "template text"
+   },
+   {
+    "name": "style",
+    "status": "pass",
+    "detail": ""
+   }
+  ],
+  "shown_allowed": true,
+  "fallback_used": false
+ },
+ "lesson_refs": [
+  {
+   "file": "my_notes/fractions.pdf",
+   "page": 3,
+   "snippet": "To add fractions, first use a common denominator.",
+   "source_url": null
+  }
+ ],
+ "handoff_note": null,
+ "calibration": {
+  "sure_correct": 1,
+  "sure_total": 3,
+  "unsure_correct": 1,
+  "unsure_total": 1
+ },
+ "cost": {
+  "calls": 6,
+  "cached_calls": 2,
+  "prompt_tokens": 3120,
+  "completion_tokens": 640,
+  "label": "free tier, rate-limited"
+ }
+}

@@ -1,0 +1,93 @@
+{
+ "contract_version": "1.0",
+ "session_id": "fake0000demo",
+ "tool": "flashcards",
+ "targeted_at": {
+  "id": "M1",
+  "name_en": "Adds numerators and adds denominators",
+  "name_fr": "Additionne les numérateurs et additionne les dénominateurs",
+  "name_ar": "يضيف البسط ويضيف المقام"
+ },
+ "sources": [
+  {
+   "file": "my_notes/fractions.pdf",
+   "page": 3,
+   "timestamp": null
+  }
+ ],
+ "files": [
+  {
+   "path": "exports/fake0000demo/flashcards.apkg",
+   "mime": "application/octet-stream"
+  },
+  {
+   "path": "exports/fake0000demo/flashcards.tsv",
+   "mime": "text/tab-separated-values"
+  }
+ ],
+ "items": [
+  {
+   "front": {
+    "text": "What is 1/2 + 1/2?",
+    "lang": "en",
+    "origin": "llm",
+    "checks": [
+     {
+      "name": "leak",
+      "status": "pass",
+      "detail": "FAKE"
+     },
+     {
+      "name": "congruency",
+      "status": "pass",
+      "detail": "FAKE"
+     },
+     {
+      "name": "math",
+      "status": "pass",
+      "detail": "FAKE"
+     },
+     {
+      "name": "style",
+      "status": "pass",
+      "detail": "FAKE"
+     }
+    ],
+    "shown_allowed": true,
+    "fallback_used": false
+   },
+   "back": {
+    "text": "1/2 + 1/2 = 1. Adding the bottoms would give 2/4, which is only one half.",
+    "lang": "en",
+    "origin": "llm",
+    "checks": [
+     {
+      "name": "leak",
+      "status": "pass",
+      "detail": "FAKE"
+     },
+     {
+      "name": "congruency",
+      "status": "pass",
+      "detail": "FAKE"
+     },
+     {
+      "name": "math",
+      "status": "pass",
+      "detail": "FAKE"
+     },
+     {
+      "name": "style",
+      "status": "pass",
+      "detail": "FAKE"
+     }
+    ],
+    "shown_allowed": true,
+    "fallback_used": false
+   },
+   "verified": true,
+   "misconception": "M1"
+  }
+ ],
+ "refused": null
+}

@@ -1,0 +1,15 @@
+{
+ "contract_version": "1.0",
+ "session_id": "fake0000demo",
+ "tool": "summary",
+ "targeted_at": {
+  "id": "M1",
+  "name_en": "Adds numerators and adds denominators",
+  "name_fr": "Additionne les numérateurs et additionne les dénominateurs",
+  "name_ar": "يضيف البسط ويضيف المقام"
+ },
+ "sources": [],
+ "files": [],
+ "items": [],
+ "refused": "This folder does not allow derived material (allow_derivatives: false)."
+}

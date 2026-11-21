@@ -1,0 +1,17 @@
+{
+ "question_id": "Q5",
+ "ig_bits": 0.412,
+ "alternatives": [
+  {
+   "question_id": "Q11",
+   "ig_bits": 0.398
+  },
+  {
+   "question_id": "Q8",
+   "ig_bits": 0.371
+  }
+ ],
+ "entropy_bits": 1.402,
+ "stop": false,
+ "stop_reason": null
+}

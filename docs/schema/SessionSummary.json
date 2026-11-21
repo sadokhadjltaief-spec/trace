@@ -1,0 +1,357 @@
+{
+ "$defs": {
+  "Calibration": {
+   "additionalProperties": false,
+   "properties": {
+    "sure_correct": {
+     "title": "Sure Correct",
+     "type": "integer"
+    },
+    "sure_total": {
+     "title": "Sure Total",
+     "type": "integer"
+    },
+    "unsure_correct": {
+     "title": "Unsure Correct",
+     "type": "integer"
+    },
+    "unsure_total": {
+     "title": "Unsure Total",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "sure_correct",
+    "sure_total",
+    "unsure_correct",
+    "unsure_total"
+   ],
+   "title": "Calibration",
+   "type": "object"
+  },
+  "Check": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "enum": [
+      "leak",
+      "congruency",
+      "math",
+      "style"
+     ],
+     "title": "Name",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "not_applicable"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "detail": {
+     "default": "",
+     "title": "Detail",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "status"
+   ],
+   "title": "Check",
+   "type": "object"
+  },
+  "Cost": {
+   "additionalProperties": false,
+   "properties": {
+    "calls": {
+     "title": "Calls",
+     "type": "integer"
+    },
+    "cached_calls": {
+     "title": "Cached Calls",
+     "type": "integer"
+    },
+    "prompt_tokens": {
+     "title": "Prompt Tokens",
+     "type": "integer"
+    },
+    "completion_tokens": {
+     "title": "Completion Tokens",
+     "type": "integer"
+    },
+    "label": {
+     "title": "Label",
+     "type": "string"
+    }
+   },
+   "required": [
+    "calls",
+    "cached_calls",
+    "prompt_tokens",
+    "completion_tokens",
+    "label"
+   ],
+   "title": "Cost",
+   "type": "object"
+  },
+  "HypProb": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "enum": [
+      "M0",
+      "M1",
+      "M2",
+      "M3",
+      "M4"
+     ],
+     "title": "Id",
+     "type": "string"
+    },
+    "name_en": {
+     "title": "Name En",
+     "type": "string"
+    },
+    "prob": {
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Prob",
+     "type": "number"
+    }
+   },
+   "required": [
+    "id",
+    "name_en",
+    "prob"
+   ],
+   "title": "HypProb",
+   "type": "object"
+  },
+  "LessonRef": {
+   "additionalProperties": false,
+   "properties": {
+    "file": {
+     "title": "File",
+     "type": "string"
+    },
+    "page": {
+     "title": "Page",
+     "type": "integer"
+    },
+    "snippet": {
+     "title": "Snippet",
+     "type": "string"
+    },
+    "source_url": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Source Url"
+    }
+   },
+   "required": [
+    "file",
+    "page",
+    "snippet"
+   ],
+   "title": "LessonRef",
+   "type": "object"
+  },
+  "MisconceptionView": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "enum": [
+      "M0",
+      "M1",
+      "M2",
+      "M3",
+      "M4"
+     ],
+     "title": "Id",
+     "type": "string"
+    },
+    "name_en": {
+     "title": "Name En",
+     "type": "string"
+    },
+    "name_fr": {
+     "default": "",
+     "title": "Name Fr",
+     "type": "string"
+    },
+    "name_ar": {
+     "default": "",
+     "title": "Name Ar",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "name_en"
+   ],
+   "title": "MisconceptionView",
+   "type": "object"
+  },
+  "SafeText": {
+   "additionalProperties": false,
+   "description": "Every piece of text the frontend may display. Render ONLY if shown_allowed is true.",
+   "properties": {
+    "text": {
+     "title": "Text",
+     "type": "string"
+    },
+    "lang": {
+     "default": "en",
+     "enum": [
+      "fr",
+      "ar",
+      "en"
+     ],
+     "title": "Lang",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "llm",
+      "verified_bank",
+      "template"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "checks": {
+     "items": {
+      "$ref": "#/$defs/Check"
+     },
+     "title": "Checks",
+     "type": "array"
+    },
+    "shown_allowed": {
+     "title": "Shown Allowed",
+     "type": "boolean"
+    },
+    "fallback_used": {
+     "default": false,
+     "title": "Fallback Used",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "text",
+    "origin",
+    "checks",
+    "shown_allowed"
+   ],
+   "title": "SafeText",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "properties": {
+  "contract_version": {
+   "default": "1.0",
+   "title": "Contract Version",
+   "type": "string"
+  },
+  "session_id": {
+   "title": "Session Id",
+   "type": "string"
+  },
+  "diagnosis": {
+   "$ref": "#/$defs/HypProb"
+  },
+  "diagnosis_names": {
+   "$ref": "#/$defs/MisconceptionView"
+  },
+  "status": {
+   "enum": [
+    "mastered",
+    "in_progress",
+    "handoff",
+    "no_misconception"
+   ],
+   "title": "Status",
+   "type": "string"
+  },
+  "evidence": {
+   "items": {
+    "type": "string"
+   },
+   "title": "Evidence",
+   "type": "array"
+  },
+  "tried": {
+   "items": {
+    "enum": [
+     "DIAGNOSE",
+     "HINT_1",
+     "HINT_2",
+     "HINT_3",
+     "RECONSTRUCT",
+     "TRANSFER",
+     "DONE",
+     "HANDOFF"
+    ],
+    "type": "string"
+   },
+   "title": "Tried",
+   "type": "array"
+  },
+  "outcome": {
+   "$ref": "#/$defs/SafeText"
+  },
+  "next_step": {
+   "$ref": "#/$defs/SafeText"
+  },
+  "lesson_refs": {
+   "items": {
+    "$ref": "#/$defs/LessonRef"
+   },
+   "title": "Lesson Refs",
+   "type": "array"
+  },
+  "handoff_note": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/SafeText"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "calibration": {
+   "$ref": "#/$defs/Calibration"
+  },
+  "cost": {
+   "$ref": "#/$defs/Cost"
+  }
+ },
+ "required": [
+  "session_id",
+  "diagnosis",
+  "diagnosis_names",
+  "status",
+  "evidence",
+  "tried",
+  "outcome",
+  "next_step",
+  "lesson_refs",
+  "handoff_note",
+  "calibration",
+  "cost"
+ ],
+ "title": "SessionSummary",
+ "type": "object"
+}

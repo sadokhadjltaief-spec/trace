@@ -1,6 +1,23 @@
 # STATUS
 
-Last update: 2026-11-21, after build step 3 (bank review still pending; it does not block step 3).
+Last update: 2026-11-21, after build step 4 (bank review still pending).
+
+## Step 4: frontend contract + stub pages (final pages = teammate)
+- `docs/INTERFACE.md` (contract v1.0) + `engine/contract.py` (pydantic, source of truth) + `docs/schema/*.json`
+  + FAKE fixtures `docs/fixtures/*.json` (`scripts/make_fixtures.py`; MAP text + our wording only, no Eedi text).
+- `engine/api.py` = the only engine module the frontend imports. Real now: sessions, diagnosis answers with
+  required confidence tap, answer-key grading, IG next question, cost, read-only results. `tutor_reply`, `summary`,
+  `studio_generate` raise NotImplementedError until steps 6/9/12; `engine/api_fake.py` serves fixtures with the same shapes.
+- `engine/safetext.py` + minimal `engine/style.py` linter: every displayable text is a SafeText; `shown_allowed`
+  is true only if leak/congruency/math/style all ran and none failed (model validator). Templates run the style linter.
+- Stub pages: `app.py` (onboarding + home), `pages/1_Learn.py`, `2_Judge_Panel.py`, `3_Results.py`, `4_Report.py`,
+  `5_Study_Studio.py`, helpers in `ui/`. Sidebar switch "engine / fake fixtures".
+- Rules enforced by `tests/test_contract.py` (AST import scan + no file writes in app.py/pages/ui; SafeText rule;
+  answer keys never in QuestionView; read_results returns a copy) and `tests/test_pages.py` (AppTest smoke of every page,
+  "Targeted at:" line in Study Studio). 56 tests pass.
+- Checked in the browser with the real engine: onboarding -> Learn (LaTeX renders, dev-mode warning) -> answer
+  "B, sure" on Q5 -> judge panel shows M2 = 0.56 and "Next question Q7 chosen because IG = 0.263 bits".
+- Run the stubs: `.\.venv\Scripts\python.exe -m streamlit run app.py`
 
 ## Step 3: diagnosis engine (`engine/bayes.py`)
 - Log-space posterior over M0..M4; default likelihoods from `config.yaml` with MAP add-one-smoothed
@@ -57,4 +74,4 @@ Last update: 2026-11-21, after build step 3 (bank review still pending; it does 
 - Python 3.12.0 + `multiprocess` prints a harmless "Exception ignored" at exit.
 
 ## Time spent
-- Step 1: ~25 min. Step 2: ~50 min. Step 2 fixes + step 3: ~45 min.
+- Step 1: ~25 min. Step 2: ~50 min. Step 2 fixes + step 3: ~45 min. Step 4 (contract + stubs): ~40 min.

@@ -1,0 +1,178 @@
+{
+ "$defs": {
+  "MisconceptionView": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "enum": [
+      "M0",
+      "M1",
+      "M2",
+      "M3",
+      "M4"
+     ],
+     "title": "Id",
+     "type": "string"
+    },
+    "name_en": {
+     "title": "Name En",
+     "type": "string"
+    },
+    "name_fr": {
+     "default": "",
+     "title": "Name Fr",
+     "type": "string"
+    },
+    "name_ar": {
+     "default": "",
+     "title": "Name Ar",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "name_en"
+   ],
+   "title": "MisconceptionView",
+   "type": "object"
+  },
+  "OutputFile": {
+   "additionalProperties": false,
+   "properties": {
+    "path": {
+     "title": "Path",
+     "type": "string"
+    },
+    "mime": {
+     "title": "Mime",
+     "type": "string"
+    }
+   },
+   "required": [
+    "path",
+    "mime"
+   ],
+   "title": "OutputFile",
+   "type": "object"
+  },
+  "Source": {
+   "additionalProperties": false,
+   "properties": {
+    "file": {
+     "title": "File",
+     "type": "string"
+    },
+    "page": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Page"
+    },
+    "timestamp": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Timestamp"
+    }
+   },
+   "required": [
+    "file"
+   ],
+   "title": "Source",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "properties": {
+  "contract_version": {
+   "default": "1.0",
+   "title": "Contract Version",
+   "type": "string"
+  },
+  "session_id": {
+   "title": "Session Id",
+   "type": "string"
+  },
+  "tool": {
+   "enum": [
+    "flashcards",
+    "summary",
+    "quiz",
+    "slides",
+    "pdf",
+    "diagram",
+    "mindmap",
+    "video",
+    "podcast"
+   ],
+   "title": "Tool",
+   "type": "string"
+  },
+  "targeted_at": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/MisconceptionView"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "sources": {
+   "items": {
+    "$ref": "#/$defs/Source"
+   },
+   "title": "Sources",
+   "type": "array"
+  },
+  "files": {
+   "items": {
+    "$ref": "#/$defs/OutputFile"
+   },
+   "title": "Files",
+   "type": "array"
+  },
+  "items": {
+   "items": {
+    "additionalProperties": true,
+    "type": "object"
+   },
+   "title": "Items",
+   "type": "array"
+  },
+  "refused": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Refused"
+  }
+ },
+ "required": [
+  "session_id",
+  "tool",
+  "targeted_at",
+  "sources",
+  "files",
+  "items"
+ ],
+ "title": "StudioOutput",
+ "type": "object"
+}

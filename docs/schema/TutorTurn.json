@@ -1,0 +1,505 @@
+{
+ "$defs": {
+  "Agenda": {
+   "additionalProperties": false,
+   "properties": {
+    "step": {
+     "title": "Step",
+     "type": "integer"
+    },
+    "total": {
+     "title": "Total",
+     "type": "integer"
+    },
+    "next": {
+     "title": "Next",
+     "type": "string"
+    }
+   },
+   "required": [
+    "step",
+    "total",
+    "next"
+   ],
+   "title": "Agenda",
+   "type": "object"
+  },
+  "Alternative": {
+   "additionalProperties": false,
+   "properties": {
+    "question_id": {
+     "title": "Question Id",
+     "type": "string"
+    },
+    "ig_bits": {
+     "title": "Ig Bits",
+     "type": "number"
+    }
+   },
+   "required": [
+    "question_id",
+    "ig_bits"
+   ],
+   "title": "Alternative",
+   "type": "object"
+  },
+  "Check": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "enum": [
+      "leak",
+      "congruency",
+      "math",
+      "style"
+     ],
+     "title": "Name",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "not_applicable"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "detail": {
+     "default": "",
+     "title": "Detail",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "status"
+   ],
+   "title": "Check",
+   "type": "object"
+  },
+  "Grading": {
+   "additionalProperties": false,
+   "properties": {
+    "correct": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Correct"
+    },
+    "method": {
+     "enum": [
+      "answer_key",
+      "sympy",
+      "simulation",
+      "llm_rubric",
+      "none"
+     ],
+     "title": "Method",
+     "type": "string"
+    },
+    "label": {
+     "title": "Label",
+     "type": "string"
+    }
+   },
+   "required": [
+    "correct",
+    "method",
+    "label"
+   ],
+   "title": "Grading",
+   "type": "object"
+  },
+  "GuardEvent": {
+   "additionalProperties": false,
+   "properties": {
+    "ts": {
+     "title": "Ts",
+     "type": "number"
+    },
+    "check": {
+     "enum": [
+      "leak",
+      "congruency",
+      "math",
+      "style"
+     ],
+     "title": "Check",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "pass",
+      "fail"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "action": {
+     "enum": [
+      "shown",
+      "regenerated",
+      "fallback"
+     ],
+     "title": "Action",
+     "type": "string"
+    },
+    "summary": {
+     "title": "Summary",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ts",
+    "check",
+    "status",
+    "action",
+    "summary"
+   ],
+   "title": "GuardEvent",
+   "type": "object"
+  },
+  "HypProb": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "enum": [
+      "M0",
+      "M1",
+      "M2",
+      "M3",
+      "M4"
+     ],
+     "title": "Id",
+     "type": "string"
+    },
+    "name_en": {
+     "title": "Name En",
+     "type": "string"
+    },
+    "prob": {
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Prob",
+     "type": "number"
+    }
+   },
+   "required": [
+    "id",
+    "name_en",
+    "prob"
+   ],
+   "title": "HypProb",
+   "type": "object"
+  },
+  "NextQuestion": {
+   "additionalProperties": false,
+   "properties": {
+    "question_id": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Question Id"
+    },
+    "ig_bits": {
+     "title": "Ig Bits",
+     "type": "number"
+    },
+    "alternatives": {
+     "items": {
+      "$ref": "#/$defs/Alternative"
+     },
+     "title": "Alternatives",
+     "type": "array"
+    },
+    "entropy_bits": {
+     "title": "Entropy Bits",
+     "type": "number"
+    },
+    "stop": {
+     "title": "Stop",
+     "type": "boolean"
+    },
+    "stop_reason": {
+     "anyOf": [
+      {
+       "enum": [
+        "threshold",
+        "max_questions",
+        "no_questions"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Stop Reason"
+    }
+   },
+   "required": [
+    "question_id",
+    "ig_bits",
+    "alternatives",
+    "entropy_bits",
+    "stop",
+    "stop_reason"
+   ],
+   "title": "NextQuestion",
+   "type": "object"
+  },
+  "QuestionView": {
+   "additionalProperties": false,
+   "description": "A question as shown to the student. Never contains the answer key or option mappings.",
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "text": {
+     "title": "Text",
+     "type": "string"
+    },
+    "options": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Options",
+     "type": "object"
+    },
+    "requires_confidence": {
+     "default": true,
+     "title": "Requires Confidence",
+     "type": "boolean"
+    },
+    "why_mode": {
+     "default": "free",
+     "enum": [
+      "free",
+      "structured"
+     ],
+     "title": "Why Mode",
+     "type": "string"
+    },
+    "why_options": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/SafeText"
+     },
+     "title": "Why Options",
+     "type": "array"
+    }
+   },
+   "required": [
+    "id",
+    "text",
+    "options"
+   ],
+   "title": "QuestionView",
+   "type": "object"
+  },
+  "Reconstruction": {
+   "additionalProperties": false,
+   "description": "Find-the-mistake view: steps only; the error step index stays in the engine.",
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "problem": {
+     "title": "Problem",
+     "type": "string"
+    },
+    "steps": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Steps",
+     "type": "array"
+    }
+   },
+   "required": [
+    "id",
+    "problem",
+    "steps"
+   ],
+   "title": "Reconstruction",
+   "type": "object"
+  },
+  "SafeText": {
+   "additionalProperties": false,
+   "description": "Every piece of text the frontend may display. Render ONLY if shown_allowed is true.",
+   "properties": {
+    "text": {
+     "title": "Text",
+     "type": "string"
+    },
+    "lang": {
+     "default": "en",
+     "enum": [
+      "fr",
+      "ar",
+      "en"
+     ],
+     "title": "Lang",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "llm",
+      "verified_bank",
+      "template"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "checks": {
+     "items": {
+      "$ref": "#/$defs/Check"
+     },
+     "title": "Checks",
+     "type": "array"
+    },
+    "shown_allowed": {
+     "title": "Shown Allowed",
+     "type": "boolean"
+    },
+    "fallback_used": {
+     "default": false,
+     "title": "Fallback Used",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "text",
+    "origin",
+    "checks",
+    "shown_allowed"
+   ],
+   "title": "SafeText",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "properties": {
+  "contract_version": {
+   "default": "1.0",
+   "title": "Contract Version",
+   "type": "string"
+  },
+  "session_id": {
+   "title": "Session Id",
+   "type": "string"
+  },
+  "turn_id": {
+   "title": "Turn Id",
+   "type": "integer"
+  },
+  "state": {
+   "enum": [
+    "DIAGNOSE",
+    "HINT_1",
+    "HINT_2",
+    "HINT_3",
+    "RECONSTRUCT",
+    "TRANSFER",
+    "DONE",
+    "HANDOFF"
+   ],
+   "title": "State",
+   "type": "string"
+  },
+  "message": {
+   "$ref": "#/$defs/SafeText"
+  },
+  "expects": {
+   "enum": [
+    "answer",
+    "retry",
+    "error_step",
+    "explanation",
+    "transfer_answer",
+    "none"
+   ],
+   "title": "Expects",
+   "type": "string"
+  },
+  "agenda": {
+   "$ref": "#/$defs/Agenda"
+  },
+  "question": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/QuestionView"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "reconstruction": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Reconstruction"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "grading": {
+   "$ref": "#/$defs/Grading"
+  },
+  "posterior": {
+   "items": {
+    "$ref": "#/$defs/HypProb"
+   },
+   "title": "Posterior",
+   "type": "array"
+  },
+  "next_question": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/NextQuestion"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "guard_events": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/GuardEvent"
+   },
+   "title": "Guard Events",
+   "type": "array"
+  }
+ },
+ "required": [
+  "session_id",
+  "turn_id",
+  "state",
+  "message",
+  "expects",
+  "agenda",
+  "grading",
+  "posterior"
+ ],
+ "title": "TutorTurn",
+ "type": "object"
+}

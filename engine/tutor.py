@@ -338,9 +338,9 @@ def on_reconstruct(s: dict, choice: str | None, text: str | None) -> tuple[dict,
                                         "attempt": s["recon_attempts"], "explanation": text, "rubric": rub})
     if rub:
         grading = Grading(correct=found, method="llm_rubric",
-                          label=f"Step checked against the answer key. Explanation graded by the LLM: {rub['verdict']}.")
+                          label=tr("grade_step_rubric", lang, v=tr(f"verdict_{rub['verdict']}", lang)))
     else:
-        grading = Grading(correct=found, method="answer_key", label="Step checked against the answer key")
+        grading = Grading(correct=found, method="answer_key", label=tr("grade_step", lang))
     if not found and s["recon_attempts"] < MAX_RECON_ATTEMPTS:
         return {"state": "RECONSTRUCT", "expects": "error_step", "agenda": agenda("RECONSTRUCT", lang),
                 "message": txt(s, "recon_retry", step=step), "reconstruction": recon_view(r, lang),
@@ -358,7 +358,7 @@ def on_transfer(s: dict, option: str, names: dict, bank: dict, diag) -> tuple[di
     diag.observe_answer(q["id"], option, None)
     s["outcome"]["transfers"].append({"question_id": q["id"], "option": option, "correct": correct,
                                       "loop": s["loops"]})
-    grading = Grading(correct=correct, method="answer_key", label="Checked against the answer key")
+    grading = Grading(correct=correct, method="answer_key", label=tr("grade_answer_key", _lang(s)))
     if correct:
         return _done(s, "done_mastered"), grading
     h = s.get("target") or "M0"
@@ -416,7 +416,7 @@ def on_retry(s: dict, option: str, names: dict, mis: dict, posterior: dict, bank
     correct = option == q["correct"]
     s.setdefault("retries", []).append({"state": s["state"], "question_id": q["id"], "option": option,
                                         "correct": correct})
-    grading = Grading(correct=correct, method="answer_key", label="Checked against the answer key")
+    grading = Grading(correct=correct, method="answer_key", label=tr("grade_answer_key", _lang(s)))
     first_answer = s.get("last_choice") is None or not s["last_choice"].get("option")
     s["last_choice"] = {"option": option, "explanation": None}
     level = int(s["state"].split("_")[1])

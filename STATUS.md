@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-21, step 15 (trilingual report, handoff note). Steps 12-15 done.
+Last update: 2026-11-21, Next.js frontend connected to the engine (demo mode), steps 12-15 done.
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [x] `live.allow_unverified_dev: false` set by the team in `config.yaml` (committed 2026-11-21). Consequence:
@@ -43,6 +43,19 @@ Last update: 2026-11-21, step 15 (trilingual report, handoff note). Steps 12-15 
 - The team put a new `GROQ_API_KEY` in `.env`, but the old key was still a Windows user variable, which took
   precedence. `engine/config.py` now loads `.env` with `override=True`. Checked (key never printed): the engine uses
   the `.env` key; both models answer (120b 927/1000 requests left today, 20b 999/1000).
+
+## Next.js frontend connected (C:\TRACE_frontend_temp, at the team's request, 2026-11-21)
+- Not a git repository: the original files are kept in `C:\TRACE_frontend_temp\_backup_avant_trace\*.bak`.
+- `next.config.mjs`: rewrite `/engine/*` -> `http://127.0.0.1:8000/api/v1/*`. `app/api/chat/route.ts`: the direct
+  LLM call (`streamText`) is replaced by a plain proxy to the engine (start / answer / reply / state / summary).
+  New hook `components/dashboard/tutor/use-trace-chat.ts` replaces `useChat` with the same return shape, so the chat
+  UI is unchanged; answers are typed ("A sûr, parce que…") or clicked (shortcut buttons with the existing suggestion
+  style); engine text is shown only if `shown_allowed`. Demo mode ON by default (`NEXT_PUBLIC_TRACE_DEMO=false` turns
+  it off); clear mode with `NEXT_PUBLIC_TRACE_PROFILE=clear`. Text-only changes in `tutor-copy.ts` (start button,
+  placeholder, disclaimer). No CSS changed. `npx tsc --noEmit`: 0 errors.
+- Checked in the browser (FR): login (local, test values) -> onboarding -> Tuteur IA -> full recorded session to
+  "Erreur type trouvée / Résultat / Prochaine étape": every LLM answer served from the cache, 0 tokens.
+- Grading labels are now in FR / AR / EN too (they were English).
 
 ## Step 15: trilingual report, handoff note, calibration (no LLM)
 - `api.summary(session_id, lang)`: evidence lines, states tried, outcome, next step and the 3-line handoff note in

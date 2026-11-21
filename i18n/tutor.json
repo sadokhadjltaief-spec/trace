@@ -454,5 +454,20 @@
   "en": "incorrect",
   "fr": "faux",
   "ar": "خطأ"
+ },
+ "grade_answer_key": {
+  "en": "Checked against the answer key",
+  "fr": "Vérifié avec le corrigé",
+  "ar": "تمّ التحقّق بالإجابة الصحيحة"
+ },
+ "grade_step": {
+  "en": "Step checked against the answer key",
+  "fr": "Étape vérifiée avec le corrigé",
+  "ar": "تمّ التحقّق من الخطوة بالإجابة الصحيحة"
+ },
+ "grade_step_rubric": {
+  "en": "Step checked against the answer key. Explanation graded by the LLM: {v}.",
+  "fr": "Étape vérifiée avec le corrigé. Explication notée par le LLM : {v}.",
+  "ar": "تمّ التحقّق من الخطوة بالإجابة الصحيحة. التفسير قيّمه النموذج اللغوي (LLM): {v}."
  }
 }

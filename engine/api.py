@@ -189,7 +189,7 @@ def submit_answer(session_id: str, question_id: str, option: str, confidence: st
                                    correct=correct, explanation=explanation))
     s["turn"] += 1
     nq = _next(d, s["pool"])
-    grading = Grading(correct=correct, method="answer_key", label="Checked against the answer key")
+    grading = Grading(correct=correct, method="answer_key", label=tr("grade_answer_key", _lang(s)))
     if nq.stop:  # diagnosis over: the state machine takes over (code decides the state and message type)
         h = d.top()[0]
         f = tutor.frame(s, tutor.begin(s, h, _names(), _mis(h), d.as_dict()))

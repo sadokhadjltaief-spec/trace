@@ -12,7 +12,7 @@ from __future__ import annotations
 import threading
 from typing import Literal
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -20,7 +20,7 @@ from engine import api
 from engine.config import cfg
 from engine.contract import (CONTRACT_VERSION, CourseAnswer, MisconceptionView, NextQuestion, SessionState,
                              SessionSummary, SimItemView, SimRun, SimTurn, StudioOutput, TutorTurn, GameTurn,
-                             ReportExport, ChatAnswer)
+                             ReportExport, ChatAnswer, StudyPlan)
 
 app = FastAPI(title="TRACE engine API", version=CONTRACT_VERSION,
               description="Thin HTTP wrapper over engine/api.py. Shapes: docs/INTERFACE.md.")
@@ -280,3 +280,18 @@ class ChatBody(BaseModel):
 def chat(body: ChatBody):
     """Ask the tutor: course questions answered from the course files with citations; off-topic refused."""
     return _call(api.ask, body.question, body.lang, body.session_id)
+
+
+@app.post("/api/v1/study-plan", response_model=StudyPlan)
+async def study_plan(files: list[UploadFile] = File(...), details: str = Form(""),
+                     lang: Literal["fr", "ar", "en"] = Form("fr"), session_id: str | None = Form(None)):
+    """Study plan from the student's uploaded files (up to 10 files, 50 MB each, PDF / TXT / MD)."""
+    if len(files) > UPLOAD_MAX_FILES:
+        raise HTTPException(400, f"up to {UPLOAD_MAX_FILES} files")
+    data = []
+    for f in files:
+        b = await f.read()
+        if len(b) > UPLOAD_MAX_BYTES:
+            raise HTTPException(400, f"{f.filename}: larger than 50 MB")
+        data.append((f.filename or "file", b))
+    return _call(api.study_plan, data, details, lang, session_id)

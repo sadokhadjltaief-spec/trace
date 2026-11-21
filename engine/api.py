@@ -444,6 +444,20 @@ def ask(question: str, lang: str = "fr", session_id: str | None = None) -> dict:
     return chat.answer(question, lang, kw, suspects)
 
 
+def study_plan(files: list[tuple[str, bytes]], details: str = "", lang: str = "fr",
+               session_id: str | None = None) -> dict:
+    """Study plan from uploaded PDF / TXT / MD files (saved to data/courses/uploads/). Targets the diagnosis if any."""
+    from engine import study_plan as sp
+    s = _SESSIONS.get(session_id) if session_id else None
+    lang = lang_of(lang)
+    kw = tutor.style_kwargs(s["profile"] if s else {}, lang)
+    h = _diagnosed(s) if s else None
+    mv = next((m for m in misconceptions() if m["id"] == h), None) if h else None
+    names = _names()
+    suspects = {k: names[k] for k, p in s["diag"].as_dict().items() if k != "M0" and p > 0.2} if s else {}
+    return sp.make(files, details or "", lang, kw, suspects, mv, _mis(h) if h else None)
+
+
 def _lesson_refs(mv: dict, k: int = 2) -> list[LessonRef]:
     """Curriculum-grounded remediation: lesson pages for the diagnosed misconception (only if courses exist)."""
     if mv["id"] == "M0":

@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-21, course chat (Ask the tutor) on the engine.
+Last update: 2026-11-21, study plan from uploaded files on the engine.
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [x] `live.allow_unverified_dev: false` set by the team in `config.yaml` (committed 2026-11-21). Consequence:
@@ -43,6 +43,18 @@ Last update: 2026-11-21, course chat (Ask the tutor) on the engine.
 - The team put a new `GROQ_API_KEY` in `.env`, but the old key was still a Windows user variable, which took
   precedence. `engine/config.py` now loads `.env` with `override=True`. Checked (key never printed): the engine uses
   the `.env` key; both models answer (120b 927/1000 requests left today, 20b 999/1000).
+
+## Study plan from uploaded files (`engine/study_plan.py`, `POST /api/v1/study-plan`)
+- Upload PDF/TXT/MD → saved to `data/courses/uploads/` (a file identical to an existing course file is reused, not
+  copied, so the search index has no duplicates) → text per page (`rag.extract`) → ONE cached LLM call writes a
+  day-by-day plan in the student's language (title, summary, days with goals / tasks / pages, self-check questions),
+  diagnosed misconception first when a session is given ("Targeted at") → every text guarded in one batch; pages
+  that do not exist are removed and wrong file names repaired by code.
+- Live check on our 4-page notes: 4 days (one per chapter, right pages), 15 tasks, 5 questions; 1 task blocked by
+  the guards ("Multiplier 3/5 par 2 pour obtenir 6/10": 3/5 × 2 = 6/5, ambiguous). The plan call replays from cache.
+- Found and fixed: with word ids ("title", "summary") the judge skipped items, which then failed closed; the study
+  plan now sends numbered ids to the judge (the shared guard is unchanged, so existing cached demo calls still match).
+- 182 tests pass (`tests/test_study_plan.py`).
 
 ## Course chat "Ask the tutor" (`engine/chat.py`, `POST /api/v1/chat`)
 - Topic gate: maths / course vocabulary or a relevant course passage → on topic; otherwise one cached LLM judge;

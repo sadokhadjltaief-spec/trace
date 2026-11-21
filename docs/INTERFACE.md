@@ -4,6 +4,7 @@
 1.2 (2026-11-21): added `CourseAnswer` / `CourseHit` (Course Q&A) and real `SessionSummary.lesson_refs` (additive).
 1.3 (2026-11-21): added simulations: `SimItemView`, `SimRun`, `SimTurn` (additive).
 1.4 (2026-11-21): added the game "Chasse aux erreurs": `GameTurn`, `GameRoundView`, `GameFeedback` (additive).
+1.7 (2026-11-21): `StudyPlan` (study plan from uploaded files).
 1.6 (2026-11-21): `ChatAnswer` (course chat).
 1.5 (2026-11-21): `ReportExport` (report as Markdown + PDF); `summary(session_id, lang)` takes an optional language;
 evidence lines and the handoff note are now in that language (additive).
@@ -177,6 +178,12 @@ answer SafeText, citations [CourseHit]}`. `method`: `rag_llm` (short answer writ
 guarded, with "(file p.N)" citations), `rag_extractive` (the course passages themselves, when the LLM answer failed
 a guard), `not_found` (school question not covered by the course files: TRACE does not answer from memory),
 `refusal` (off topic: "Je suis un tuteur éducatif, je ne peux répondre qu'aux questions sur tes cours.").
+
+### Study plan (since 1.7)
+`POST /api/v1/study-plan` (multipart: `files` = PDF/TXT/MD, `details`, `lang`, `session_id`?) → `StudyPlan {title,
+summary, days [{day, title, goals[], tasks[], sources [{file, page}]}], check_questions[], sources, targeted_at,
+dropped_by_guards, unreadable_pages, refused}`. Every text is a SafeText (show only if `shown_allowed`). Each day
+lists the pages it uses (checked to exist). If `refused` is set (no readable text), show it and nothing else.
 
 ### GuardEvent, Cost
 `GuardEvent {ts, check, status "pass|fail", action "shown|regenerated|fallback", summary}`.

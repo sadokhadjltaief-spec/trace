@@ -1,5 +1,5 @@
 {
- "contract_version": "1.6",
+ "contract_version": "1.7",
  "session_id": "fake0000demo",
  "turn_id": 3,
  "state": "HINT_1",

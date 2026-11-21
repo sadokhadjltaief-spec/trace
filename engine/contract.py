@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.6"  # 1.1 explanation_evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat
+CONTRACT_VERSION = "1.7"  # 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7 plan
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]
@@ -353,3 +353,26 @@ class ChatAnswer(_M):
     topic_reason: str              # keywords | course passage | llm judge | judge unavailable
     answer: SafeText
     citations: list[CourseHit]
+
+
+class PlanDay(_M):
+    day: int
+    title: SafeText
+    goals: list[SafeText]
+    tasks: list[SafeText]
+    sources: list[Source]          # pages of the uploaded files this day uses (checked to exist)
+
+
+class StudyPlan(_M):
+    """Study plan from the student's files (since 1.7). Show only texts with shown_allowed."""
+    contract_version: str = CONTRACT_VERSION
+    plan_id: str = ""
+    title: SafeText
+    summary: SafeText | None = None
+    days: list[PlanDay]
+    check_questions: list[SafeText]
+    sources: list[Source]          # every page read
+    targeted_at: MisconceptionView | None = None
+    dropped_by_guards: int = 0
+    unreadable_pages: list[str] = []
+    refused: str | None = None

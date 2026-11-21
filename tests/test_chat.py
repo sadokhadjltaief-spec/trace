@@ -24,8 +24,13 @@ def courses(tmp_path, monkeypatch):
 
 
 def fake(answer_text="Pour additionner, on prend un dénominateur commun : 1/3 + 2/5 = 11/15 "
-                     "(trace_notes/cours_fractions_relatifs.pdf p.1).", school=False, judge_ok=True):
+                     "(trace_notes/cours_fractions_relatifs.pdf p.1).", school=False, judge_ok=True,
+         tutor_text="Pour l'aire d'un rectangle, on multiplie la longueur par la largeur : 3 × 4 = 12."):
     def f(system, user, *, purpose, **kw):
+        if purpose == "chat_tutor":
+            return {"answer": tutor_text}
+        if purpose == "chat_tutor_judge":
+            return {"texts": [{"id": "a", "congruent": [], "claims": []}]}
         if purpose == "chat_topic":
             if not judge_ok:
                 raise llm.CacheMiss("demo")
@@ -67,13 +72,26 @@ def test_false_maths_in_answer_falls_back_to_the_course_text(courses, monkeypatc
     assert "3/8 (" not in r["answer"]["text"].split("\n")[0]
 
 
-def test_school_question_not_in_courses_is_not_answered_from_memory(tmp_path, monkeypatch):
+@pytest.mark.parametrize("q,expr,val", [("5*8", "5 × 8", "40"), ("combien font 12/4 ?", "12 / 4", "3"),
+                                        ("(-8) - (-5)", "(-8) - (-5)", "-3"), ("كم يساوي 7*6؟", "7 × 6", "42")])
+def test_arithmetic_is_computed_exactly_without_llm(courses, monkeypatch, q, expr, val):
+    def no_llm(*a, **k):
+        raise AssertionError("no LLM call for arithmetic")
+    monkeypatch.setattr(llm, "ask_json", no_llm)
+    r = api.ask(q, "fr")
+    assert r["method"] == "computed" and r["answer"]["text"] == f"{expr} = {val}" and "SymPy" in r["label"]
+
+
+def test_school_question_not_in_courses_gets_a_labelled_tutor_answer(tmp_path, monkeypatch):
     monkeypatch.setattr(rag, "COURSES", tmp_path / "empty")
     (tmp_path / "empty").mkdir()
     rag.index(root=tmp_path / "empty", use_embeddings=False)
     monkeypatch.setattr(llm, "ask_json", fake())
-    r = api.ask("Comment calculer le volume d'une sphère ?", "fr")
-    assert r["on_topic"] and r["method"] == "not_found" and "ne réponds pas de mémoire" in r["answer"]["text"]
+    r = api.ask("Comment calculer l'aire d'un rectangle ?", "fr")
+    assert r["method"] == "tutor_llm" and r["answer"]["shown_allowed"] and "pas tirée de ton cours" in r["label"]
+    monkeypatch.setattr(llm, "ask_json", fake(tutor_text="Donc 3 × 4 = 13."))          # false maths: not shown
+    r = api.ask("Comment calculer l'aire d'un rectangle ?", "fr")
+    assert r["method"] == "not_found" and "hors ligne" in r["answer"]["text"]
 
 
 def test_chat_http(courses, monkeypatch):
@@ -82,3 +100,24 @@ def test_chat_http(courses, monkeypatch):
     r = c.post("/api/v1/chat", json={"question": "football ?", "lang": "en"}).json()
     assert r["method"] == "refusal" and r["answer"]["lang"] == "en"
     assert c.post("/api/v1/chat", json={"question": "  ", "lang": "fr"}).status_code == 400
+
+
+def test_off_topic_is_refused_even_when_a_course_page_looks_similar(courses, monkeypatch):
+    # regression: "Qui est Cristiano Ronaldo ?" got a page from a physics PDF and was answered from it
+    monkeypatch.setattr(rag.Index, "search", lambda self, q, k=None: [
+        {**self.chunks[0].__dict__, "score": 0.1, "bm25": 0.0, "cosine": 0.86, "relevant": True}])
+    monkeypatch.setattr(llm, "ask_json", fake(school=False))
+    r = api.ask("Qui est Cristiano Ronaldo ?", "fr")
+    assert r["method"] == "refusal" and not r["citations"]
+
+
+def test_passages_that_do_not_cover_the_question_go_to_the_tutor(courses, monkeypatch):
+    base = fake()
+
+    def f(system, user, *, purpose, **kw):
+        if purpose == "chat_answer":
+            return {"covered": False, "answer": ""}
+        return base(system, user, purpose=purpose, **kw)
+    monkeypatch.setattr(llm, "ask_json", f)
+    r = api.ask("Explique les fractions et le théorème de Pythagore", "fr")
+    assert r["method"] == "tutor_llm" and "pas tirée de ton cours" in r["label"]

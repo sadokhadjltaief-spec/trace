@@ -116,7 +116,9 @@ def extract(path: Path) -> tuple[list[tuple[int, str, list[str]]], list[int]]:
     import pymupdf
     with pymupdf.open(path) as doc:
         for i, page in enumerate(doc, 1):
-            t = page.get_text("text") or ""
+            # expand ligatures ("ﬁ" was extracted as an unknown character: "Dé\x1cnir" instead of "Définir")
+            t = page.get_text("text", flags=pymupdf.TEXTFLAGS_TEXT & ~pymupdf.TEXT_PRESERVE_LIGATURES) or ""
+            t = t.replace("\x1c", "fi").replace("\x1d", "fl").replace("ﬁ", "fi").replace("ﬂ", "fl")
             fl = []
             if len(t.strip()) < 50:
                 o = _ocr(page)

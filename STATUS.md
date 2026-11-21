@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-22, chat + study plan connected to the Next.js app; offline demo mode for all features.
+Last update: 2026-11-22, study plan from content + useful maths chat (team feedback).
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [x] `live.allow_unverified_dev: false` set by the team in `config.yaml` (committed 2026-11-21). Consequence:
@@ -43,6 +43,27 @@ Last update: 2026-11-22, chat + study plan connected to the Next.js app; offline
 - The team put a new `GROQ_API_KEY` in `.env`, but the old key was still a Windows user variable, which took
   precedence. `engine/config.py` now loads `.env` with `override=True`. Checked (key never printed): the engine uses
   the `.env` key; both models answer (120b 927/1000 requests left today, 20b 999/1000).
+
+## Team feedback fixed (2026-11-22): content-based study plan, useful maths chat
+- Why the team saw "Lis la page 1": they uploaded their own PDF with the engine in forced offline mode
+  (`TRACE_DEMO=1`), so the plan was not in the cache and the code-built fallback was used. New content needs the
+  engine WITHOUT `TRACE_DEMO`; that mode is only for replaying a recorded demo.
+- Study plan v2: ligatures expanded in PDF text ("Définir" was "Dénir"); repeated headers/footers and page
+  counters removed; duplicate pages (outline repeated on each section slide) merged; the WHOLE document sent within
+  an 8000-character budget (before: only the first 12 pages = mostly the outline). The LLM first extracts chapters
+  and concepts, then plans "Étudier : <chapitre>" days with duration, goals and 3-5 concrete tasks (exercises,
+  formulas, flashcards, self-test), key formulas and self-check questions; every chapter must get a day. Fallback
+  without the LLM: days from the detected sections ("Étudier : <section>", summary sheet, 3 examples, 5 flashcards).
+  On the team's 51-page thermodynamics deck: 7 days following its outline; on the demo PDF: 5 days (4 chapters +
+  review). Contract 1.8 (`PlanChapter`, `formulas`, `duration_min`).
+- Chat v2, in this order: pure arithmetic ("5*8", "combien font 12/4 ?") computed exactly by SymPy, no LLM;
+  topic decided FIRST (vocabulary, else LLM judge), never by a retrieved page (a physics slide had made "Qui est
+  Cristiano Ronaldo ?" look on topic); course passages that really cover the question → cited answer; otherwise a
+  tutor answer labelled "pas tirée de ton cours", checked by the guards; off topic → polite refusal. Each answer
+  carries a `label` (computed / from your course / tutor answer).
+- Recorded live, then replayed offline over HTTP (`TRACE_DEMO=1`): 22/22 LLM calls from the cache, 0 misses
+  (chat: 5*8, fractions, Pythagore, Ronaldo; plans: demo PDF and chap2.pdf). Frontend shows the label, the day
+  duration and the key formulas. 190 tests pass.
 
 ## Offline demo mode for every feature (2026-11-22)
 - `TRACE_DEMO=1` (environment variable, set before starting the server) forces cache-only mode for every LLM call

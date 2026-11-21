@@ -486,28 +486,58 @@
   "ar": "إليك ما يقوله درسك:"
  },
  "plan_fallback_title": {
-  "en": "Study plan (one page per day)",
-  "fr": "Plan d'étude (une page par jour)",
-  "ar": "خطة مراجعة (صفحة في كل يوم)"
+  "en": "Study plan by section",
+  "fr": "Plan d'étude par partie du cours",
+  "ar": "خطة مراجعة حسب أجزاء الدرس"
  },
  "plan_fallback_summary": {
-  "en": "A simple plan built from your pages. Read one page each day.",
-  "fr": "Un plan simple construit à partir de tes pages. Lis une page chaque jour.",
-  "ar": "خطة بسيطة مبنية على صفحاتك. اقرأ صفحة واحدة كل يوم."
- },
- "plan_task_read": {
-  "en": "Read page {page} carefully.",
-  "fr": "Lis attentivement la page {page}.",
-  "ar": "اقرأ الصفحة {page} بانتباه."
+  "en": "One section of the course each day, with concrete tasks.",
+  "fr": "Une partie du cours chaque jour, avec des tâches concrètes.",
+  "ar": "جزء من الدرس كل يوم، مع مهام ملموسة."
  },
  "plan_task_examples": {
-  "en": "Redo the examples of the page without looking.",
-  "fr": "Refais les exemples de la page sans regarder.",
-  "ar": "أعد حلّ أمثلة الصفحة دون النظر إليها."
+  "en": "Redo 3 examples from these pages without looking at the solution.",
+  "fr": "Refais 3 exemples de ces pages sans regarder la solution.",
+  "ar": "أعد حلّ 3 أمثلة من هذه الصفحات دون النظر إلى الحلّ."
  },
  "plan_task_explain": {
-  "en": "Explain the rule in your own words.",
-  "fr": "Explique la règle avec tes mots.",
-  "ar": "اشرح القاعدة بكلماتك."
+  "en": "Explain the main rule in 3 sentences, in your own words.",
+  "fr": "Explique la règle principale en 3 phrases, avec tes mots.",
+  "ar": "اشرح القاعدة الأساسية في 3 جمل بكلماتك."
+ },
+ "plan_study": {
+  "en": "Study: {topic}",
+  "fr": "Étudier : {topic}",
+  "ar": "ادرس: {topic}"
+ },
+ "plan_task_notes": {
+  "en": "Make a one-page summary of \"{topic}\" (pages {pages}): definitions, rules, examples.",
+  "fr": "Fais une fiche d'une page sur « {topic} » (pages {pages}) : définitions, règles, exemples.",
+  "ar": "اكتب ملخّصًا في صفحة واحدة عن «{topic}» (الصفحات {pages}): تعريفات وقواعد وأمثلة."
+ },
+ "plan_task_cards": {
+  "en": "Make 5 flashcards on the key terms.",
+  "fr": "Crée 5 cartes mémo sur les termes clés.",
+  "ar": "أنشئ 5 بطاقات مراجعة عن المصطلحات الأساسية."
+ },
+ "chat_label_computed": {
+  "en": "Computed exactly by the engine (SymPy)",
+  "fr": "Calculé exactement par le moteur (SymPy)",
+  "ar": "حسبه المحرّك بدقّة (SymPy)"
+ },
+ "chat_label_course": {
+  "en": "From your course",
+  "fr": "D'après ton cours",
+  "ar": "من درسك"
+ },
+ "chat_label_tutor": {
+  "en": "Tutor answer (not taken from your course), checked before display",
+  "fr": "Réponse du tuteur (pas tirée de ton cours), vérifiée avant affichage",
+  "ar": "إجابة المعلّم (ليست من درسك)، تمّ التحقّق منها قبل العرض"
+ },
+ "chat_unavailable": {
+  "en": "I cannot answer this right now (offline). Ask a question from your course, or start a diagnosis.",
+  "fr": "Je ne peux pas répondre à cette question maintenant (hors ligne). Pose une question sur ton cours, ou commence un diagnostic.",
+  "ar": "لا أستطيع الإجابة عن هذا السؤال الآن (دون اتصال). اطرح سؤالًا عن درسك أو ابدأ التشخيص."
  }
 }

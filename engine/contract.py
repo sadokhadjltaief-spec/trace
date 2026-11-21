@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.7"  # 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7 plan
+CONTRACT_VERSION = "1.8"  # 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7-1.8 plan
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]
@@ -349,18 +349,27 @@ class ChatAnswer(_M):
     contract_version: str = CONTRACT_VERSION
     question: str
     on_topic: bool
-    method: Literal["rag_llm", "rag_extractive", "not_found", "refusal"]
-    topic_reason: str              # keywords | course passage | llm judge | judge unavailable
+    method: Literal["computed", "rag_llm", "rag_extractive", "tutor_llm", "not_found", "refusal"]
+    topic_reason: str              # arithmetic | keywords | course passage | llm judge | judge unavailable
+    label: str = ""                # since 1.8: where the answer comes from (show it under the answer)
     answer: SafeText
     citations: list[CourseHit]
 
 
 class PlanDay(_M):
     day: int
-    title: SafeText
+    title: SafeText                # e.g. "Étudier : Le premier principe"
     goals: list[SafeText]
-    tasks: list[SafeText]
+    tasks: list[SafeText]          # concrete tasks (exercises, formulas, flashcards, self-test)
     sources: list[Source]          # pages of the uploaded files this day uses (checked to exist)
+    duration_min: int | None = None  # since 1.8
+
+
+class PlanChapter(_M):
+    """A chapter / section found in the CONTENT of the files (since 1.8)."""
+    title: SafeText
+    concepts: list[SafeText]
+    pages: list[int]
 
 
 class StudyPlan(_M):
@@ -371,6 +380,8 @@ class StudyPlan(_M):
     summary: SafeText | None = None
     days: list[PlanDay]
     check_questions: list[SafeText]
+    chapters: list[PlanChapter] = []   # since 1.8: the course's structure, as analysed from its content
+    formulas: list[SafeText] = []      # since 1.8: key formulas / rules copied from the pages
     sources: list[Source]          # every page read
     targeted_at: MisconceptionView | None = None
     dropped_by_guards: int = 0

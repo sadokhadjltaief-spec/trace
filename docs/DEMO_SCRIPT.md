@@ -132,11 +132,14 @@ All offline: the Study Studio outputs for Amira (FR, M1) are cached; simulations
 ## Optional · "Demander au tuteur" and "Plan d'étude" (offline, cached)
 
 - In the tutor, on a NEW conversation (not during a diagnosis), type:
+  `5*8` → "5 × 8 = 40", computed exactly by the engine (no LLM).
   `Comment additionner deux fractions ?` → answer from the course with "(cours_fractions_relatifs.pdf p.1)".
+  `Explique-moi le théorème de Pythagore` → tutor answer, labelled "pas tirée de ton cours".
   `Qui va gagner la Coupe du monde de football ?` → "Je suis un tuteur éducatif, je ne peux répondre qu'aux
   questions sur tes cours."
 - Plan d'étude → upload `C:\TRACE\docs\demo\cours_fractions_relatifs.pdf`, leave the details empty, confirm →
-  4 days, one per chapter, each with its pages, and 5 self-check questions.
+  5 days ("Étudier : Chapitre 1 …" to chapter 4, then a review), with durations, concrete tasks, key formulas and
+  self-check questions.
 - Exact wording matters for the cache: other questions still work offline but fall back (course passages instead of
   a written answer; a plan built by code, one page per day).
 

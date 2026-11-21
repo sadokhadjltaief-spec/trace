@@ -11,8 +11,11 @@ NOTES = ROOT / "data" / "courses" / "trace_notes" / "cours_fractions_relatifs.pd
 pytestmark = pytest.mark.skipif(not NOTES.exists(), reason="run scripts/make_course_notes.py")
 
 PLAN = {"title": "Plan : fractions et nombres relatifs", "summary": "Quatre jours pour revoir le cours.",
+        "chapters": [{"title": "Additionner des fractions", "concepts": ["Dénominateur commun"], "pages": [1, 77]}],
+        "formulas": ["a/c + b/c = (a+b)/c"],
         "days": [
-            {"day": 1, "title": "Additionner des fractions", "goals": ["Comprendre le dénominateur commun."],
+            {"day": 1, "title": "Étudier : Additionner des fractions", "duration_min": 45,
+             "goals": ["Comprendre le dénominateur commun."],
              "tasks": ["Relis la page 1.", "Refais l'exemple : 1/3 + 2/5 = 11/15."],
              "pages": [{"file": "cours_fractions_relatifs.pdf", "page": 1}, {"file": "cours_fractions_relatifs.pdf", "page": 99}]},
             {"day": 2, "title": "Multiplier par un entier", "goals": ["Multiplier seulement le numérateur."],
@@ -23,7 +26,7 @@ PLAN = {"title": "Plan : fractions et nombres relatifs", "summary": "Quatre jour
 
 
 def fake(system, user, *, purpose, **kw):
-    if purpose == "study_plan":
+    if purpose == "study_plan_v2":
         return PLAN
     if purpose == "study_plan_judge":
         import re
@@ -48,7 +51,9 @@ def test_plan_from_pdf(env):
     assert [(s["file"], s["page"]) for s in d2["sources"]] == [(NOTES.name, 2)]   # wrong name repaired
     assert len(d1["tasks"]) == 2 and d2["tasks"] == []                    # the false task is dropped
     assert r["dropped_by_guards"] == 1 and r["check_questions"][0]["shown_allowed"]
-    assert r["targeted_at"] is None
+    assert r["targeted_at"] is None and d1["duration_min"] == 45 and d1["title"]["text"].startswith("Étudier")
+    assert r["chapters"][0]["pages"] == [1] and r["chapters"][0]["concepts"][0]["text"] == "Dénominateur commun"
+    assert r["formulas"][0]["shown_allowed"]
 
 
 def test_plan_targets_the_diagnosis(env):
@@ -81,5 +86,18 @@ def test_offline_fallback_plan(env, monkeypatch):
     r = api.study_plan([(NOTES.name, NOTES.read_bytes())], "", "fr")
     StudyPlan.model_validate(r)
     assert r["plan_id"] == "fallback" and len(r["days"]) == 4 and not r["refused"]
-    assert r["days"][0]["title"]["text"].startswith("Chapitre 1") and r["days"][0]["sources"][0]["page"] == 1
+    assert r["days"][0]["title"]["text"].startswith("Étudier : Chapitre 1") and r["days"][0]["sources"][0]["page"] == 1
     assert all(t["shown_allowed"] for d in r["days"] for t in d["tasks"])
+    assert not any("page 1" in t["text"].lower() and t["text"].lower().startswith("lis") for d in r["days"] for t in d["tasks"])
+
+
+def test_cleaning_removes_repeated_headers_and_duplicate_pages():
+    from engine import study_plan as sp
+    body = "sur la chaleur et le travail mécanique"
+    pages = [("c.pdf", i, f"Titre {i // 3}\nContenu {i} {body}\nM AUTEUR\nCours\n{i} / 9") for i in range(1, 10)]
+    pages.insert(1, ("c.pdf", 99, f"Titre 0\nContenu 1 {body}\nM AUTEUR\nCours\n1 / 9"))  # duplicate page
+    out = sp.clean_pages(pages)
+    assert all("M AUTEUR" not in t and "/ 9" not in t for _, _, t in out)
+    assert 99 not in [p for _, p, _ in out]
+    secs = sp.sections(out)
+    assert [s["title"] for s in secs] == ["Titre 0", "Titre 1", "Titre 2", "Titre 3"]

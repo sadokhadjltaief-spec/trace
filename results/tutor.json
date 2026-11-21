@@ -1,10 +1,10 @@
 {
  "script": "eval/bench_tutor.py",
  "label": "SIMULATION PROXY: LLM-played students, small sample (free-tier limits)",
- "created": "2026-11-21T19:21:13",
+ "created": "2026-11-21T19:28:35",
  "runs_per_condition_planned": 5,
- "runs_per_condition_completed": 1,
- "stopped_early": "Groq daily token cap hit during run 1 (A); runs from 1 on are not counted.",
+ "runs_per_condition_completed": 5,
+ "stopped_early": null,
  "max_tutor_turns": 3,
  "models": {
   "tutor": "openai/gpt-oss-120b",
@@ -18,58 +18,58 @@
  },
  "summary": {
   "A": {
-   "runs": 1,
-   "tutor_messages": 1,
+   "runs": 5,
+   "tutor_messages": 13,
    "leak_rate_per_message": 1.0,
    "leak_rate_per_message_ci95": [
-    0.2065,
+    0.7719,
     1.0
    ],
-   "runs_with_a_leak": 1,
-   "transfer_pass_rate": 1.0,
+   "runs_with_a_leak": 5,
+   "transfer_pass_rate": 0.4,
    "transfer_pass_ci95": [
-    0.2065,
-    1.0
+    0.1176,
+    0.7693
    ],
-   "retry_solved_rate": 1.0,
+   "retry_solved_rate": 0.2,
    "mean_turns_when_solved": 1.0,
    "fallbacks_used": 0
   },
   "B": {
-   "runs": 1,
-   "tutor_messages": 3,
+   "runs": 5,
+   "tutor_messages": 13,
    "leak_rate_per_message": 0.0,
    "leak_rate_per_message_ci95": [
     0.0,
-    0.5615
+    0.2281
    ],
    "runs_with_a_leak": 0,
    "transfer_pass_rate": 0.0,
    "transfer_pass_ci95": [
-    0.0,
-    0.7935
+    -0.0,
+    0.4345
    ],
-   "retry_solved_rate": 0.0,
-   "mean_turns_when_solved": null,
+   "retry_solved_rate": 0.2,
+   "mean_turns_when_solved": 1.0,
    "fallbacks_used": 0
   },
   "C": {
-   "runs": 1,
-   "tutor_messages": 3,
+   "runs": 5,
+   "tutor_messages": 13,
    "leak_rate_per_message": 0.0,
    "leak_rate_per_message_ci95": [
     0.0,
-    0.5615
+    0.2281
    ],
    "runs_with_a_leak": 0,
-   "transfer_pass_rate": 0.0,
+   "transfer_pass_rate": 0.2,
    "transfer_pass_ci95": [
-    0.0,
-    0.7935
+    0.0362,
+    0.6245
    ],
-   "retry_solved_rate": 0.0,
-   "mean_turns_when_solved": null,
-   "fallbacks_used": 0
+   "retry_solved_rate": 0.2,
+   "mean_turns_when_solved": 1.0,
+   "fallbacks_used": 2
   }
  },
  "errors": [],
@@ -149,6 +149,346 @@
    "transfer_option": "B",
    "transfer_correct": false,
    "fallbacks": 0
+  },
+  {
+   "condition": "A",
+   "run": 1,
+   "misconception": "M2",
+   "repair_q": "Q5",
+   "transfer_q": "Q6",
+   "messages": [
+    {
+     "turn": 1,
+     "text": "You should multiply the numerator by 5, not both numerator and denominator. (2×5)/3 = 10/3, which simplifies to 3 1/3. So the correct choice is C, not B.",
+     "deterministic_leak": [
+      "contains the answer value ['10/3', '3 1/3']"
+     ]
+    },
+    {
+     "turn": 2,
+     "text": "You multiplied the denominator unnecessarily. Multiplying 2/3 by 5 means (2×5)/3 = 10/3, which is 3 1/3. So the correct answer is C, not B.",
+     "deterministic_leak": [
+      "contains the answer value ['10/3', '3 1/3']"
+     ]
+    },
+    {
+     "turn": 3,
+     "text": "Multiplying a fraction by a whole number only affects the numerator: (2/3)×5 = (2×5)/3 = 10/3, which is 3 1/3. You shouldn't multiply the denominator. The correct answer is C.",
+     "deterministic_leak": [
+      "contains the answer value ['10/3', '3 1/3']"
+     ]
+    }
+   ],
+   "solved_at_turn": null,
+   "transfer_option": "B",
+   "transfer_correct": false,
+   "fallbacks": 0
+  },
+  {
+   "condition": "B",
+   "run": 1,
+   "misconception": "M2",
+   "repair_q": "Q5",
+   "transfer_q": "Q6",
+   "messages": [
+    {
+     "turn": 1,
+     "text": "When you multiply 2/3 by 5, how should you treat the 5 to combine the fractions correctly?",
+     "deterministic_leak": []
+    },
+    {
+     "turn": 2,
+     "text": "Try multiplying 3/4 by 2. If you multiply both numerator and denominator you get 6/8 = 3/4, unchanged, which is wrong. Correctly, 3/4 × 2 = 6/4 = 1 1/2. Look at your problem again.",
+     "deterministic_leak": []
+    },
+    {
+     "turn": 3,
+     "text": "Write 5 as 5/1. Set up the product (2/3)·(5/1). Multiply the numerators: 2×5, and the denominators: 3×1. Then simplify the resulting fraction before converting to a mixed number.",
+     "deterministic_leak": []
+    }
+   ],
+   "solved_at_turn": null,
+   "transfer_option": "B",
+   "transfer_correct": false,
+   "fallbacks": 0
+  },
+  {
+   "condition": "C",
+   "run": 1,
+   "misconception": "M2",
+   "repair_q": "Q5",
+   "transfer_q": "Q6",
+   "messages": [
+    {
+     "turn": 1,
+     "text": "When you multiply 2/3 by 5, how should you treat the 5 to combine the fractions correctly?",
+     "deterministic_leak": []
+    },
+    {
+     "turn": 2,
+     "text": "Try multiplying 3/4 by 2. If you multiply both numerator and denominator you get 6/8 = 3/4, unchanged, which is wrong. Correctly, 3/4 × 2 = 6/4 = 1 1/2. Look at your problem again.",
+     "deterministic_leak": []
+    },
+    {
+     "turn": 3,
+     "text": "Write 5 as 5/1. Set up the product (2/3)·(5/1). Multiply the numerators: 2×5, and the denominators: 3×1. Then simplify the resulting fraction before converting to a mixed number.",
+     "deterministic_leak": []
+    }
+   ],
+   "solved_at_turn": null,
+   "transfer_option": "B",
+   "transfer_correct": false,
+   "fallbacks": 0
+  },
+  {
+   "condition": "A",
+   "run": 2,
+   "misconception": "M3",
+   "repair_q": "Q8",
+   "transfer_q": "Q9",
+   "messages": [
+    {
+     "turn": 1,
+     "text": "The expression is -8 − (-5). Subtracting a negative means you add: -8 + 5 = -3. So the correct choice is B, not C. The “two negatives make a positive” rule applies when you multiply or divide, not when you subtract a negative.",
+     "deterministic_leak": [
+      "contains the answer value ['-3']"
+     ]
+    },
+    {
+     "turn": 2,
+     "text": "Subtracting a negative turns into addition: -8 − (-5)= -8+5 = -3. The “two negatives make a positive” rule is for multiplication/division, not subtraction. So the correct answer is B, not C.",
+     "deterministic_leak": [
+      "contains the answer value ['-3']"
+     ]
+    },
+    {
+     "turn": 3,
+     "text": "Subtracting a negative is the same as adding its opposite: -8 − (-5)= -8+5 = -3. The “two negatives make a positive” rule only works for multiplication or division. Hence the correct answer is B, not C.",
+     "deterministic_leak": [
+      "contains the answer value ['-3']"
+     ]
+    }
+   ],
+   "solved_at_turn": null,
+   "transfer_option": "D",
+   "transfer_correct": true,
+   "fallbacks": 0
+  },
+  {
+   "condition": "B",
+   "run": 2,
+   "misconception": "M3",
+   "repair_q": "Q8",
+   "transfer_q": "Q9",
+   "messages": [
+    {
+     "turn": 1,
+     "text": "What operation should replace the double minus in -8 - -5 to rewrite the expression correctly?",
+     "deterministic_leak": []
+    }
+   ],
+   "solved_at_turn": 1,
+   "transfer_option": "A",
+   "transfer_correct": false,
+   "fallbacks": 0
+  },
+  {
+   "condition": "C",
+   "run": 2,
+   "misconception": "M3",
+   "repair_q": "Q8",
+   "transfer_q": "Q9",
+   "messages": [
+    {
+     "turn": 1,
+     "text": "What operation should replace the double minus in -8 - -5 to rewrite the expression correctly?",
+     "deterministic_leak": []
+    }
+   ],
+   "solved_at_turn": 1,
+   "transfer_option": "D",
+   "transfer_correct": true,
+   "fallbacks": 0
+  },
+  {
+   "condition": "A",
+   "run": 3,
+   "misconception": "M4",
+   "repair_q": "Q11",
+   "transfer_q": "Q12",
+   "messages": [
+    {
+     "turn": 1,
+     "text": "Cross‑multiply: (A)/10 = 9/15 → A·15 = 9·10 → 15A = 90 → A = 90/15 = 6. The answer is C, not B. The ‘difference between 10 and 15’ is irrelevant.",
+     "deterministic_leak": [
+      "contains the answer value ['90/15', '6']"
+     ]
+    },
+    {
+     "turn": 2,
+     "text": "Adding the same number to numerator and denominator changes the fraction’s value. To keep equality, cross‑multiply: A/10 = 9/15 → 15A = 90 → A = 6. So the correct choice is C, not B.",
+     "deterministic_leak": [
+      "contains the answer value ['6']"
+     ]
+    },
+    {
+     "turn": 3,
+     "text": "Adding the same number to numerator and denominator changes the fraction, so your method is invalid. Cross‑multiply: A/10 = 9/15 → 15A = 90 → A = 6. The correct answer is C, not B.",
+     "deterministic_leak": [
+      "contains the answer value ['6']"
+     ]
+    }
+   ],
+   "solved_at_turn": null,
+   "transfer_option": "C",
+   "transfer_correct": false,
+   "fallbacks": 0
+  },
+  {
+   "condition": "B",
+   "run": 3,
+   "misconception": "M4",
+   "repair_q": "Q11",
+   "transfer_q": "Q12",
+   "messages": [
+    {
+     "turn": 1,
+     "text": "If two fractions are equal, what operation relates their numerators and denominators rather than adding the same number to each?",
+     "deterministic_leak": []
+    },
+    {
+     "turn": 2,
+     "text": "Consider 2/5 = x/8. If you add the denominator difference (8‑5=3) to both numerator and denominator, you get 5/8, which is not equal to 2/5. Correctly cross‑multiply: 2·8 = 5·x, giving x=16/5. Check your original problem using this method.",
+     "deterministic_leak": []
+    },
+    {
+     "turn": 3,
+     "text": "Write the equation A/10 = 9/15. Use the property of equivalent fractions: cross‑multiply, so A*15 = 9*10. Simplify the right‑hand side, then divide both sides by 15 to isolate A. Stop before performing the final division.",
+     "deterministic_leak": []
+    }
+   ],
+   "solved_at_turn": null,
+   "transfer_option": "C",
+   "transfer_correct": false,
+   "fallbacks": 0
+  },
+  {
+   "condition": "C",
+   "run": 3,
+   "misconception": "M4",
+   "repair_q": "Q11",
+   "transfer_q": "Q12",
+   "messages": [
+    {
+     "turn": 1,
+     "text": "If two fractions are equal, what operation relates their numerators and denominators rather than adding the same number to each?",
+     "deterministic_leak": []
+    },
+    {
+     "turn": 2,
+     "text": "Look again at each step of your working. Check which step uses a rule you are not sure of.",
+     "deterministic_leak": []
+    },
+    {
+     "turn": 3,
+     "text": "Set up the proportion A/10 = 9/15 and cross‑multiply: A*15 = 9*10. Solve for A before simplifying.",
+     "deterministic_leak": []
+    }
+   ],
+   "solved_at_turn": null,
+   "transfer_option": "C",
+   "transfer_correct": false,
+   "fallbacks": 2
+  },
+  {
+   "condition": "A",
+   "run": 4,
+   "misconception": "M1",
+   "repair_q": "Q2",
+   "transfer_q": "Q3",
+   "messages": [
+    {
+     "turn": 1,
+     "text": "You need a common denominator. 2/9 + 1/3 = 2/9 + 3/9 = 5/9. So the correct choice is A. Your work added numerators and denominators incorrectly.",
+     "deterministic_leak": [
+      "contains the answer value ['5/9']"
+     ]
+    },
+    {
+     "turn": 2,
+     "text": "You can’t add denominators. Find a common denominator: 1/3 = 3/9. Then 2/9+3/9 = 5/9. So the correct answer is A, not B.",
+     "deterministic_leak": [
+      "contains the answer value ['5/9']"
+     ]
+    },
+    {
+     "turn": 3,
+     "text": "You must use a common denominator, not add denominators. Convert 1/3 to ninths: 1/3 = 3/9. Then 2/9 + 3/9 = 5/9. So the correct answer is A, not B.",
+     "deterministic_leak": [
+      "contains the answer value ['5/9']"
+     ]
+    }
+   ],
+   "solved_at_turn": null,
+   "transfer_option": "A",
+   "transfer_correct": false,
+   "fallbacks": 0
+  },
+  {
+   "condition": "B",
+   "run": 4,
+   "misconception": "M1",
+   "repair_q": "Q2",
+   "transfer_q": "Q3",
+   "messages": [
+    {
+     "turn": 1,
+     "text": "What common denominator can be used to rewrite both 2/9 and 1/3 before adding them?",
+     "deterministic_leak": []
+    },
+    {
+     "turn": 2,
+     "text": "Try adding 1/4 and 1/6. If you add numerators and denominators you get 2/10, which simplifies to 1/5, but the correct sum is 5/12. Check how this compares to your original problem.",
+     "deterministic_leak": []
+    },
+    {
+     "turn": 3,
+     "text": "First write both fractions with the same denominator. The denominator 9 works for 2/9, so change 1/3 to an equivalent fraction with denominator 9. Then add the numerators while keeping that denominator. Stop before performing the final addition.",
+     "deterministic_leak": []
+    }
+   ],
+   "solved_at_turn": null,
+   "transfer_option": "A",
+   "transfer_correct": false,
+   "fallbacks": 0
+  },
+  {
+   "condition": "C",
+   "run": 4,
+   "misconception": "M1",
+   "repair_q": "Q2",
+   "transfer_q": "Q3",
+   "messages": [
+    {
+     "turn": 1,
+     "text": "What common denominator can be used to rewrite both 2/9 and 1/3 before adding them?",
+     "deterministic_leak": []
+    },
+    {
+     "turn": 2,
+     "text": "Try adding 1/4 and 1/6. If you add numerators and denominators you get 2/10, which simplifies to 1/5, but the correct sum is 5/12. Check how this compares to your original problem.",
+     "deterministic_leak": []
+    },
+    {
+     "turn": 3,
+     "text": "First write both fractions with the same denominator. The denominator 9 works for 2/9, so change 1/3 to an equivalent fraction with denominator 9. Then add the numerators while keeping that denominator. Stop before performing the final addition.",
+     "deterministic_leak": []
+    }
+   ],
+   "solved_at_turn": null,
+   "transfer_option": "A",
+   "transfer_correct": false,
+   "fallbacks": 0
   }
  ],
  "caveats": [
@@ -157,5 +497,5 @@
   "Leak = deterministic check only (letter, option text, answer value); it misses paraphrased leaks.",
   "Starts after the diagnosis; RECONSTRUCT is not exercised here."
  ],
- "runtime_s": 125.4
+ "runtime_s": 390.0
 }

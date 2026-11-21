@@ -27,6 +27,22 @@ Last update: 2026-11-21 ~20:00, step 9 + Gate P0.
 - `docs/TEAMMATE_INSTRUCTIONS.md`: how the Next.js app replaces `app/api/chat/route.ts` (`streamText` ->
   proxy to FastAPI), the `next.config.mjs` rewrite, the turn loop, the SafeText rule. Frontend repo not touched.
 
+## Measured: `results/tutor.json` (SIMULATION PROXY, 5 runs per condition, all roles on gpt-oss-120b)
+LLM-played students with one planted misconception (M1..M4 rotating), up to 3 tutor turns, then a fresh
+transfer question. Team decision: 5 runs (free-tier token cap); we accept the small sample.
+| condition | tutor messages | leak rate per message (deterministic) [95% CI] | transfer pass [95% CI] |
+|---|---|---|---|
+| A plain tutor | 13 | 1.00 [0.77, 1.00] (leaks in 5/5 runs) | 0.40 [0.12, 0.77] |
+| B TRACE, no guards | 13 | 0.00 [0.00, 0.23] | 0.00 [0.00, 0.43] |
+| C full TRACE | 13 | 0.00 [0.00, 0.23] | 0.20 [0.04, 0.62] |
+- Honest reading: the plain tutor states the answer in every message (e.g. "1/3+2/5 = 22/30 = 11/15"); TRACE
+  never did (deterministic check). **Transfer differences are noise at n=5** (CIs overlap); do not claim TRACE
+  improves learning from this. B and C tie on deterministic leaks: the hint prompt + state machine already avoid
+  them; what the guards add (congruency, false maths, paraphrased leaks) is not measured here. C used the
+  verified fallback twice.
+- A bug made the first attempt stop after 1 run: a unit test wrote a fake "daily cap" row into the real call log.
+  Fixed: `tests/conftest.py` gives every test a temporary log DB; the bench only reads its own session's rows.
+
 ## Gate P0 (checked 2026-11-21 ~20:00)
 - [x] pytest green: 100 passed (tests/test_server.py, test_tutor.py, test_contract.py, …).
 - [x] `results/diagnosis.json` (eval/bench_diagnosis.py) and `results/detector.json` (eval/eval_detector.py) exist,

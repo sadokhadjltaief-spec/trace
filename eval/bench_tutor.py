@@ -128,7 +128,8 @@ def summarise(rows: list[dict]) -> dict:
 
 def daily_cap_hit(since: float) -> bool:
     con = llm._db()
-    n = con.execute("SELECT COUNT(*) FROM llm_calls WHERE ts >= ? AND error LIKE '%daily cap%'", (since,)).fetchone()[0]
+    n = con.execute("SELECT COUNT(*) FROM llm_calls WHERE ts >= ? AND session = 'bench_tutor' "
+                    "AND error LIKE '%daily cap%'", (since,)).fetchone()[0]
     con.close()
     return n > 0
 

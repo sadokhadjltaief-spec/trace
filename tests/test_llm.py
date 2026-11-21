@@ -90,6 +90,7 @@ def test_daily_cap_fails_fast(monkeypatch, tmp_path):
     monkeypatch.setattr(llm, "_groq", lambda: Fake)
     monkeypatch.setattr(llm, "_cache_dir", lambda: tmp_path)
     monkeypatch.setattr(llm, "_throttle", lambda *a, **k: None)
+    monkeypatch.setattr(llm, "_log", lambda *a, **k: None)  # never write test rows into the real call log
     with pytest.raises(llm.LLMError, match="daily cap"):
         llm.chat(llm.Request(messages=[{"role": "user", "content": "x"}], purpose="test_tpd"))
     assert len(calls) == 1

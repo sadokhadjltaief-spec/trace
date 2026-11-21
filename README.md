@@ -137,7 +137,7 @@ Reproduce the results:
 ```powershell
 .\.venv\Scripts\python.exe eval\bench_diagnosis.py   # results/diagnosis.json (no LLM)
 .\.venv\Scripts\python.exe eval\eval_detector.py     # results/detector.json
-.\.venv\Scripts\python.exe eval\eval_guards.py --labels eval\guard_labels_clean.csv
+.\.venv\Scripts\python.exe eval\eval_guards.py
 .\.venv\Scripts\python.exe eval\bench_tutor.py --runs 5
 .\.venv\Scripts\python.exe eval\eval_style.py --n 10
 ```

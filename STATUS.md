@@ -51,9 +51,10 @@ Last update: 2026-11-21 ~22:30, step 11 (course RAG, no LLM).
 - The 3 "leak" misses (G04, G08, G12) are messages that tell the student to use the WRONG method; the team labelled
   them as revealing the answer, the leak check does not, but the congruency check blocks all three.
 - Labels: the team corrected G07/G08, G11/G12 (swapped), G17 (M2), G22 (leak) on 2026-11-21. Excel saves the
-  labels at the end of each line after `;;;;;`; they were read from there into `eval/guard_labels_clean.csv`
-  (UTF-8, original messages), which the results use. Run (0 tokens, judge answers cached):
-  `.\.venv\Scripts\python.exe eval\eval_guards.py --labels eval\guard_labels_clean.csv`
+  labels at the end of each line after `;;;;;`; they were read from there and `eval/guard_labels.csv` is now a
+  clean UTF-8 CSV (original messages + final labels; Excel copies backed up in `.cache/`). To edit it in Excel,
+  save as "CSV UTF-8". Run (0 tokens, judge answers cached):
+  `.\.venv\Scripts\python.exe eval\eval_guards.py`
 - Honest claim: "checked against 30 messages labelled by the team; every unsafe one blocked". Small, hand-written
   set (our own messages); not a general validation.
 

@@ -1,11 +1,11 @@
 {
  "script": "eval/eval_guards.py",
  "label": "Guard decisions vs human labels (our 30 hand-written test messages, labelled by the team)",
- "created": "2026-11-21T21:01:08",
+ "created": "2026-11-21T21:13:24",
  "judge_model": "openai/gpt-oss-120b",
  "n_labelled": 30,
  "n_total": 30,
- "labels_file": "eval\\guard_labels_clean.csv",
+ "labels_file": "eval\\guard_labels.csv",
  "leak_full_guard": {
   "n": 30,
   "positives": 8,

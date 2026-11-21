@@ -392,6 +392,10 @@ def main():
     n_ok = sum(q["verified"] for q in questions) + sum(r["verified"] for r in recon)
     log(f"\nwrote data/bank/bank.json ({len(questions)} questions, {len(recon)} reconstruction items); "
         f"verified items: {n_ok}")
+    # physics bank (hand-written, no LLM): copy the human ticks of physics_review.md into physics.json
+    from engine.sims import poe
+    phys = poe.sync_verified()
+    log(f"physics.json: {sum(phys.values())}/{len(phys)} items verified (ticks in data/bank/physics_review.md)")
     (BANK / "build_log.md").write_text("\n".join(LOG), encoding="utf-8")
 
 

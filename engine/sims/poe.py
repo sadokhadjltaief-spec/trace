@@ -96,6 +96,19 @@ def table(its: list[dict]) -> bayes.Table:
     return bayes.build_table(qs)
 
 
+def sync_verified() -> dict[str, bool]:
+    """Write the human ticks of physics_review.md into the `verified` field of physics.json (the engine reads the
+    ticks directly; this keeps the bank file consistent for people who read it)."""
+    ok = approved()
+    raw = json.loads(BANK.read_text(encoding="utf-8"))
+    for it in raw["items"]:
+        it["verified"] = it["id"] in ok
+    BANK.write_text(json.dumps(raw, ensure_ascii=False, indent=1), encoding="utf-8")
+    _raw.cache_clear()
+    items.cache_clear()
+    return {it["id"]: it["verified"] for it in raw["items"]}
+
+
 def write_review() -> None:
     """data/bank/physics_review.md: one tick box per item, keeping existing ticks."""
     ok = approved()

@@ -103,7 +103,7 @@ Last update: 2026-11-21, step 15 (trilingual report, handoff note). Steps 12-15 
 - `data/bank/physics.json`: 4 physics misconceptions (heavier always falls faster; period depends on mass;
   constant force gives constant speed; stops when the force stops), 4 prediction items + 4 transfer items,
   original wording EN/FR/AR. **The correct option is computed by running the simulation**, never stored.
-  **Waiting for HUMAN review**: tick items in `data/bank/physics_review.md` (generated; 0/8 ticked). Until then
+  **Reviewed by the team (8/8 ticked, 2026-11-21)**; `build_bank.py` copies the ticks into `physics.json`. Before that
   the items are only live with `allow_unverified_dev: true`.
 - POE flow: predict (+ confidence) -> separate PHYSICS posterior with the same Bayesian engine -> observe (computed
   runs + result text, grading method `simulation`) -> explain (stored for the teacher, not graded) -> transfer

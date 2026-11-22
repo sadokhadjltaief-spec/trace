@@ -539,5 +539,35 @@
   "en": "I cannot answer this right now (offline). Ask a question from your course, or start a diagnosis.",
   "fr": "Je ne peux pas répondre à cette question maintenant (hors ligne). Pose une question sur ton cours, ou commence un diagnostic.",
   "ar": "لا أستطيع الإجابة عن هذا السؤال الآن (دون اتصال). اطرح سؤالًا عن درسك أو ابدأ التشخيص."
+ },
+ "practice_source_unsupported": {
+  "en": "This source is not supported yet (it needs the internet). Use a file or paste the text.",
+  "fr": "Cette source n'est pas encore prise en charge (elle demande internet). Utilise un fichier ou colle le texte.",
+  "ar": "هذا المصدر غير مدعوم بعد (يحتاج إلى الإنترنت). استعمل ملفًا أو الصق النص."
+ },
+ "practice_no_material": {
+  "en": "Add a file or paste a text first.",
+  "fr": "Ajoute d'abord un fichier ou colle un texte.",
+  "ar": "أضف ملفًا أو الصق نصًّا أولًا."
+ },
+ "practice_no_text": {
+  "en": "No readable text was found in this material.",
+  "fr": "Aucun texte lisible n'a été trouvé dans ce contenu.",
+  "ar": "لم يُعثر على نصّ مقروء في هذا المحتوى."
+ },
+ "practice_unavailable": {
+  "en": "This could not be generated right now. You may be offline. Try again later.",
+  "fr": "Impossible de générer ce contenu maintenant. Tu es peut-être hors ligne. Réessaie plus tard.",
+  "ar": "تعذّر إنشاء هذا المحتوى الآن. ربما أنت دون اتصال. حاول لاحقًا."
+ },
+ "practice_quiz_verification": {
+  "en": "Questions generated from your material. A second, independent solve checked the answer key. The guards checked every text. No teacher has reviewed them. {kept} of {total} questions kept.",
+  "fr": "Questions générées depuis ton contenu. Une seconde résolution indépendante a vérifié le corrigé. Les garde-fous ont vérifié chaque texte. Aucun enseignant ne les a relues. {kept} questions gardées sur {total}.",
+  "ar": "أسئلة مولّدة من محتواك. تحقّق حلّ ثانٍ مستقلّ من الإجابات. فحصت الضوابط كل نصّ. لم يراجعها أي معلّم. بقي {kept} من {total} سؤالًا."
+ },
+ "practice_cards_note": {
+  "en": "Cards generated from your material. The guards checked them ({dropped} removed). No teacher has reviewed them.",
+  "fr": "Cartes générées depuis ton contenu. Les garde-fous les ont vérifiées ({dropped} retirées). Aucun enseignant ne les a relues.",
+  "ar": "بطاقات مولّدة من محتواك. فحصتها الضوابط ({dropped} حُذفت). لم يراجعها أي معلّم."
  }
 }

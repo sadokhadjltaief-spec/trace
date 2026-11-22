@@ -463,6 +463,35 @@ def study_plan(files: list[tuple[str, bytes]], details: str = "", lang: str = "f
     return sp.make(files, details or "", lang, kw, suspects, mv, _mis(h) if h else None)
 
 
+def _practice_ctx(session_id: str | None, lang: str):
+    s = _SESSIONS.get(session_id) if session_id else None
+    kw = tutor.style_kwargs(s["profile"] if s else {}, lang_of(lang))
+    names = _names()
+    suspects = {k: names[k] for k, p in s["diag"].as_dict().items() if k != "M0" and p > 0.2} if s else {}
+    return kw, suspects
+
+
+def practice_quiz(files: list[tuple[str, bytes]] | None = None, text: str = "", source: str = "file",
+                  details: str = "", lang: str = "fr", session_id: str | None = None) -> dict:
+    """Practice quiz from the student's file or pasted text (key cross-checked, kept on the server)."""
+    from engine import practice
+    kw, suspects = _practice_ctx(session_id, lang)
+    return practice.make_quiz(files or [], text, source, details, lang, kw, suspects)
+
+
+def practice_check(quiz_id: str, question_id: str, option: str) -> dict:
+    from engine import practice
+    return practice.check(quiz_id, question_id, option)
+
+
+def practice_cards(files: list[tuple[str, bytes]] | None = None, text: str = "", source: str = "file",
+                   details: str = "", lang: str = "fr", session_id: str | None = None) -> dict:
+    """Flashcards from the student's file or pasted text (guarded drafts)."""
+    from engine import practice
+    kw, suspects = _practice_ctx(session_id, lang)
+    return practice.make_cards(files or [], text, source, details, lang, kw, suspects)
+
+
 def _lesson_refs(mv: dict, k: int = 2) -> list[LessonRef]:
     """Curriculum-grounded remediation: lesson pages for the diagnosed misconception (only if courses exist)."""
     if mv["id"] == "M0":

@@ -20,7 +20,7 @@ from engine import api
 from engine.config import cfg
 from engine.contract import (CONTRACT_VERSION, CourseAnswer, MisconceptionView, NextQuestion, SessionState,
                              SessionSummary, SimItemView, SimRun, SimTurn, StudioOutput, TutorTurn, GameTurn,
-                             ReportExport, ChatAnswer, StudyPlan)
+                             ReportExport, ChatAnswer, StudyPlan, PracticeCards, PracticeCheck, PracticeQuiz)
 
 app = FastAPI(title="TRACE engine API", version=CONTRACT_VERSION,
               description="Thin HTTP wrapper over engine/api.py. Shapes: docs/INTERFACE.md.")
@@ -296,3 +296,39 @@ async def study_plan(files: list[UploadFile] = File(...), details: str = Form(""
             raise HTTPException(400, f"{f.filename}: larger than 50 MB")
         data.append((f.filename or "file", b))
     return _call(api.study_plan, data, details, lang, session_id)
+
+
+async def _read_files(files: list[UploadFile] | None) -> list[tuple[str, bytes]]:
+    data = []
+    for f in files or []:
+        b = await f.read()
+        if len(b) > UPLOAD_MAX_BYTES:
+            raise HTTPException(400, f"{f.filename}: larger than 50 MB")
+        data.append((f.filename or "file", b))
+    if len(data) > UPLOAD_MAX_FILES:
+        raise HTTPException(400, f"up to {UPLOAD_MAX_FILES} files")
+    return data
+
+
+@app.post("/api/v1/practice/quiz", response_model=PracticeQuiz)
+async def practice_quiz(files: list[UploadFile] | None = File(None), text: str = Form(""), source: str = Form("file"),
+                        details: str = Form(""), lang: Literal["fr", "ar", "en"] = Form("fr"),
+                        session_id: str | None = Form(None)):
+    return _call(api.practice_quiz, await _read_files(files), text, source, details, lang, session_id)
+
+
+class PracticeCheckBody(BaseModel):
+    question_id: str
+    option: str
+
+
+@app.post("/api/v1/practice/quiz/{quiz_id}/check", response_model=PracticeCheck)
+def practice_check(quiz_id: str, body: PracticeCheckBody):
+    return _call(api.practice_check, quiz_id, body.question_id, body.option)
+
+
+@app.post("/api/v1/practice/cards", response_model=PracticeCards)
+async def practice_cards(files: list[UploadFile] | None = File(None), text: str = Form(""), source: str = Form("file"),
+                         details: str = Form(""), lang: Literal["fr", "ar", "en"] = Form("fr"),
+                         session_id: str | None = Form(None)):
+    return _call(api.practice_cards, await _read_files(files), text, source, details, lang, session_id)

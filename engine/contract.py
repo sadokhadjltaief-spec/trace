@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.8"  # 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7-1.8 plan
+CONTRACT_VERSION = "1.9"  # 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7-1.8 plan; 1.9 practice
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]
@@ -386,4 +386,38 @@ class StudyPlan(_M):
     targeted_at: MisconceptionView | None = None
     dropped_by_guards: int = 0
     unreadable_pages: list[str] = []
+    refused: str | None = None
+
+
+# ---------------------------------------------------------------- practice from the student's material (since 1.9)
+class PracticeQuestion(_M):
+    """A practice question generated from the student's file; the answer key stays on the server."""
+    id: str
+    question: SafeText
+    options: dict[str, SafeText]   # A-D
+    sources: list[Source] = []
+
+
+class PracticeQuiz(_M):
+    contract_version: str = CONTRACT_VERSION
+    quiz_id: str
+    questions: list[PracticeQuestion]
+    sources: list[Source]
+    verification: str              # how the key was checked (show it): generated + blind cross-check, not a teacher
+    refused: str | None = None
+
+
+class PracticeCheck(_M):
+    question_id: str
+    correct: bool
+    correct_option: str
+    explanation: SafeText
+
+
+class PracticeCards(_M):
+    contract_version: str = CONTRACT_VERSION
+    deck_id: str
+    cards: list[dict]              # {id, front SafeText, back SafeText}
+    sources: list[Source]
+    note: str                      # e.g. generated and checked by the guards, not reviewed by a teacher
     refused: str | None = None

@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-22, study plan from content + useful maths chat (team feedback).
+Last update: 2026-11-22, interactive Quiz (practice from the student's material).
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [x] `live.allow_unverified_dev: false` set by the team in `config.yaml` (committed 2026-11-21). Consequence:
@@ -43,6 +43,18 @@ Last update: 2026-11-22, study plan from content + useful maths chat (team feedb
 - The team put a new `GROQ_API_KEY` in `.env`, but the old key was still a Windows user variable, which took
   precedence. `engine/config.py` now loads `.env` with `override=True`. Checked (key never printed): the engine uses
   the `.env` key; both models answer (120b 927/1000 requests left today, 20b 999/1000).
+
+## Interactive practice pages (2026-11-22, team request)
+- Step 1, Quiz: `engine/practice.py` + `POST /api/v1/practice/quiz` (file or pasted text) and
+  `POST /api/v1/practice/quiz/{id}/check`. One LLM call writes the questions; a second, independent call answers
+  them blind; only questions where both agree are kept; every text guarded; the answer key stays on the server.
+  **Deviation from the brief, accepted by the team**: practice questions from the student's own file have an
+  LLM-written key (cross-checked, labelled "pas vérifié par un enseignant"); diagnosis and tutor still use only the
+  human-verified bank. YouTube / Wikipedia sources are refused (internet needed; demo is offline).
+  Live: demo PDF and chap2.pdf → 8/8 questions kept each (~17k tokens, cached).
+  Frontend: new `components/dashboard/quiz-player.tsx` (one question at a time, A-D, answer checked by the engine,
+  explanation, progress bar, final score, restart); the source picker now keeps the File objects. Copies of all
+  frontend files TRACE touched: `frontend_integration/` (the app is not a git repository).
 
 ## Team feedback fixed (2026-11-22): content-based study plan, useful maths chat
 - Why the team saw "Lis la page 1": they uploaded their own PDF with the engine in forced offline mode

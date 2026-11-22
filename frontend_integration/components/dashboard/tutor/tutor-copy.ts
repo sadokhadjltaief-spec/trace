@@ -1,0 +1,88 @@
+import type { Lang } from '@/lib/translations'
+
+const en = {
+  greeting: (name: string) => `Hi ${name}! I'm your WASLA tutor.`,
+  subtitle: 'I find the exact idea behind your mistake, then we fix it together.',
+  placeholder: 'Your answer, e.g. A sure, because…',
+  start: 'Start the diagnosis: fractions and negative numbers',
+  send: 'Send',
+  stop: 'Stop',
+  newChat: 'New chat',
+  history: 'History',
+  closeHistory: 'Close history',
+  historyEmpty: 'Your conversations will appear here.',
+  pinned: 'Pinned',
+  recent: 'Recent',
+  pin: 'Pin conversation',
+  unpin: 'Unpin conversation',
+  remove: 'Delete conversation',
+  untitled: 'New conversation',
+  micStart: 'Dictate your question',
+  micStop: 'Stop dictation',
+  thinking: 'The tutor is thinking…',
+  error: 'Something went wrong. Please try again.',
+  retry: 'Try again',
+  disclaimer: 'Every tutor message is checked before it is shown (answer not revealed, maths verified).',
+  you: 'You',
+  tutor: 'WASLA tutor',
+}
+
+export type TutorCopy = typeof en
+
+const fr: TutorCopy = {
+  greeting: (name) => `Bonjour ${name} ! Je suis ton tuteur WASLA.`,
+  subtitle: 'Je trouve l’idée précise qui cause ton erreur, puis on la corrige ensemble.',
+  placeholder: 'Ta réponse, ex. : A sûr, parce que…',
+  start: 'Commencer le diagnostic : fractions et nombres relatifs',
+  send: 'Envoyer',
+  stop: 'Arrêter',
+  newChat: 'Nouveau chat',
+  history: 'Historique',
+  closeHistory: 'Fermer l’historique',
+  historyEmpty: 'Tes conversations apparaîtront ici.',
+  pinned: 'Épinglées',
+  recent: 'Récentes',
+  pin: 'Épingler la conversation',
+  unpin: 'Désépingler la conversation',
+  remove: 'Supprimer la conversation',
+  untitled: 'Nouvelle conversation',
+  micStart: 'Dicter ta question',
+  micStop: 'Arrêter la dictée',
+  thinking: 'Le tuteur réfléchit…',
+  error: 'Une erreur est survenue. Réessaie.',
+  retry: 'Réessayer',
+  disclaimer: 'Chaque message du tuteur est vérifié avant d’être affiché (réponse non révélée, calculs vérifiés).',
+  you: 'Toi',
+  tutor: 'Tuteur WASLA',
+}
+
+const ar: TutorCopy = {
+  greeting: (name) => `مرحباً ${name}! أنا معلمك في وصلة.`,
+  subtitle: 'أجد الفكرة الدقيقة وراء خطئك، ثم نصحّحها معًا.',
+  placeholder: 'إجابتك، مثال: A متأكّد لأن…',
+  start: 'ابدأ التشخيص: الكسور والأعداد النسبية',
+  send: 'إرسال',
+  stop: 'إيقاف',
+  newChat: 'محادثة جديدة',
+  history: 'السجل',
+  closeHistory: 'إغلاق السجل',
+  historyEmpty: 'ستظهر محادثاتك هنا.',
+  pinned: 'المثبتة',
+  recent: 'الأخيرة',
+  pin: 'تثبيت المحادثة',
+  unpin: 'إلغاء تثبيت المحادثة',
+  remove: 'حذف المحادثة',
+  untitled: 'محادثة جديدة',
+  micStart: 'أملِ سؤالك صوتياً',
+  micStop: 'إيقاف الإملاء',
+  thinking: 'المعلم يفكر…',
+  error: 'حدث خطأ ما. حاول مرة أخرى.',
+  retry: 'إعادة المحاولة',
+  disclaimer: 'كل رسالة من المعلّم تُفحص قبل عرضها (لا تكشف الإجابة، والحسابات مُتحقَّق منها).',
+  you: 'أنت',
+  tutor: 'معلم وصلة',
+}
+
+export const TUTOR_COPY: Record<Lang, TutorCopy> = { en, fr, ar }
+
+export const SPEECH_LANG: Record<Lang, string> = { en: 'en-US', fr: 'fr-FR', ar: 'ar-MA' }

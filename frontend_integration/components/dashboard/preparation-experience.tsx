@@ -6,6 +6,7 @@ import type { DashboardCopy } from './dashboard-copy'
 import type { Lang } from '@/lib/translations'
 import { HighwayGame } from './highway-game'
 import { QuizPlayer, type PracticeQuiz } from './quiz-player'
+import { FlashcardPlayer } from './flashcard-player'
 
 type FlowKind = 'quiz' | 'plan' | 'flashcards'
 
@@ -133,6 +134,9 @@ export function PreparationExperience({ copy, kind, fileNames, details, lang, on
   if (playing && quiz && quiz.questions.length) {
     return <QuizPlayer quiz={quiz} lang={lang} onExit={() => setPlaying(false)} />
   }
+  if (playing && cards && cards.cards.length) {
+    return <FlashcardPlayer deck={cards} lang={lang} onExit={() => setPlaying(false)} />
+  }
 
   return (
     <section className="min-h-[calc(100dvh-5rem)] bg-muted/40 px-4 py-8 md:px-8 md:py-12" aria-labelledby="preparation-title">
@@ -232,8 +236,16 @@ export function PreparationExperience({ copy, kind, fileNames, details, lang, on
           {ready && quiz && !quiz.refused && quiz.questions.length ? (
             <p className="mt-6 text-center text-sm text-muted-foreground">{quiz.questions.length} questions · {quiz.verification}</p>
           ) : null}
+          {ready && cards && !cards.refused && cards.cards.length ? (
+            <p className="mt-6 text-center text-sm text-muted-foreground">{cards.cards.length} · {cards.note}</p>
+          ) : null}
           {ready ? (
             <div className="mt-7 flex flex-col-reverse justify-center gap-3 sm:flex-row">
+              {cards && !cards.refused && cards.cards.length ? (
+                <button type="button" onClick={() => setPlaying(true)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-foreground transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  {START_COPY[lang].cards}
+                </button>
+              ) : null}
               {quiz && !quiz.refused && quiz.questions.length ? (
                 <button type="button" onClick={() => setPlaying(true)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-foreground transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   {START_COPY[lang].quiz}

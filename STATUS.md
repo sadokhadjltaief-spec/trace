@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-22, interactive Quiz (practice from the student's material).
+Last update: 2026-11-22, interactive Quiz + Flashcards.
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [x] `live.allow_unverified_dev: false` set by the team in `config.yaml` (committed 2026-11-21). Consequence:
@@ -55,6 +55,12 @@ Last update: 2026-11-22, interactive Quiz (practice from the student's material)
   Frontend: new `components/dashboard/quiz-player.tsx` (one question at a time, A-D, answer checked by the engine,
   explanation, progress bar, final score, restart); the source picker now keeps the File objects. Copies of all
   frontend files TRACE touched: `frontend_integration/` (the app is not a git repository).
+
+- Step 2, Flashcards: `POST /api/v1/practice/cards` (file or pasted text; cards from 6 passages spread over the
+  material, guarded; each answer cites its page). Live: 10 cards on the demo PDF, 9 on chap2.pdf (1 blocked), cached.
+  Frontend: new `components/dashboard/flashcard-player.tsx` (card flips on click / Space; "Je savais" / "Je ne savais
+  pas"; missed cards come back at the end; final count and "revoir les cartes manquées"; no animation with
+  reduced motion).
 
 ## Team feedback fixed (2026-11-22): content-based study plan, useful maths chat
 - Why the team saw "Lis la page 1": they uploaded their own PDF with the engine in forced offline mode

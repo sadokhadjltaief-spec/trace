@@ -54,6 +54,7 @@ def test_plan_from_pdf(env):
     assert r["targeted_at"] is None and d1["duration_min"] == 45 and d1["title"]["text"].startswith("Étudier")
     assert r["chapters"][0]["pages"] == [1] and r["chapters"][0]["concepts"][0]["text"] == "Dénominateur commun"
     assert r["formulas"][0]["shown_allowed"]
+    assert [pt["page"] for pt in r["page_texts"]] == [1, 2, 3, 4] and "dénominateur" in r["page_texts"][0]["text"]
 
 
 def test_plan_targets_the_diagnosis(env):

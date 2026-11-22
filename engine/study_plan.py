@@ -20,7 +20,7 @@ import re
 from collections import Counter
 
 from engine import guards, llm, rag
-from engine.contract import MisconceptionView, PlanChapter, PlanDay, Source, StudyPlan
+from engine.contract import MisconceptionView, PageText, PlanChapter, PlanDay, Source, StudyPlan
 from engine.i18n import lang_of
 from engine.studio.flashcards import guards_safetext
 
@@ -143,7 +143,8 @@ def fallback_plan(pages: list[tuple[str, int, str]], lang: str, kw: dict, mis_vi
                      chapters=[PlanChapter(title=st(s["title"]), concepts=[], pages=s["pages"]) for s in secs],
                      sources=[Source(file=f, page=n) for f, n, _ in pages],
                      targeted_at=MisconceptionView(**mis_view) if mis_view else None, dropped_by_guards=0,
-                     unreadable_pages=unread, plan_id="fallback").model_dump()
+                     unreadable_pages=unread, plan_id="fallback",
+                     page_texts=[PageText(file=f, page=n, text=t[:6000]) for f, n, t in pages]).model_dump()
 
 
 def _guard(texts: dict[str, str], suspects: dict, lang: str, kw: dict) -> dict:
@@ -247,4 +248,5 @@ def make(files: list[tuple[str, bytes]], details: str, lang: str, kw: dict, susp
                      sources=[Source(file=f, page=n) for f, n, _ in raw],
                      targeted_at=MisconceptionView(**mis_view) if mis_view else None,
                      dropped_by_guards=dropped, unreadable_pages=unread,
+                     page_texts=[PageText(file=f, page=n, text=tx[:6000]) for f, n, tx in pages],
                      plan_id=hashlib.sha1(text.encode("utf-8")).hexdigest()[:10]).model_dump()

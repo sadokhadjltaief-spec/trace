@@ -365,6 +365,13 @@ class PlanDay(_M):
     duration_min: int | None = None  # since 1.8
 
 
+class PageText(_M):
+    """Text of one page of the student's own file (extracted by PyMuPDF, headers/footers removed; not generated)."""
+    file: str
+    page: int
+    text: str
+
+
 class PlanChapter(_M):
     """A chapter / section found in the CONTENT of the files (since 1.8)."""
     title: SafeText
@@ -382,6 +389,7 @@ class StudyPlan(_M):
     check_questions: list[SafeText]
     chapters: list[PlanChapter] = []   # since 1.8: the course's structure, as analysed from its content
     formulas: list[SafeText] = []      # since 1.8: key formulas / rules copied from the pages
+    page_texts: list[PageText] = []    # since 1.9: cleaned text of every page (for the study session reader)
     sources: list[Source]          # every page read
     targeted_at: MisconceptionView | None = None
     dropped_by_guards: int = 0

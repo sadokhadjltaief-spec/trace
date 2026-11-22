@@ -7,6 +7,7 @@ import type { Lang } from '@/lib/translations'
 import { HighwayGame } from './highway-game'
 import { QuizPlayer, type PracticeQuiz } from './quiz-player'
 import { FlashcardPlayer } from './flashcard-player'
+import { StudyPlanSession } from './study-plan-session'
 
 type FlowKind = 'quiz' | 'plan' | 'flashcards'
 
@@ -28,10 +29,10 @@ export type PracticeCards = {
   note: string
   refused: string | null
 }
-const START_COPY: Record<Lang, { quiz: string; cards: string }> = {
-  en: { quiz: 'Start the quiz', cards: 'Start' },
-  fr: { quiz: 'Commencer le quiz', cards: 'Commencer' },
-  ar: { quiz: 'ابدأ الاختبار', cards: 'ابدأ' },
+const START_COPY: Record<Lang, { quiz: string; cards: string; plan: string }> = {
+  en: { quiz: 'Start the quiz', cards: 'Start', plan: 'Start the session' },
+  fr: { quiz: 'Commencer le quiz', cards: 'Commencer', plan: 'Commencer la session' },
+  ar: { quiz: 'ابدأ الاختبار', cards: 'ابدأ', plan: 'ابدأ الجلسة' },
 }
 
 // TRACE engine study plan (C:\TRACE\engine\study_plan.py). Texts arrive checked by the engine's guards.
@@ -43,6 +44,7 @@ type StudyPlan = {
   days: PlanDay[]
   check_questions: SafeText[]
   formulas?: SafeText[]
+  page_texts?: { file: string; page: number; text: string }[]
   targeted_at: { name_en: string; name_fr: string; name_ar: string } | null
   refused: string | null
 }
@@ -136,6 +138,9 @@ export function PreparationExperience({ copy, kind, fileNames, details, lang, on
   }
   if (playing && cards && cards.cards.length) {
     return <FlashcardPlayer deck={cards} lang={lang} onExit={() => setPlaying(false)} />
+  }
+  if (playing && plan && plan.days.length) {
+    return <StudyPlanSession plan={plan} lang={lang} onExit={() => setPlaying(false)} />
   }
 
   return (
@@ -241,6 +246,11 @@ export function PreparationExperience({ copy, kind, fileNames, details, lang, on
           ) : null}
           {ready ? (
             <div className="mt-7 flex flex-col-reverse justify-center gap-3 sm:flex-row">
+              {plan && !plan.refused && plan.days.length ? (
+                <button type="button" onClick={() => setPlaying(true)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-foreground transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  {START_COPY[lang].plan}
+                </button>
+              ) : null}
               {cards && !cards.refused && cards.cards.length ? (
                 <button type="button" onClick={() => setPlaying(true)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-foreground transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   {START_COPY[lang].cards}

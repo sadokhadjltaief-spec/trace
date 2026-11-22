@@ -1,6 +1,6 @@
 # STATUS
 
-Last update: 2026-11-22, interactive Quiz + Flashcards.
+Last update: 2026-11-22, interactive Quiz, Flashcards and Study session.
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [x] `live.allow_unverified_dev: false` set by the team in `config.yaml` (committed 2026-11-21). Consequence:
@@ -61,6 +61,14 @@ Last update: 2026-11-22, interactive Quiz + Flashcards.
   Frontend: new `components/dashboard/flashcard-player.tsx` (card flips on click / Space; "Je savais" / "Je ne savais
   pas"; missed cards come back at the end; final count and "revoir les cartes manquées"; no animation with
   reduced motion).
+
+- Step 3, Study session: the study plan now returns `page_texts` (cleaned text of every page, from the student's
+  own file, not generated). Frontend: new `components/dashboard/study-plan-session.tsx`: "Commencer la session"
+  opens day 1; each step shows the day's focus, duration, goals, tasks (tick them off) and the text of one page;
+  "Précédent / Suivant / Jour suivant" across the whole plan; end screen.
+- Offline check (engine with `TRACE_DEMO=1`, real HTTP routes): quiz + answer check + flashcards + plan for the demo
+  PDF and chap2.pdf → 31/31 LLM calls from the cache, 0 misses. `npx tsc`: 0 errors. Not yet clicked through in the
+  browser (the team's servers were running the previous engine).
 
 ## Team feedback fixed (2026-11-22): content-based study plan, useful maths chat
 - Why the team saw "Lis la page 1": they uploaded their own PDF with the engine in forced offline mode

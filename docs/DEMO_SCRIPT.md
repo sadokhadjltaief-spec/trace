@@ -143,6 +143,15 @@ All offline: the Study Studio outputs for Amira (FR, M1) are cached; simulations
 - Exact wording matters for the cache: other questions still work offline but fall back (course passages instead of
   a written answer; a plan built by code, one page per day).
 
+## Optional · Quiz, Cartes mémo, Plan d'étude (offline, cached for the demo PDF and chap2.pdf)
+
+- Quiz → "Importer un fichier" → `C:\TRACE\docs\demo\cours_fractions_relatifs.pdf` → "Préparer mon quiz" →
+  "Commencer le quiz": 8 questions, one at a time, answer checked by the engine, explanation, final score.
+- Cartes mémo → same file → "Commencer": click the card to flip it, "Je savais" / "Je ne savais pas".
+- Plan d'étude → same file → plan → "Commencer la session": day 1, tasks to tick, the course page text,
+  "Suivant" / "Précédent".
+- Leave "détails" empty (the cache was recorded with an empty field).
+
 ## 4:15 – 4:40 · Results slide (read from `results/`)
 
 | what | number | source |

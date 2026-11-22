@@ -23,7 +23,7 @@ type Turn = {
 type SessionState = { session_id: string; current_question: QuestionView | null; warnings: string[] }
 type ChatAnswer = {
   on_topic: boolean
-  method: 'computed' | 'rag_llm' | 'rag_extractive' | 'tutor_llm' | 'not_found' | 'refusal'
+  method: 'computed' | 'rag_llm' | 'rag_extractive' | 'tutor_llm' | 'tutor_explain' | 'not_found' | 'refusal'
   label?: string
   answer: SafeText
   citations: { file: string; page: number; source_url: string | null }[]

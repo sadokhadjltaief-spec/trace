@@ -18,7 +18,7 @@ def latex_to_plain(s: str) -> str:
     for _ in range(3):  # nested fracs
         t = re.sub(r"\\frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}", r"(\1)/(\2)", t)
     t = t.replace("\\times", "*").replace("\\div", "/").replace("\\cdot", "*")
-    t = t.replace("×", "*").replace("÷", "/").replace("−", "-").replace("–", "-")
+    t = t.replace("·", "*").replace("⋅", "*").replace("×", "*").replace("÷", "/").replace("−", "-").replace("–", "-").replace("‑", "-")
     t = t.replace("\\left", "").replace("\\right", "").replace("\\square", "?")
     t = re.sub(r"\\[a-zA-Z]+", " ", t)
     t = t.replace("{", "(").replace("}", ")")
@@ -78,14 +78,17 @@ _EQ = re.compile(rf"(?<![\w/.])({_EXPR})\s*=\s*({_EXPR})(?![\w/])")
 _NUM_TOKEN = re.compile(r"-?\d+(?:\s+\d+/\d+|\s*/\s*\d+|\.\d+)?")
 
 
+_DEC_COMMA = re.compile(r"(?<![\d,])(\d+),(\d+)(?![\d,])")  # French / Arabic decimal comma: 3,14 -> 3.14
+
+
 def check_equalities(text: str) -> list[dict]:
     """Find simple 'lhs = rhs' claims in free text and verify each with SymPy."""
     out = []
-    t = latex_to_plain(text)
+    t = _DEC_COMMA.sub(r"\1.\2", latex_to_plain(text))
     # chains like 1+2 = 3 = 3: check consecutive pairs
     for m in _EQ.finditer(t):
         prev = t[:m.start()].rstrip().split(" ")[-1] if t[:m.start()].strip() else ""
-        if prev and (prev[-1] in "*/+-×÷−=" or (len(prev) == 1 and prev.isalpha())):
+        if prev and (prev[-1] in "*/+-×÷−=·⋅²³^√," or (len(prev) == 1 and prev.isalpha())):
             continue  # lhs is the tail of a longer expression we cannot see whole (e.g. 'A x 15 = ...')
         lhs, rhs = m.group(1).strip(), m.group(2).strip()
         ok = equal(lhs, rhs)
@@ -129,7 +132,7 @@ def check_inequalities(text: str) -> list[dict]:
     """Find simple comparison claims between two numbers ('2/5 < 1/3', '2/5 est inférieur à 1/3',
     '2/5 is smaller than 1/3', 'أصغر من') and verify each with SymPy. Claims about unnamed quantities
     ('smaller than each fraction') are not visible here: the guard judge extracts those (guards.py)."""
-    t = latex_to_plain(text)
+    t = _DEC_COMMA.sub(r"\1.\2", latex_to_plain(text))
     out = []
     for m in _SYM_INEQ.finditer(t):
         out.append({"claim": f"{m.group(1)} {m.group(2)} {m.group(3)}", "ok": compare(m.group(1), m.group(2), m.group(3))})

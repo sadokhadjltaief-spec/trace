@@ -349,7 +349,7 @@ class ChatAnswer(_M):
     contract_version: str = CONTRACT_VERSION
     question: str
     on_topic: bool
-    method: Literal["computed", "rag_llm", "rag_extractive", "tutor_llm", "not_found", "refusal"]
+    method: Literal["computed", "rag_llm", "rag_extractive", "tutor_llm", "tutor_explain", "not_found", "refusal"]
     topic_reason: str              # arithmetic | keywords | course passage | llm judge | judge unavailable
     label: str = ""                # since 1.8: where the answer comes from (show it under the answer)
     answer: SafeText

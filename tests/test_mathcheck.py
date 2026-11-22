@@ -37,3 +37,11 @@ def test_mentions_value_ignores_question_tokens():
     assert mc.mentions_value("The answer is 11/15.", "11/15") == ["11/15"]
     assert mc.mentions_value("Look at 1/3 again.", "1/3", exclude_from="1/3 + 2/5") == []
     assert mc.mentions_value("Try 22/30.", "11/15") == ["22/30"]
+
+
+def test_decimal_comma_and_middle_dot():
+    from engine import mathcheck as mc
+    assert mc.check_equalities("3,14 × 9 = 28,26") == [{"claim": "3.14 * 9 = 28.26", "ok": True}]
+    assert mc.check_equalities("3,14 × 9 = 28,3")[0]["ok"] is False
+    assert mc.check_equalities("Δ = 5²-4·2·(-3) = 25+24 = 49.") == []      # partial expression: not judged
+    assert mc.check_equalities("les nombres 1,2,3 = 6") == []

@@ -446,7 +446,17 @@ def ask(question: str, lang: str = "fr", session_id: str | None = None) -> dict:
     if s:
         names = _names()
         suspects = {h: names[h] for h, p in s["diag"].as_dict().items() if h != "M0" and p > 0.2}
-    return chat.answer(question, lang, kw, suspects)
+    return chat.answer(question, lang, kw, suspects, exercise=_open_question(s) if s else None)
+
+
+def _open_question(s: dict) -> dict | None:
+    """The bank question the student is working on right now (the chat must not leak its answer)."""
+    if s["state"] == "DIAGNOSE":
+        nq = _next(s["diag"], s["pool"])
+        return None if nq.stop else s["by_id"].get(nq.question_id)
+    qid = s.get("repair_q") if s["state"].startswith("HINT") else (
+        s.get("transfer_q") if s["state"] == "TRANSFER" else None)
+    return s["by_id"].get(qid) if qid else None
 
 
 def study_plan(files: list[tuple[str, bytes]], details: str = "", lang: str = "fr",

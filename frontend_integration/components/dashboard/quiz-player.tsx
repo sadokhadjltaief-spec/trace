@@ -5,6 +5,7 @@
 import { useState } from 'react'
 import { ArrowLeft, ArrowRight, Check, RotateCcw, Trophy, X } from 'lucide-react'
 import type { Lang } from '@/lib/translations'
+import { MathText } from './math-text'
 import { cn } from '@/lib/utils'
 
 type SafeText = { text: string; shown_allowed: boolean }
@@ -127,7 +128,7 @@ export function QuizPlayer({ quiz, lang, onExit }: { quiz: PracticeQuiz; lang: L
         </div>
 
         <div className="rounded-3xl border border-border bg-card p-6 shadow-sm sm:p-8">
-          <h1 id="quiz-question" className="text-balance text-xl font-bold leading-snug text-foreground sm:text-2xl">{shown(q.question)}</h1>
+          <h1 id="quiz-question" className="text-balance text-xl font-bold leading-snug text-foreground sm:text-2xl"><MathText text={shown(q.question)} /></h1>
           {q.sources[0]?.page ? <p className="mt-2 text-xs text-muted-foreground">{q.sources[0].file} · {c.page} {q.sources[0].page}</p> : null}
 
           <ul className="mt-6 flex flex-col gap-3">
@@ -153,7 +154,7 @@ export function QuizPlayer({ quiz, lang, onExit }: { quiz: PracticeQuiz; lang: L
                     <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-xl text-sm font-bold', isCorrect ? 'bg-primary text-primary-foreground' : isWrong ? 'bg-destructive text-primary-foreground' : 'bg-muted text-foreground')}>
                       {isCorrect ? <Check className="size-4" aria-hidden="true" /> : isWrong ? <X className="size-4" aria-hidden="true" /> : letter}
                     </span>
-                    <span className="flex-1 text-base text-foreground">{shown(opt)}</span>
+                    <span className="flex-1 text-base text-foreground"><MathText text={shown(opt)} /></span>
                   </button>
                 </li>
               )
@@ -168,7 +169,7 @@ export function QuizPlayer({ quiz, lang, onExit }: { quiz: PracticeQuiz; lang: L
               <p className={cn('font-semibold', result.correct ? 'text-primary-deep' : 'text-destructive')}>
                 {result.correct ? c.correct : `${c.wrong} · ${c.answer} : ${result.correct_option}`}
               </p>
-              {shown(result.explanation) ? <p className="mt-1 text-sm text-foreground">{shown(result.explanation)}</p> : null}
+              {shown(result.explanation) ? <p className="mt-1 text-sm text-foreground"><MathText text={shown(result.explanation)} /></p> : null}
             </div>
           ) : null}
 

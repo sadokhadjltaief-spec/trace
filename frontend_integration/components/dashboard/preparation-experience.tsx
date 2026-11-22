@@ -1,7 +1,17 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, Check, CircleCheck, Gamepad2, LoaderCircle } from 'lucide-react'
+import { ArrowLeft, BookOpen, CalendarDays, Check, CircleCheck, Clock, Gamepad2, HelpCircle, LoaderCircle, Sigma, Target } from 'lucide-react'
+import { MathText } from './math-text'
+
+// one colour per day of the plan (rotates)
+const DAY_TONES = [
+  { badge: 'bg-primary text-primary-foreground', dot: 'bg-primary', chip: 'bg-primary/10 text-primary-deep' },
+  { badge: 'bg-brand-cyan text-white', dot: 'bg-brand-cyan', chip: 'bg-brand-cyan/15 text-brand-cyan' },
+  { badge: 'bg-emerald-500 text-white', dot: 'bg-emerald-500', chip: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' },
+  { badge: 'bg-violet-500 text-white', dot: 'bg-violet-500', chip: 'bg-violet-500/15 text-violet-600 dark:text-violet-400' },
+  { badge: 'bg-rose-500 text-white', dot: 'bg-rose-500', chip: 'bg-rose-500/15 text-rose-600 dark:text-rose-400' },
+]
 import type { DashboardCopy } from './dashboard-copy'
 import type { Lang } from '@/lib/translations'
 import { HighwayGame } from './highway-game'
@@ -204,46 +214,94 @@ export function PreparationExperience({ copy, kind, fileNames, details, lang, on
             <p className="mt-6 rounded-2xl border border-border bg-background/70 p-4 text-sm text-muted-foreground">{planError}</p>
           ) : null}
           {ready && plan && !plan.refused ? (
-            <div className="mt-6 flex flex-col gap-3">
-              {shown(plan.title) ? <p className="text-base font-semibold text-foreground">{shown(plan.title)}</p> : null}
-              {shown(plan.summary) ? <p className="text-sm text-muted-foreground">{shown(plan.summary)}</p> : null}
-              {plan.targeted_at ? (
-                <p className="text-sm font-medium text-foreground">
-                  {PLAN_COPY[lang].targeted} : {lang === 'fr' ? plan.targeted_at.name_fr : lang === 'ar' ? plan.targeted_at.name_ar : plan.targeted_at.name_en}
-                </p>
-              ) : null}
-              {plan.days.map((d) => (
-                <div key={d.day} className="rounded-2xl border border-border bg-background/70 p-4">
-                  <p className="text-sm font-semibold text-foreground">{PLAN_COPY[lang].day} {d.day} · {shown(d.title)}{d.duration_min ? ` · ${d.duration_min} min` : ''}</p>
-                  {d.goals.filter(shown).length ? (
-                    <p className="mt-1 text-sm text-muted-foreground">{d.goals.map(shown).filter(Boolean).join(' · ')}</p>
-                  ) : null}
-                  <ul className="mt-2 flex list-disc flex-col gap-1 ps-5 text-sm text-foreground">
-                    {d.tasks.map(shown).filter(Boolean).map((tk, i) => <li key={i}>{tk}</li>)}
-                  </ul>
-                  {d.sources.length ? (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {PLAN_COPY[lang].pages} : {d.sources.map((s) => `${s.file} p. ${s.page}`).join(' · ')}
+            <div className="mt-8 flex flex-col gap-5 text-start">
+              <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-card to-brand-cyan/15 p-6 sm:p-7">
+                <div className="absolute -end-10 -top-12 size-40 rounded-full bg-primary/15 blur-3xl" aria-hidden="true" />
+                <div className="relative flex flex-col gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground"><CalendarDays className="size-3.5" aria-hidden="true" />{plan.days.length} {({ en: 'days', fr: 'jours', ar: 'أيام' } as const)[lang]}</span>
+                    {plan.days.some((d) => d.duration_min) ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-cyan/15 px-3 py-1 text-xs font-bold text-brand-cyan"><Clock className="size-3.5" aria-hidden="true" />{plan.days.reduce((n, d) => n + (d.duration_min ?? 0), 0)} min</span>
+                    ) : null}
+                  </div>
+                  {shown(plan.title) ? <h2 className="text-balance text-2xl font-bold leading-tight text-foreground sm:text-3xl">{shown(plan.title)}</h2> : null}
+                  {shown(plan.summary) ? <p className="max-w-2xl text-pretty leading-relaxed text-muted-foreground">{shown(plan.summary)}</p> : null}
+                  {plan.targeted_at ? (
+                    <p className="inline-flex w-fit items-center gap-2 rounded-xl bg-background/80 px-3 py-2 text-sm font-semibold text-foreground"><Target className="size-4 text-primary" aria-hidden="true" />
+                      {PLAN_COPY[lang].targeted} : {lang === 'fr' ? plan.targeted_at.name_fr : lang === 'ar' ? plan.targeted_at.name_ar : plan.targeted_at.name_en}
                     </p>
                   ) : null}
                 </div>
-              ))}
-              {(plan.formulas ?? []).filter(shown).length ? (
-                <div className="rounded-2xl border border-border bg-background/70 p-4">
-                  <p className="text-sm font-semibold text-foreground">{PLAN_COPY[lang].formulas}</p>
-                  <ul className="mt-2 flex list-disc flex-col gap-1 ps-5 text-sm text-foreground" dir="ltr">
-                    {(plan.formulas ?? []).map(shown).filter(Boolean).map((f, i) => <li key={i}>{f}</li>)}
-                  </ul>
-                </div>
-              ) : null}
-              {plan.check_questions.filter(shown).length ? (
-                <div className="rounded-2xl border border-border bg-background/70 p-4">
-                  <p className="text-sm font-semibold text-foreground">{PLAN_COPY[lang].check}</p>
-                  <ul className="mt-2 flex list-disc flex-col gap-1 ps-5 text-sm text-foreground">
-                    {plan.check_questions.map(shown).filter(Boolean).map((q, i) => <li key={i}>{q}</li>)}
-                  </ul>
-                </div>
-              ) : null}
+              </div>
+
+              <ol className="relative flex flex-col gap-4 sm:ps-6">
+                <span className="absolute bottom-6 start-[0.7rem] top-6 hidden w-0.5 rounded-full bg-gradient-to-b from-primary via-brand-cyan to-emerald-500/60 sm:block" aria-hidden="true" />
+                {plan.days.map((d, di) => {
+                  const tone = DAY_TONES[di % DAY_TONES.length]
+                  return (
+                    <li key={d.day} className="relative">
+                      <span className={`absolute -start-[1.05rem] top-7 hidden size-3.5 rounded-full ring-4 ring-card sm:block ${tone.dot}`} aria-hidden="true" />
+                      <div className="rounded-3xl border border-border bg-card p-5 shadow-sm transition hover:border-primary/40 hover:shadow-md sm:p-6">
+                        <div className="flex items-start gap-4">
+                          <span className={`flex size-12 shrink-0 flex-col items-center justify-center rounded-2xl text-center leading-none ${tone.badge}`}>
+                            <span className="text-[10px] font-bold uppercase tracking-wide">{PLAN_COPY[lang].day}</span>
+                            <span className="text-lg font-extrabold">{d.day}</span>
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <h3 className="text-lg font-bold leading-snug text-foreground">{shown(d.title)}</h3>
+                              {d.duration_min ? <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground"><Clock className="size-3.5" aria-hidden="true" />{d.duration_min} min</span> : null}
+                            </div>
+                            {d.goals.filter(shown).length ? (
+                              <div className="mt-2 flex flex-wrap gap-1.5">
+                                {d.goals.map(shown).filter(Boolean).map((g, k) => <span key={k} className={`rounded-full px-2.5 py-1 text-xs font-semibold ${tone.chip}`}>{g}</span>)}
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
+                        <ul className="mt-4 flex flex-col gap-2">
+                          {d.tasks.map(shown).filter(Boolean).map((tk, k) => (
+                            <li key={k} className="flex items-start gap-2.5 rounded-xl bg-muted/50 px-3 py-2.5 text-sm leading-relaxed text-foreground">
+                              <CircleCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+                              <span><MathText text={tk} /></span>
+                            </li>
+                          ))}
+                        </ul>
+                        {d.sources.length ? (
+                          <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                            <BookOpen className="size-3.5" aria-hidden="true" />{PLAN_COPY[lang].pages} :
+                            {d.sources.map((s, k) => <span key={k} title={s.file} className="rounded-full border border-border bg-background px-2 py-0.5 font-semibold text-foreground" dir="ltr">p. {s.page}</span>)}
+                          </div>
+                        ) : null}
+                      </div>
+                    </li>
+                  )
+                })}
+              </ol>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {(plan.formulas ?? []).filter(shown).length ? (
+                  <div className="rounded-3xl border border-border bg-card p-5 shadow-sm sm:p-6">
+                    <p className="flex items-center gap-2 font-bold text-foreground"><span className="flex size-8 items-center justify-center rounded-xl bg-brand-cyan/15 text-brand-cyan"><Sigma className="size-4" aria-hidden="true" /></span>{PLAN_COPY[lang].formulas}</p>
+                    <ul className="mt-3 flex flex-col gap-2">
+                      {(plan.formulas ?? []).map(shown).filter(Boolean).map((f, k) => <li key={k} className="rounded-xl bg-muted/50 px-3 py-2 text-sm text-foreground"><MathText text={f} formula /></li>)}
+                    </ul>
+                  </div>
+                ) : null}
+                {plan.check_questions.filter(shown).length ? (
+                  <div className="rounded-3xl border border-border bg-card p-5 shadow-sm sm:p-6">
+                    <p className="flex items-center gap-2 font-bold text-foreground"><span className="flex size-8 items-center justify-center rounded-xl bg-primary/15 text-primary"><HelpCircle className="size-4" aria-hidden="true" /></span>{PLAN_COPY[lang].check}</p>
+                    <ol className="mt-3 flex flex-col gap-2">
+                      {plan.check_questions.map(shown).filter(Boolean).map((q, k) => (
+                        <li key={k} className="flex items-start gap-2.5 rounded-xl bg-muted/50 px-3 py-2 text-sm text-foreground">
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">{k + 1}</span>
+                          <span><MathText text={q} /></span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ) : null}
+              </div>
             </div>
           ) : null}
           {ready && quiz && !quiz.refused && quiz.questions.length ? (

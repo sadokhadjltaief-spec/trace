@@ -1,6 +1,15 @@
 # STATUS
 
-Last update: 2026-11-22, interactive Quiz, Flashcards and Study session.
+Last update: 2026-11-22, final checks before the video.
+
+## Final checks (2026-11-22, before the video)
+- Summary offline: `TRACE_DEMO=1`, `POST /api/v1/practice/summary` on `cours_fractions_relatifs.pdf` (2 pages, fr,
+  no focus) -> 200, 5 sections, 4 formulas, 4 mistakes; all 5 LLM calls served from cache (0 network).
+- Models (from `.cache/trace.db`): `practice_summary_judge` is the ONLY app purpose on gpt-oss-20b; the summary
+  writer and every other judge are on 120b. (20b rows `eval_*` are the old offline eval scripts, not the app.)
+- `scripts/demo_session.py --lang fr` with `TRACE_DEMO=1`: DONE / mastered, 8 calls, 8 cached, 0 fallbacks
+  (needs `PYTHONIOENCODING=utf-8` in a cp1252 console).
+- Tests: 198 passed.
 
 ## ⚠ BEFORE STEP 6 AND BEFORE ANY REAL DEMO
 - [x] `live.allow_unverified_dev: false` set by the team in `config.yaml` (committed 2026-11-21). Consequence:
@@ -44,6 +53,22 @@ Last update: 2026-11-22, interactive Quiz, Flashcards and Study session.
   precedence. `engine/config.py` now loads `.env` with `override=True`. Checked (key never printed): the engine uses
   the `.env` key; both models answer (120b 927/1000 requests left today, 20b 999/1000).
 
+## Final pass before the video (2026-11-22 ~02:30, team request)
+- **Summary judge on gpt-oss-20b** (team decision): the 120b daily cap was reached and the new key is in the SAME
+  Groq organisation (shared quota). `config.yaml` `llm.judge_model_by_purpose.practice_summary_judge` sends ONLY the
+  summary judge to 20b; every other judge stays on 120b (and keeps its recorded cache).
+- **Summary recorded for offline**: `cours_fractions_relatifs.pdf`, 2 pages, French, no focus. Checked on an engine with
+  `TRACE_DEMO=1`: the answer is identical to the live one. Other settings (4+ pages, a focus, another language) are
+  NOT recorded and would be refused offline. Also checked offline: quiz (8 questions), flashcards (10), study plan
+  (5 days), programme.
+- **Browser checks (localhost:3000)**: summary reader (contents, page badges, formulas), Programme (12 levels, level
+  menu, domain filter), quiz (start, answer, correction), flashcards, study plan.
+- **Sources**: YouTube / Wikipedia stay visible but disabled with a "Bientôt disponible" badge (quiz, flashcards,
+  summary).
+- **KaTeX** (katex 0.16.11): `math-text.tsx` typesets plain-text maths (fractions, ×) in flashcards, quiz, summary and
+  study plan; whole formulas ("a/b + c/d = …") in the formula blocks.
+- **Study plan design**: header card, coloured day timeline, goal chips, task checklist, page chips.
+
 ## Summary, quiz fix and "Programme" page (2026-11-22, team request)
 - **Quiz / flashcards fixed:** the browser called the `/engine` rewrite, whose proxy cuts at ~30 s; the first
   generation takes ~60 s. They now go through Next route handlers (`lib/engine-proxy.ts`, 280 s). Verified: an
@@ -57,9 +82,7 @@ Last update: 2026-11-22, interactive Quiz, Flashcards and Study session.
   official Ministry programme**; the API and the page always show this disclaimer. `GET /api/v1/curriculum?level=`
   (contract 1.11, no LLM). Frontend: `curriculum-view.tsx` (level dropdown, domain filter, chapter cards) + a
   "Programme" link in the sidebar.
-- **Blocked:** the offline cache for the summary is NOT recorded yet. Groq returned 429 (gpt-oss-120b daily cap:
-  199,246 / 200,000 tokens used). In `TRACE_DEMO=1` a summary of a file that was never recorded is refused
-  ("could not be generated"). Record it live once the quota frees up.
+- ~~Blocked: summary cache not recorded~~ -> done in the final pass (see above).
 - Tests: 198 passed.
 
 ## Interactive practice pages (2026-11-22, team request)

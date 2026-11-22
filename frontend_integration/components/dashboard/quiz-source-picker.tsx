@@ -25,6 +25,9 @@ export function QuizSourcePicker({ copy, onBack, kind = 'quiz', lang }: { copy: 
     { id: 'wikipedia', title: copy.quiz.wikipedia, description: copy.quiz.wikipediaDescription, tone: 'bg-accent text-accent-foreground' },
   ]
 
+  // YouTube / Wikipedia need the internet and are not connected to the TRACE engine yet: shown, but marked "coming soon"
+  const SOON = { en: 'Coming soon', fr: 'Bientôt disponible', ar: 'قريبًا' }[lang]
+  const isSoon = (id: SourceId) => id === 'youtube' || id === 'wikipedia'
   const selectedSource = sources.find((item) => item.id === source)
   const isReady = source === 'file' ? fileName.length > 0 : Boolean(value.trim())
   const flashcardCopy = {
@@ -73,7 +76,8 @@ export function QuizSourcePicker({ copy, onBack, kind = 'quiz', lang }: { copy: 
             <ul className="grid gap-3 sm:grid-cols-2">
               {sources.map((item) => (
                 <li key={item.id}>
-                  <button type="button" onClick={() => chooseSource(item.id)} className="group flex min-h-40 w-full flex-col items-center justify-center gap-4 rounded-2xl border border-border bg-background/70 p-5 text-center transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <button type="button" disabled={isSoon(item.id)} onClick={() => chooseSource(item.id)} className="group relative flex min-h-40 w-full flex-col items-center justify-center gap-4 rounded-2xl border border-border bg-background/70 p-5 text-center transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:border-border disabled:hover:shadow-none">
+                    {isSoon(item.id) ? <span className="absolute end-3 top-3 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-primary-deep">{SOON}</span> : null}
                     <span className={`flex size-14 items-center justify-center rounded-full ${item.tone}`}>
                       {item.icon ? (
                         <item.icon className="size-6" aria-hidden="true" />

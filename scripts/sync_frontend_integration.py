@@ -33,6 +33,9 @@ FILES = [
     "components/dashboard/sidebar.tsx",
     "components/dashboard/dashboard.tsx",
     "components/dashboard/dashboard-copy.ts",
+    "components/dashboard/math-text.tsx",
+    "types/katex.d.ts",
+    "package.json",
 ]
 
 

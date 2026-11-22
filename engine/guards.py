@@ -40,8 +40,10 @@ Return JSON: {"reveals_answer": true|false, "leak_reason": "...",
  "claims": [{"lhs": "...", "op": "...", "rhs": "..."}]}"""
 
 
-def _judge_model() -> str:
-    return cfg()["llm"].get("judge_model") or llm.eval_model()
+def _judge_model(purpose: str | None = None) -> str:
+    """Judge model; config llm.judge_model_by_purpose can override it for one purpose (e.g. the summary judge)."""
+    c = cfg()["llm"]
+    return (c.get("judge_model_by_purpose") or {}).get(purpose) or c.get("judge_model") or llm.eval_model()
 
 
 def deterministic_leak(text: str, q: dict) -> list[str]:
@@ -196,7 +198,7 @@ def check_studio(texts: dict[str, str], suspects: dict[str, str], lang: str, sty
     mis = "\n".join(f"{k}: {v}" for k, v in suspects.items()) or "(none)"
     user = f"Misconceptions:\n{mis}\n\nTexts:\n" + "\n".join(f"[{k}] {v}" for k, v in texts.items())
     try:
-        j = llm.ask_json(STUDIO_JUDGE_SYS, user, purpose=purpose, model=_judge_model(), max_tokens=2048) or {}
+        j = llm.ask_json(STUDIO_JUDGE_SYS, user, purpose=purpose, model=_judge_model(purpose), max_tokens=2048) or {}
         verdict = {str(x.get("id", "")).strip("[]"): x for x in j.get("texts", []) if isinstance(x, dict)}
         err = None
     except Exception as e:  # noqa: BLE001

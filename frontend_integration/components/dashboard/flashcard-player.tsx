@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react'
 import { ArrowLeft, Check, Layers, RotateCcw, X } from 'lucide-react'
 import type { Lang } from '@/lib/translations'
+import { MathText } from './math-text'
 import { cn } from '@/lib/utils'
 import type { PracticeCards } from './preparation-experience'
 
@@ -118,12 +119,12 @@ export function FlashcardPlayer({ deck, lang, onExit }: { deck: PracticeCards; l
           >
             <span className="absolute inset-0 flex flex-col rounded-3xl border border-border bg-card p-6 shadow-sm [backface-visibility:hidden] sm:p-8">
               <span className="text-xs font-semibold uppercase tracking-wide text-primary">{c.question}</span>
-              <span id="card-title" className="my-auto py-6 text-center text-xl font-bold leading-snug text-foreground sm:text-2xl">{card.front.text}</span>
+              <span id="card-title" className="my-auto py-6 text-center text-xl font-bold leading-snug text-foreground sm:text-2xl"><MathText text={card.front.text} /></span>
               <span className="text-center text-xs text-muted-foreground">{c.flip}</span>
             </span>
             <span className="absolute inset-0 flex flex-col rounded-3xl border border-primary/40 bg-secondary p-6 shadow-sm [backface-visibility:hidden] [transform:rotateY(180deg)] sm:p-8">
               <span className="text-xs font-semibold uppercase tracking-wide text-primary-deep">{c.answer}</span>
-              <span className="my-auto py-6 text-center text-lg leading-relaxed text-foreground">{card.back.text}</span>
+              <span className="my-auto py-6 text-center text-lg leading-relaxed text-foreground"><MathText text={card.back.text} /></span>
             </span>
           </button>
         </div>

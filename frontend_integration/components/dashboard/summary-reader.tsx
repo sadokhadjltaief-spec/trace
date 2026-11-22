@@ -5,6 +5,7 @@
 import { useMemo, useState } from 'react'
 import { AlertTriangle, ArrowLeft, BookOpenText, FileText, ListChecks, Printer, RotateCcw, Sigma } from 'lucide-react'
 import type { Lang } from '@/lib/translations'
+import { MathText } from './math-text'
 import { cn } from '@/lib/utils'
 
 type SafeText = { text: string; shown_allowed: boolean }
@@ -43,9 +44,15 @@ function Cite({ sources, label }: { sources: Source[]; label: string }) {
 
 export function SummaryReader({ summary, lang, contentLang, onBack, onNew }: { summary: PracticeSummary; lang: Lang; contentLang: Lang; onBack: () => void; onNew: () => void }) {
   const c = COPY[lang]
-  const sections = useMemo(() => summary.sections.filter((s) => shown(s.heading) && s.points.some((p) => shown(p.text))), [summary])
   const formulas = summary.formulas.filter((p) => shown(p.text))
   const mistakes = summary.mistakes.filter((p) => shown(p.text))
+  // the model sometimes also writes a "Key formulas" / "Common mistakes" section: hide it when the dedicated block exists
+  const dup = (h: string) => {
+    const x = h.trim().toLowerCase()
+    return (formulas.length > 0 && Object.values(COPY).some((k) => k.formulas.toLowerCase() === x)) ||
+      (mistakes.length > 0 && Object.values(COPY).some((k) => k.mistakes.toLowerCase() === x))
+  }
+  const sections = useMemo(() => summary.sections.filter((s) => shown(s.heading) && !dup(shown(s.heading)) && s.points.some((p) => shown(p.text))), [summary]) // eslint-disable-line react-hooks/exhaustive-deps
   const [active, setActive] = useState(0)
   const files = Array.from(new Set(summary.sources.map((s) => s.file)))
   const go = (id: string, i: number) => { setActive(i); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
@@ -92,7 +99,7 @@ export function SummaryReader({ summary, lang, contentLang, onBack, onNew }: { s
               {s.points.filter((p) => shown(p.text)).map((p, k) => (
                 <li key={k} className="flex gap-3 text-pretty text-base leading-relaxed text-foreground">
                   <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
-                  <span>{shown(p.text)}<Cite sources={p.sources} label={c.page} /></span>
+                  <span><MathText text={shown(p.text)} /><Cite sources={p.sources} label={c.page} /></span>
                 </li>
               ))}
             </ul>
@@ -105,7 +112,7 @@ export function SummaryReader({ summary, lang, contentLang, onBack, onNew }: { s
             <ul className="grid gap-3 sm:grid-cols-2">
               {formulas.map((p, k) => (
                 <li key={k} className="rounded-2xl border border-border bg-muted/40 p-4">
-                  <span className="block font-mono text-sm font-semibold text-foreground" dir="ltr">{shown(p.text)}</span>
+                  <span className="block text-base font-semibold text-foreground"><MathText text={shown(p.text)} formula /></span>
                   <Cite sources={p.sources} label={c.page} />
                 </li>
               ))}
@@ -120,7 +127,7 @@ export function SummaryReader({ summary, lang, contentLang, onBack, onNew }: { s
               {mistakes.map((p, k) => (
                 <li key={k} className="flex gap-3 rounded-2xl bg-destructive/10 px-4 py-3 text-base leading-relaxed text-foreground">
                   <ListChecks className="mt-1 size-4 shrink-0 text-destructive" aria-hidden="true" />
-                  <span>{shown(p.text)}<Cite sources={p.sources} label={c.page} /></span>
+                  <span><MathText text={shown(p.text)} /><Cite sources={p.sources} label={c.page} /></span>
                 </li>
               ))}
             </ul>

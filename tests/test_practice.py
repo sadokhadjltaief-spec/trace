@@ -35,7 +35,7 @@ def fake(system, user, *, purpose, **kw):
         return QUIZ
     if purpose == "practice_quiz_blind":
         return BLIND
-    if purpose in ("practice_quiz_judge", "studio_flashcards_judge"):
+    if purpose in ("practice_quiz_judge", "practice_summary_judge", "studio_flashcards_judge"):
         return {"texts": [{"id": i, "congruent": [], "claims": []} for i in re.findall(r"^\[(\w+)\]", user, re.M)]}
     if purpose == "studio_flashcards":
         return {"cards": [{"front": "Comment additionner deux fractions ?", "back": "On les met au même dénominateur."},

@@ -172,7 +172,8 @@ def make_cards(files, text: str, source: str, details: str, lang: str, kw: dict,
                          refused=None if cards else tr("practice_unavailable", lang)).model_dump()
 
 
-def _guard_batches(texts: dict[str, str], suspects: dict, lang: str, kw: dict, size: int = 12) -> dict:
+def _guard_batches(texts: dict[str, str], suspects: dict, lang: str, kw: dict, size: int = 12,
+                   purpose: str = "practice_quiz_judge") -> dict:
     keys = list(texts)
     out = {}
     for s in range(0, len(keys), size):
@@ -180,7 +181,7 @@ def _guard_batches(texts: dict[str, str], suspects: dict, lang: str, kw: dict, s
         ids = {f"x{i}": k for i, k in enumerate(part)}
         judged = guards.check_studio({x: texts[k] for x, k in ids.items()}, suspects, lang,
                                      style_kwargs={**kw, "max_questions": 2, "max_words_per_sentence": 40},
-                                     purpose="practice_quiz_judge")
+                                     purpose=purpose)
         out.update({k: judged[x] for x, k in ids.items()})
     return out
 
@@ -243,7 +244,7 @@ def make_summary(files, text: str, source: str, focus: str, pages_wanted: int, l
     for kind in ("formulas", "mistakes"):
         for j, pt in enumerate([p for p in (d.get(kind) or []) if isinstance(p, dict)][:8]):
             add(f"{kind[0]}{j}", pt.get("text"), pt)
-    checks = _guard_batches(texts, suspects, lang, kw)
+    checks = _guard_batches(texts, suspects, lang, kw, purpose="practice_summary_judge")
     safe = {k: guards_safetext(v, checks[k], lang) for k, v in texts.items()}
     ok = lambda k: k in safe and safe[k].shown_allowed  # noqa: E731
     dropped = sum(1 for k in texts if not ok(k) or (k in refs and not refs[k]))

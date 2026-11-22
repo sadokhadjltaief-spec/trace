@@ -1,9 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, BookOpenText, Check, ChevronDown, FileText, FileUp, Focus, Languages, LoaderCircle, Sparkles, TextQuote, Upload, X } from 'lucide-react'
 import { siWikipedia, siYoutube } from 'simple-icons'
 import type { Lang } from '@/lib/translations'
+import { SummaryReader, type PracticeSummary } from './summary-reader'
+
+const ERROR_COPY: Record<Lang, { error: string; retry: string }> = {
+  en: { error: 'The summary could not be created.', retry: 'Back to the settings' },
+  fr: { error: 'Le résumé n’a pas pu être créé.', retry: 'Retour aux réglages' },
+  ar: { error: 'تعذّر إنشاء الملخص.', retry: 'العودة إلى الإعدادات' },
+}
 
 type Props = { lang: Lang; onBack: () => void }
 type SourceKind = 'file' | 'text' | 'youtube' | 'wikipedia'
@@ -30,17 +37,42 @@ export function SummaryFlow({ lang, onBack }: Props) {
   const [language, setLanguage] = useState<Lang>(lang)
   const [progress, setProgress] = useState(0)
   const [dragging, setDragging] = useState(false)
+  const [result, setResult] = useState<PracticeSummary | null>(null)
+  const [error, setError] = useState('')
+  const started = useRef(false) // React dev mode runs effects twice: send the request only once
 
+  // Real generation by the TRACE engine (Next route handler -> POST /api/v1/practice/summary). The bar only shows
+  // that the request is running (it slows down and stops at 90 % until the answer arrives).
   useEffect(() => {
-    if (stage !== 'loading') return
+    if (stage !== 'loading') { started.current = false; return }
     const startedAt = Date.now()
     const timer = window.setInterval(() => {
-      const next = Math.min(100, Math.round(((Date.now() - startedAt) / 4400) * 100))
-      setProgress(next)
-      if (next === 100) setStage('complete')
-    }, 100)
+      const s = (Date.now() - startedAt) / 1000
+      setProgress((p) => Math.max(p, Math.min(90, Math.round(90 * (1 - Math.exp(-s / 25))))))
+    }, 250)
+    if (!started.current) {
+      started.current = true
+      setError('')
+      const form = new FormData()
+      if (source === 'file' && file) form.append('files', file)
+      if (source !== 'file') form.append('text', value)
+      form.append('source', source ?? 'file')
+      form.append('focus', focus)
+      form.append('pages', String(pages))
+      form.append('lang', language)
+      fetch('/api/practice/summary', { method: 'POST', body: form })
+        .then(async (r) => {
+          const data = await r.json().catch(() => ({}))
+          if (!r.ok) throw new Error(`${ERROR_COPY[lang].error} (${typeof data.detail === 'string' ? data.detail : 'HTTP ' + r.status})`)
+          if (data.refused) throw new Error(data.refused)
+          setResult(data as PracticeSummary)
+          setProgress(100)
+          setStage('complete')
+        })
+        .catch((e: Error) => setError(e.message || ERROR_COPY[lang].error))
+    }
     return () => window.clearInterval(timer)
-  }, [stage])
+  }, [stage]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const chooseSource = (next: SourceKind) => {
     setSource(next)
@@ -158,7 +190,11 @@ export function SummaryFlow({ lang, onBack }: Props) {
         </div>
       ) : null}
 
-      {stage === 'loading' || stage === 'complete' ? (
+      {stage === 'complete' && result ? (
+        <SummaryReader summary={result} lang={lang} contentLang={language} onBack={onBack} onNew={() => { setResult(null); setProgress(0); setStage('settings') }} />
+      ) : null}
+
+      {stage === 'loading' || (stage === 'complete' && !result) ? (
         <div className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-3xl flex-col items-center justify-center gap-6 px-4 py-8 text-center">
           <Stepper active={2} text={text} />
           <div className="w-full rounded-3xl border border-border bg-card p-6 shadow-sm sm:p-10">
@@ -166,6 +202,7 @@ export function SummaryFlow({ lang, onBack }: Props) {
             <h1 className="text-2xl font-bold sm:text-3xl">{stage === 'complete' ? text.ready : text.working}</h1><p className="mx-auto mt-2 max-w-lg text-muted-foreground">{stage === 'complete' ? text.readyText : text.workingText}</p>
             <div className="mt-8 text-start"><div className="mb-2 flex items-center justify-between gap-3 text-sm"><span className="font-semibold">{text.stepSummary}</span><span className="tabular-nums text-muted-foreground">{progress}%</span></div><div className="h-3 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label={text.stepSummary} aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><div className="h-full rounded-full bg-gradient-to-r from-primary to-brand-cyan transition-[width] duration-200" style={{ width: `${progress}%` }} /></div></div>
             <div className="mt-6 flex items-center gap-3 rounded-2xl border border-border bg-background/70 p-4 text-start"><FileText className="size-5 shrink-0 text-primary" aria-hidden="true" /><span className="min-w-0 flex-1 truncate text-sm font-semibold">{selectedName}</span><span className="text-xs text-muted-foreground">{pages} {text.pageUnit}</span></div>
+            {error ? <div role="alert" className="mt-6 rounded-2xl bg-destructive/10 p-4 text-start text-sm text-destructive">{error}<button type="button" onClick={() => { setError(''); setProgress(0); setStage('settings') }} className="mt-3 block min-h-10 rounded-xl border border-border bg-card px-4 font-semibold text-foreground hover:bg-muted">{ERROR_COPY[lang].retry}</button></div> : null}
             {stage === 'complete' ? <button type="button" onClick={onBack} className="mt-7 min-h-11 rounded-xl bg-primary px-6 font-bold text-primary-foreground hover:bg-primary-deep">{text.back}</button> : null}
           </div>
         </div>

@@ -58,7 +58,21 @@ export function LoginScreen({ onSuccess }: { onSuccess: (r: { email: string; pro
     setServerError('')
     setBusy(true)
     try {
-      const r = isLogin ? await login(email.trim(), password) : await register(email.trim(), password)
+      // "Sign in" with an unknown email creates the account (as the first version did: any email + 8 characters
+      // enters). A known email with a wrong password is still refused (register answers email_taken).
+      const signIn = async () => {
+        try {
+          return await login(email.trim(), password)
+        } catch (e) {
+          if (!(e instanceof AuthFailure) || e.code !== 'bad_credentials') throw e
+          try {
+            return await register(email.trim(), password)
+          } catch (e2) {
+            throw e2 instanceof AuthFailure && e2.code === 'email_taken' ? new AuthFailure('bad_credentials') : e2
+          }
+        }
+      }
+      const r = isLogin ? await signIn() : await register(email.trim(), password)
       setPassword('')
       onSuccess({ email: r.email, profile: r.profile })
     } catch (e) {

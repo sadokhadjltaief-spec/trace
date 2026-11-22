@@ -7,7 +7,7 @@ import { Dashboard } from '@/components/dashboard/dashboard'
 import { WelcomeTransition } from '@/components/onboarding/welcome-transition'
 import type { StudentProfile } from '@/components/onboarding/options'
 import { I18nProvider, useI18n } from '@/lib/i18n'
-import { hasPreferences, me, saveProfile, savedSession, signOut } from '@/lib/auth'
+import { hasPreferences, saveProfile, savedSession, signOut } from '@/lib/auth'
 
 const EMPTY_PROFILE: StudentProfile = {
   email: '',
@@ -52,8 +52,10 @@ function WaslaStages() {
   }, [])
 
   useEffect(() => {
-    if (!savedSession()) { setStage('login'); return }
-    me().then((r) => enter(r.email, r.profile)).catch(() => { signOut(); setStage('login') })
+    // the app always opens on the login screen (demo): a saved session is cleared at start. The account and its
+    // profile stay in the engine, so signing in again restores the preferences and skips the onboarding.
+    if (savedSession()) signOut()
+    setStage('login')
   }, [enter])
 
   if (stage === 'loading') return <div className="min-h-dvh bg-background" />

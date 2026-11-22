@@ -25,7 +25,7 @@ const fold = (x: string) => x.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').
 const CYCLE_OF_LEVEL = (id: string) => (id.endsWith('p') ? 'primaire' : ['7e', '8e', '9e'].includes(id) ? 'college' : 'lycee')
 const KEY = 'trace.curriculum.level'
 
-export function CurriculumView({ lang }: { lang: Lang }) {
+export function CurriculumView({ lang, search }: { lang: Lang; search?: { q: string; at: number } | null }) {
   const c = COPY[lang]
   const pick = (t?: Tri) => (t ? t[lang] || t.fr : '')
   const [data, setData] = useState<Curriculum | null>(null)
@@ -37,6 +37,8 @@ export function CurriculumView({ lang }: { lang: Lang }) {
   const [cycle, setCycle] = useState<string>(() => CYCLE_OF_LEVEL('9e'))
   const [query, setQuery] = useState('')
   const [openId, setOpenId] = useState<string | null>(null)
+  // a search typed in the top bar opens the Programme with it
+  useEffect(() => { if (search?.q) { setQuery(search.q); setOpenId(null) } }, [search?.at]) // eslint-disable-line react-hooks/exhaustive-deps
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -60,7 +62,13 @@ export function CurriculumView({ lang }: { lang: Lang }) {
   const cycleTyped = useMemo(() => {
     const q = fold(query)
     if (!q || !data?.cycles) return null
-    return Object.entries(data.cycles).find(([id, cy]) => fold(id) === q || cy.aliases.some((a) => fold(a) === q) || Object.values(cy.name).some((n) => fold(n) === q))?.[0] ?? null
+    const entries = Object.entries(data.cycles)
+    const exact = entries.find(([id, cy]) => fold(id) === q || cy.aliases.some((a) => fold(a) === q) || Object.values(cy.name).some((n) => fold(n) === q))
+    if (exact) return exact[0]
+    // from the 3rd letter: "sch" -> School -> primary, "coll" -> collège, "lyc" -> lycée (only when one cycle matches)
+    if (q.length < 3) return null
+    const starts = entries.filter(([id, cy]) => [id, ...cy.aliases, ...Object.values(cy.name)].some((a) => fold(a).startsWith(q)))
+    return starts.length === 1 ? starts[0][0] : null
   }, [query, data])
   useEffect(() => { if (cycleTyped && cycleTyped !== cycle) chooseCycle(cycleTyped) }, [cycleTyped]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { setCycle(CYCLE_OF_LEVEL(level)) }, [level])

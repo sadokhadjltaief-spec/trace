@@ -191,9 +191,10 @@ type Opts = {
   startText?: string // the "start the diagnosis" button text; any other free text goes to the personal tutor
   preferences?: Record<string, string | null> // used only when nobody is signed in (the engine reads the saved profile)
   onProgress?: (understood: number) => void // gamified mode: genuine progress shown by the tutor's observations
+  docId?: string | null // PDF attached in the chat: the tutor answers from its pages first
 }
 
-export function useTraceChat({ id, messages: initial, lang, student, startText, preferences, onProgress }: Opts) {
+export function useTraceChat({ id, messages: initial, lang, student, startText, preferences, onProgress, docId }: Opts) {
   const [messages, setMessages] = useState<UIMessage[]>(initial)
   const [status, setStatus] = useState<'ready' | 'submitted' | 'streaming'>('ready')
   const [error, setError] = useState<Error | undefined>()
@@ -238,7 +239,7 @@ export function useTraceChat({ id, messages: initial, lang, student, startText, 
         }
         const tutor = async () => {
           const r = await engine<TutorTurn>(
-            { action: 'tutor', message: text, lang, tutorSessionId: SESSIONS.get(id)?.tutorSessionId ?? null, preferences: preferences ?? null, media },
+            { action: 'tutor', message: text, lang, tutorSessionId: SESSIONS.get(id)?.tutorSessionId ?? null, preferences: preferences ?? null, media, docId: docId ?? null },
             ctrl.signal,
           )
           store({ tutorSessionId: r.session_id, suggestions: r.suggestions })
@@ -311,7 +312,7 @@ export function useTraceChat({ id, messages: initial, lang, student, startText, 
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [id, lang, student.name, student.level, preferences, onProgress],
+    [id, lang, student.name, student.level, preferences, onProgress, docId],
   )
 
   const sendMessage = useCallback(({ text }: { text: string }) => run(text, true), [run])

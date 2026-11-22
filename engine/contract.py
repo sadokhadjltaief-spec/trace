@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.13"  # 1.13 personal tutor, accounts, progress, media; 1.12 cycles + chapter page + sources youtube/wikipedia; 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7-1.8 plan; 1.9 practice; 1.10 summary; 1.11 curriculum
+CONTRACT_VERSION = "1.14"  # 1.14 chat PDF + textbook; 1.13 personal tutor, accounts, progress, media; 1.12 cycles + chapter page + sources youtube/wikipedia; 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7-1.8 plan; 1.9 practice; 1.10 summary; 1.11 curriculum
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]

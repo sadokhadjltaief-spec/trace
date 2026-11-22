@@ -29,6 +29,7 @@ type Action =
       tutorSessionId?: string | null
       preferences?: Record<string, string | null> | null // guests only
       media?: 'image' | 'video' | null
+      docId?: string | null // a PDF attached in the chat
     }
 
 export async function POST(req: Request) {
@@ -78,6 +79,7 @@ export async function POST(req: Request) {
           session_id: b.tutorSessionId ?? null,
           preferences: b.preferences ?? null,
           media: b.media ?? null,
+          doc_id: b.docId ?? null,
         })
         break
       default:

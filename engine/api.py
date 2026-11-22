@@ -788,11 +788,18 @@ def save_profile(token: str, profile: dict) -> dict:
 
 
 def tutor_turn(message: str, lang: str = "fr", session_id: str | None = None, token: str | None = None,
-               prefs: dict | None = None, want_media: str | None = None) -> dict:
+               prefs: dict | None = None, want_media: str | None = None, doc_id: str | None = None) -> dict:
     """Personal tutor turn: preferences read from the student's saved profile (or `prefs` for a guest)."""
     from engine import students, tutor_chat
     student = students.from_token(token) if token else None
-    return tutor_chat.turn(message, lang, session_id, student, prefs, want_media)
+    return tutor_chat.turn(message, lang, session_id, student, prefs, want_media, doc_id)
+
+
+def upload_document(filename: str, data: bytes, token: str | None = None) -> dict:
+    """PDF attached in the tutor chat: validated, text extracted page by page (scanned pages reported)."""
+    from engine import documents, students
+    student = students.from_token(token) if token else None
+    return documents.save(filename, data, (student or {}).get("student_id"))
 
 
 def progress(token: str, lang: str = "fr") -> dict:
@@ -805,3 +812,24 @@ def progress(token: str, lang: str = "fr") -> dict:
 def make_media(kind: str, request: str, lang: str = "fr") -> dict:
     from engine import tutor_chat
     return tutor_chat.make_media(kind, request, lang_of(lang))
+
+
+# ---------------------------------------------------------------- interactive textbook (1.14)
+def textbook_make(lang: str = "fr", doc_id: str | None = None, text: str | None = None, token: str | None = None) -> dict:
+    from engine import students, textbook
+    return textbook.make(lang, doc_id, text, students.from_token(token) if token else None)
+
+
+def textbook_get(tb_id: str, token: str | None = None, guest: str | None = None) -> dict:
+    from engine import students, textbook
+    return textbook.get(tb_id, students.from_token(token) if token else None, guest)
+
+
+def textbook_answer(tb_id: str, i: int, choice: int, token: str | None = None, guest: str | None = None) -> dict:
+    from engine import students, textbook
+    return textbook.answer(tb_id, i, choice, students.from_token(token) if token else None, guest)
+
+
+def textbook_event(tb_id: str, i: int, name: str, token: str | None = None, guest: str | None = None) -> dict:
+    from engine import students, textbook
+    return textbook.event(tb_id, i, name, students.from_token(token) if token else None, guest)

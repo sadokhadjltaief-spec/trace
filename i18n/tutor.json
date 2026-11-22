@@ -694,5 +694,30 @@
   "fr": "Aucune voix n'est disponible pour la narration.",
   "en": "No voice is available for the narration.",
   "ar": "لا يوجد صوت متاح للسرد."
+ },
+ "doc_not_pdf": {
+  "fr": "Ce fichier n'est pas un PDF. Choisis un fichier .pdf.",
+  "en": "This file is not a PDF. Choose a .pdf file.",
+  "ar": "هذا الملف ليس PDF. اختر ملفًا بصيغة pdf."
+ },
+ "doc_too_big": {
+  "fr": "Le PDF dépasse 25 Mo. Choisis un fichier plus léger.",
+  "en": "The PDF is larger than 25 MB. Choose a smaller file.",
+  "ar": "حجم الملف أكبر من 25 ميغابايت. اختر ملفًا أصغر."
+ },
+ "doc_too_many_pages": {
+  "fr": "Le PDF a plus de 300 pages. Envoie un chapitre à la fois.",
+  "en": "The PDF has more than 300 pages. Send one chapter at a time.",
+  "ar": "الملف يتجاوز 300 صفحة. أرسل فصلًا واحدًا في كل مرة."
+ },
+ "doc_unreadable": {
+  "fr": "Ce PDF ne peut pas être ouvert (fichier abîmé ou protégé).",
+  "en": "This PDF cannot be opened (damaged or protected file).",
+  "ar": "لا يمكن فتح هذا الملف (تالف أو محمي)."
+ },
+ "doc_needs_ocr": {
+  "fr": "Ce PDF est scanné : aucune page n'a de texte. Il faut une reconnaissance de texte (OCR), qui n'est pas installée.",
+  "en": "This PDF is scanned: no page has text. It needs text recognition (OCR), which is not installed.",
+  "ar": "هذا الملف ممسوح ضوئيًا ولا يحتوي على نص. يحتاج إلى التعرّف الضوئي على الحروف وهو غير مثبّت."
  }
 }

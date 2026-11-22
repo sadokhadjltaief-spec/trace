@@ -71,12 +71,21 @@ DEFAULTS = {"explanationStyle": "step-by-step", "informationAmount": "normal", "
 
 SYSTEM = """You are WASLA, a warm, patient personal tutor for a school student{name_part}{level_part}. Write in {lang}.
 
+PERSONALITY: friendly, patient and encouraging, like a supportive personal tutor - never robotic, cold or formal, and
+never childish. Every answer starts with a SHORT encouraging phrase ("opener"), written for THIS message:
+- a question: welcome it ("Great question! Let's explore it together.");
+- a correct answer: acknowledge the understanding and invite further ("Exactly! You're making a great connection.");
+- a wrong or partly wrong answer: value the effort, NEVER congratulate it as correct ("Nice attempt! There's just one
+  little thing to clarify.");
+- frustration or discouragement: reassure first, then simplify ("No worries at all, this one is tricky at first.");
+- a request for the direct answer: agree simply ("Of course! Here it is, with a short why.");
+- a simple factual question: a very short opener (3-6 words).
+Vary the opener; never reuse one of these recent openers: {recent_openers}. The opener never replaces the explanation.
+
 PHILOSOPHY: do not just give answers; help the student understand how to find them (guided, Socratic-style), while
 staying natural and conversational - never an interrogation.
 Each turn: understand the request; decide what the student needs now (explanation, hint, example, guided question,
 check of understanding, or the answer); build understanding progressively from the student's own words.
-- When the student ANSWERS or TRIES something, acknowledge what is right first ("Exactly", "Good thinking", "You're
-  getting closer" - vary them, never the same twice in a row). Do not use them to reply to a plain question.
 - Wrong or partly wrong answer: say what is reasonable in it, look for the cause, ask ONE targeted question or give a
   simpler explanation / another example, then check again. One mistake does not prove a misconception.
 - Do not ask a question after every sentence: sometimes the student needs a clear explanation.
@@ -103,7 +112,10 @@ MEDIA: the app can draw an educational diagram (computed, not a photo) or make a
 Video only when the student asks for a video. "request" = what to show, precisely, in one sentence.
 
 Return JSON only:
-{{"reply": "Markdown message to the student",
+{{"opener": "the short encouraging first sentence (not repeated in reply)",
+ "reply": "Markdown message to the student, after the opener",
+ "student_answer": "correct|partly_correct|incorrect|none (judge ONLY the student's last message; none if it is not an answer)",
+ "student_mood": "neutral|frustrated|confident",
  "mode": "explain|hint|example|guided_question|answer|check|encourage|refusal",
  "suggestions": ["up to 3 short follow-up buttons the student may click, written in {lang_name}, e.g. {sugg}"],
  "observations": [{{"concept": "short concept name in the student's language", "subject": "maths|physics|history|...",
@@ -168,6 +180,73 @@ def _json(text: str) -> dict:
     return {"reply": raw, "mode": "explain"} if raw and "{" not in raw[:5] else {}
 
 
+# ---------------------------------------------------------------- encouraging opener (checked by code)
+# fallbacks when the model's opener is missing, repeated, too long or wrong for the situation; calm = no "!"
+OPENERS = {
+    "fr": {"question": ["Bonne question ! Explorons-la ensemble.", "Très bonne question, on regarde ça ensemble.",
+                        "Super, c'est une question intéressante.", "Allons-y pas à pas."],
+           "correct": ["Exactement ! Tu fais le bon lien.", "Bien vu, tu as compris l'idée.",
+                       "C'est juste ! Allons un peu plus loin.", "Excellent raisonnement !"],
+           "incorrect": ["Bonne tentative ! Il y a juste un détail à clarifier.", "Tu es sur une piste, regardons un point ensemble.",
+                         "Pas grave, c'est comme ça qu'on apprend.", "Presque ! Regardons-le sous un autre angle."],
+           "frustrated": ["Pas d'inquiétude, on va y arriver ensemble.", "Ne lâche rien, cette notion est difficile au début.",
+                          "Prends ton temps, il n'y a aucune urgence.", "C'est normal de bloquer ici, on simplifie."],
+           "answer": ["Bien sûr ! Voici la réponse, avec un court pourquoi.", "D'accord, voici la réponse expliquée."]},
+    "en": {"question": ["Great question! Let's explore it together.", "Good question, let's look at it together.",
+                        "Nice, that's an interesting question.", "Let's take it step by step."],
+           "correct": ["Exactly! You're making a great connection.", "Well spotted, you've got the idea.",
+                       "That's right! Let's take it one step further.", "Excellent thinking!"],
+           "incorrect": ["Nice attempt! There's just one little thing to clarify.", "You're on a track, let's check one point together.",
+                         "No problem, that's how we learn.", "Almost! Let's look at it from another angle."],
+           "frustrated": ["Don't worry, we'll figure it out together.", "Don't give up, this idea is tricky at first.",
+                          "Take your time, there's no rush.", "It's normal to get stuck here, let's simplify."],
+           "answer": ["Of course! Here's the answer, with a short why.", "Sure, here's the answer explained."]},
+    "ar": {"question": ["سؤال رائع! لنستكشفه معًا.", "سؤال جيد، لننظر فيه معًا.", "لنمضِ خطوة بخطوة."],
+           "correct": ["بالضبط! أنت تربط الأفكار جيدًا.", "أحسنت، فهمت الفكرة.", "صحيح! لنذهب أبعد قليلًا."],
+           "incorrect": ["محاولة جيدة! بقيت نقطة صغيرة نوضحها.", "لا بأس، هكذا نتعلم.", "قريب! لننظر من زاوية أخرى."],
+           "frustrated": ["لا تقلق، سنصل معًا.", "لا تستسلم، هذه الفكرة صعبة في البداية.", "خذ وقتك، لا داعي للعجلة."],
+           "answer": ["بالتأكيد! إليك الإجابة مع شرح قصير.", "حسنًا، إليك الإجابة مشروحة."]},
+}
+_PRAISE_CORRECT = re.compile(r"(?i)\b(exact\w*|correct\w*|right|bravo|parfait\w*|excellent\w*|well done|"
+                             r"bien jou\w*|c'est juste|juste !|perfect|great job|good job)\b|بالضبط|صحيح|أحسنت|ممتاز")
+_FRUSTRATED = re.compile(r"(?i)(je (ne )?comprends (rien|pas)|j'y arrive pas|je n'y arrive pas|encore faux|nul|"
+                         r"marre|abandonne|i don't understand|i give up|wrong again|i can't|لا أفهم|لم أفهم|صعب)")
+_ASKS_ANSWER = re.compile(r"(?i)(donne[- ]moi la r[ée]ponse|dis[- ]moi (juste )?la r[ée]ponse|just (tell|give) me the "
+                          r"answer|la solution directement|أعطني الإجابة)")
+
+
+def situation(message: str, d: dict) -> str:
+    """What the opener must fit: computed from the message (code) and the model's judgement of the answer."""
+    if _ASKS_ANSWER.search(message):
+        return "answer"
+    if _FRUSTRATED.search(message) or d.get("student_mood") == "frustrated":
+        return "frustrated"
+    ans = str(d.get("student_answer", "none"))
+    if ans == "correct":
+        return "correct"
+    if ans in ("incorrect", "partly_correct"):
+        return "incorrect"
+    return "question"
+
+
+def choose_opener(raw: str, sit: str, lang: str, recent: list[str], env: str, amount: str) -> str:
+    """Keep the model's opener when it fits; otherwise a fallback for the situation. Never praise a wrong answer as
+    correct, never repeat a recent opener, keep it short (shorter for 'short' / 'small' preferences), calm = no '!'."""
+    o = tidy(re.sub(r"\s+", " ", (raw or "").strip()))
+    words = len(o.split())
+    max_words = 10 if amount == "small" else 16
+    low = {r.strip().lower() for r in recent}
+    bad = (not o or words > max_words or o.lower() in low
+           or (sit == "incorrect" and _PRAISE_CORRECT.search(o) and not re.search(r"(?i)presque|almost|tentative|attempt", o))
+           or "\n" in o)
+    if bad:
+        bank = [x for x in OPENERS[lang][sit] if x.lower() not in low] or OPENERS[lang][sit]
+        o = bank[len(recent) % len(bank)]
+    if env == "calm":
+        o = o.replace(" !", ".").replace("!", ".")
+    return o
+
+
 def _prefs_text(p: dict) -> str:
     v = {k: p.get(k) or DEFAULTS[k] for k in DEFAULTS}
     notes = p.get("notes") or {}
@@ -215,8 +294,9 @@ def _fallback(lang: str) -> str:
 
 
 def turn(message: str, lang: str = "fr", session_id: str | None = None, student: dict | None = None,
-         prefs: dict | None = None, want_media: str | None = None) -> dict:
-    """One tutor turn. `student` = students.from_token(...) result (profile read from the database) or None (guest:
+         prefs: dict | None = None, want_media: str | None = None, doc_id: str | None = None) -> dict:
+    """One tutor turn. `doc_id` = a PDF attached in the chat (engine/documents.py): its pages come first.
+     `student` = students.from_token(...) result (profile read from the database) or None (guest:
     `prefs` from the request is used). `want_media` = 'image' | 'video' forces a media request (buttons)."""
     lang = lang_of(lang)
     message = (message or "").strip()[:2000]
@@ -226,14 +306,23 @@ def turn(message: str, lang: str = "fr", session_id: str | None = None, student:
     profile = (student or {}).get("profile") or students.clean_profile(prefs or {})
     student_id = (student or {}).get("student_id")
     history = students.session_history(sid)
-    course, hits = _course(message, history)
+    recent = [h.get("opener", "") for h in history if h.get("role") == "assistant" and h.get("opener")][-5:]
+    env = profile.get("learningEnvironment") or DEFAULTS["learningEnvironment"]
+    opener = ""
+    if doc_id:
+        from engine import documents
+        prev = next((h["content"] for h in reversed(history) if h["role"] == "user"), "")
+        course, hits = documents.passages(doc_id, f"{message} {prev}")
+    else:
+        course, hits = _course(message, history)
     memory = students.memory_summary(student_id) if student_id else "(guest: nothing saved)"
     name = (profile.get("name") or "").strip().split(" ")[0]
     system = SYSTEM.format(name_part=f" called {name}" if name else "",
                            level_part=f" (level: {LEVELS.get(profile.get('educationLevel'), profile.get('educationLevel'))})"
                            if profile.get("educationLevel") else "",
                            lang=LANG[lang], prefs=_prefs_text(profile), memory=memory, course=course,
-                           lang_name=LANG[lang].split(" (")[0], sugg=SUGG[lang])
+                           lang_name=LANG[lang].split(" (")[0], sugg=SUGG[lang],
+                           recent_openers=" | ".join(recent) or "(none yet)")
     msgs = [{"role": "system", "content": system}]
     for h in history[-12:]:
         c = h["content"][:1500]
@@ -253,9 +342,15 @@ def turn(message: str, lang: str = "fr", session_id: str | None = None, student:
         except Exception:  # noqa: BLE001  offline and not cached / all models unavailable
             d = {}
             break
-        text = tidy(str(d.get("reply", "")))
-        if not text:
+        body = tidy(str(d.get("reply", "")))
+        if not body:
             continue
+        sit = situation(message, d)
+        opener = "" if str(d.get("mode")) == "refusal" else choose_opener(
+            str(d.get("opener", "")), sit, lang, recent, env, profile.get("informationAmount") or "normal")
+        if opener and body.lower().startswith(opener.lower()[:20]):
+            body = body[len(opener):].lstrip(" \n")  # the model repeated its opener at the start of the reply
+        text = f"{opener}\n\n{body}" if opener else body
         checks = _check(text, suspects, lang, kw)
         failed = [c for c in checks if c.status == "fail"]
         if not failed:
@@ -296,7 +391,8 @@ def turn(message: str, lang: str = "fr", session_id: str | None = None, student:
     if student_id and obs:
         students.observe(student_id, obs, helped_by=profile.get("explanationStyle"))
     history = history + [{"role": "user", "content": message},
-                         {"role": "assistant", "content": reply.text if reply.shown_allowed else ""}]
+                         {"role": "assistant", "content": reply.text if reply.shown_allowed else "",
+                          "opener": opener if ok else ""}]
     students.save_history(sid, student_id, history)
     progress = sum(1 for o in obs if o.get("status") == "understood")
     return TutorChatTurn(session_id=sid, reply=reply, mode=mode, suggestions=suggestions, media=media_out,

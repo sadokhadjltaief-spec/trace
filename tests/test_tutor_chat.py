@@ -134,3 +134,28 @@ def test_http_auth_profile_tutor_progress(fake):
     assert c.get("/api/v1/students/me/progress", headers=H).status_code == 200
     assert c.get("/api/v1/students/me/progress").status_code == 401
     assert c.get("/api/v1/media/../../.env").status_code == 404
+
+
+def test_opener_never_praises_a_wrong_answer_and_does_not_repeat():
+    o = tutor_chat.choose_opener("Exactement, bravo !", "incorrect", "fr", [], "interactive", "normal")
+    assert not tutor_chat._PRAISE_CORRECT.search(o) or "tentative" in o.lower() or "presque" in o.lower()
+    assert tutor_chat.choose_opener("Bonne question !", "question", "fr", ["Bonne question !"], "interactive", "normal") \
+        != "Bonne question !"
+    calm = tutor_chat.choose_opener("Super question ! On y va.", "question", "fr", [], "calm", "normal")
+    assert "!" not in calm
+    assert len(tutor_chat.choose_opener("un " * 30, "question", "fr", [], "gamified", "small").split()) <= 10
+
+
+def test_situation_from_message_and_model_judgement():
+    assert tutor_chat.situation("Donne-moi la réponse", {}) == "answer"
+    assert tutor_chat.situation("je comprends rien", {"student_answer": "none"}) == "frustrated"
+    assert tutor_chat.situation("x = 3", {"student_answer": "incorrect"}) == "incorrect"
+    assert tutor_chat.situation("x = 3", {"student_answer": "correct"}) == "correct"
+    assert tutor_chat.situation("C'est quoi une dérivée ?", {}) == "question"
+
+
+def test_every_reply_starts_with_the_opener(fake):
+    fake.reply = "Une fraction représente une part d'un tout."
+    r = tutor_chat.turn("C'est quoi une fraction ?", "fr", None, None, {"learningEnvironment": "interactive"})
+    first = r["reply"]["text"].split("\n\n")[0]
+    assert first in sum(tutor_chat.OPENERS["fr"].values(), []) and "part d'un tout" in r["reply"]["text"]

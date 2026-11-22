@@ -60,6 +60,7 @@ export function Dashboard({ profile, onChange, onSignOut }: Props) {
   const streak = 1
   // gamified mode: points come only from genuine progress the tutor observed (10 per notion shown understood)
   const [points, setPoints] = useState(0)
+  const [programmeQuery, setProgrammeQuery] = useState<{ q: string; at: number } | null>(null)
 
   const preferences = [
     { key: 'explanations', label: t.summary.explanations, value: option('explanation', profile.explanationStyle)?.label },
@@ -188,7 +189,7 @@ export function Dashboard({ profile, onChange, onSignOut }: Props) {
         />
       ) : (
       <div className="flex min-w-0 flex-1 flex-col">
-        {!quizOpen && !gamesOpen && !flashcardsOpen && !summaryOpen && !planOpen ? <Topbar copy={copy} streak={streak} points={points} onOpenMenu={() => setMenuOpen(true)} /> : null}
+        {!quizOpen && !gamesOpen && !flashcardsOpen && !summaryOpen && !planOpen ? <Topbar copy={copy} streak={streak} points={points} onOpenMenu={() => setMenuOpen(true)} onSearch={(q) => { setProgrammeQuery({ q, at: Date.now() }); navigate('curriculum') }} /> : null}
 
         {profilePageOpen ? (
           <ProfilePage profile={profile} onEdit={() => openSettings('profile')} onBack={() => setProfilePageOpen(false)} />
@@ -220,7 +221,7 @@ export function Dashboard({ profile, onChange, onSignOut }: Props) {
               />
             </section>
           ) : active === 'curriculum' ? (
-            <CurriculumView lang={lang} />
+            <CurriculumView lang={lang} search={programmeQuery} />
           ) : active === 'progress' ? (
             <ProgressView lang={lang} />
           ) : active === 'media' ? (

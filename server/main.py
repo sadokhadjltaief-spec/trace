@@ -395,6 +395,7 @@ class TutorBody(BaseModel):
     session_id: str | None = None
     preferences: dict | None = None          # guests only; a signed-in student's saved profile is used
     media: Literal["image", "video"] | None = None
+    doc_id: str | None = None                # a PDF attached in the chat
 
 
 class MediaBody(BaseModel):
@@ -431,7 +432,7 @@ def students_progress(lang: Literal["fr", "ar", "en"] = "fr", authorization: str
 def tutor_chat(body: TutorBody, authorization: str | None = Header(None)):
     """Personal tutor: adapts to the saved preferences; the reply passes the guards before it is returned."""
     return _auth(api.tutor_turn, body.message, body.lang, body.session_id, _token(authorization), body.preferences,
-                 body.media)
+                 body.media, body.doc_id)
 
 
 @app.post("/api/v1/media/image", response_model=ChatMedia)
@@ -453,3 +454,54 @@ def media_file(name: str):
         raise HTTPException(404, "unknown media") from None
     kind = {"png": "image/png", "mp4": "video/mp4", "vtt": "text/vtt; charset=utf-8"}[p.suffix[1:]]
     return FileResponse(p, media_type=kind)
+
+
+@app.post("/api/v1/tutor/documents")
+async def tutor_document(file: UploadFile = File(...), authorization: str | None = Header(None)):
+    """Attach a PDF in the tutor chat (25 MB max). Returns pages read and pages that need OCR."""
+    from engine.documents import DocError
+    from engine.i18n import t as tr
+    data = await file.read()
+    try:
+        return _auth(api.upload_document, file.filename or "document.pdf", data, _token(authorization))
+    except DocError as e:
+        raise HTTPException(413 if e.key == "doc_too_big" else 400, {"code": e.key, "fr": tr(e.key, "fr"),
+                                                                     "en": tr(e.key, "en"), "ar": tr(e.key, "ar")}) from None
+
+
+
+class TextbookBody(BaseModel):
+    lang: Literal["fr", "ar", "en"] = "fr"
+    doc_id: str | None = None
+    text: str | None = None
+
+
+class AnswerBody(BaseModel):
+    choice: int
+    guest: str | None = None
+
+
+class EventBody(BaseModel):
+    event: Literal["flap", "vocab", "visual"]
+    guest: str | None = None
+
+
+@app.post("/api/v1/textbooks")
+def textbook_make(body: TextbookBody, authorization: str | None = Header(None)):
+    """Turn an attached PDF (doc_id) or a tutor explanation (text) into textbook spreads (checked, cached)."""
+    return _auth(api.textbook_make, body.lang, body.doc_id, body.text, _token(authorization))
+
+
+@app.get("/api/v1/textbooks/{tb_id}")
+def textbook_get(tb_id: str, guest: str | None = None, authorization: str | None = Header(None)):
+    return _auth(api.textbook_get, tb_id, _token(authorization), guest)
+
+
+@app.post("/api/v1/textbooks/{tb_id}/spreads/{i}/answer")
+def textbook_answer(tb_id: str, i: int, body: AnswerBody, authorization: str | None = Header(None)):
+    return _auth(api.textbook_answer, tb_id, i, body.choice, _token(authorization), body.guest)
+
+
+@app.post("/api/v1/textbooks/{tb_id}/spreads/{i}/event")
+def textbook_event(tb_id: str, i: int, body: EventBody, authorization: str | None = Header(None)):
+    return _auth(api.textbook_event, tb_id, i, body.event, _token(authorization), body.guest)

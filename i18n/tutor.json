@@ -634,5 +634,35 @@
   "fr": "Fais un quiz ou un diagnostic TRACE pour vérifier ce que tu as compris.",
   "en": "Take a quiz or a TRACE diagnosis to check what you understood.",
   "ar": "اختبر نفسك بمسابقة أو بتشخيص TRACE."
+ },
+ "source_offline": {
+  "fr": "Impossible de récupérer ce contenu. Il n'y a pas de connexion internet, ou le site ne répond pas. Réessaie avec internet, ou utilise un fichier ou du texte collé.",
+  "en": "This content could not be fetched: no internet connection (or the site is not answering). Try again online, or use a file or pasted text.",
+  "ar": "تعذّر جلب هذا المحتوى: لا يوجد اتصال بالإنترنت (أو الموقع لا يستجيب). أعد المحاولة مع الإنترنت أو استعمل ملفًا أو نصًا ملصوقًا."
+ },
+ "source_bad_link": {
+  "fr": "Ce lien n'est pas reconnu. Colle un lien YouTube (youtube.com/watch?v=… ou youtu.be/…) ou un lien Wikipédia (fr.wikipedia.org/wiki/…).",
+  "en": "This link is not recognised. Paste a YouTube link (youtube.com/watch?v=… or youtu.be/…) or a Wikipedia link (en.wikipedia.org/wiki/…).",
+  "ar": "هذا الرابط غير معروف. الصق رابط فيديو من يوتيوب أو رابط مقال من ويكيبيديا."
+ },
+ "source_youtube_no_transcript": {
+  "fr": "Cette vidéo n'a pas de sous-titres : TRACE ne peut pas en extraire le texte. Choisis une vidéo avec sous-titres.",
+  "en": "This video has no captions, so TRACE cannot extract its text. Choose a video with captions.",
+  "ar": "هذا الفيديو بلا ترجمة نصية، لذلك لا يستطيع TRACE استخراج نصه. اختر فيديو بترجمة."
+ },
+ "source_youtube_unavailable": {
+  "fr": "Cette vidéo n'est pas accessible (privée, supprimée ou bloquée).",
+  "en": "This video is not available (private, removed or blocked).",
+  "ar": "هذا الفيديو غير متاح (خاص أو محذوف أو محجوب)."
+ },
+ "source_wikipedia_missing": {
+  "fr": "Cet article Wikipédia est introuvable. Vérifie le lien ou le titre.",
+  "en": "This Wikipedia article was not found. Check the link or the title.",
+  "ar": "لم يُعثر على مقال ويكيبيديا هذا. تحقّق من الرابط أو العنوان."
+ },
+ "source_unavailable": {
+  "fr": "Cette source n'est pas disponible sur ce serveur.",
+  "en": "This source is not available on this server.",
+  "ar": "هذا المصدر غير متاح على هذا الخادم."
  }
 }

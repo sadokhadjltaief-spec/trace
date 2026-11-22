@@ -1,6 +1,31 @@
 # STATUS
 
-Last update: 2026-11-22, final checks before the video.
+Last update: 2026-11-22, chat explanations, programme cycles + chapter page, summary reader, YouTube / Wikipedia.
+
+## Four requests before the video (2026-11-22, team request)
+- **Chat:** a general course question ("Explique-moi l'équation du second degré", "C'est quoi le théorème de
+  Pythagore ?") gets a structured teacher explanation on gpt-oss-120b (idea, rule, method, worked example, common
+  mistake), labelled "not from your course", guarded (SymPy claims, congruency, style, language) and leak-checked
+  against the exercise open in the session. Off topic (Cristiano Ronaldo) still refused. Recorded for offline:
+  second-degree equation, Pythagoras, area of a circle, Ronaldo refusal. Thalès was blocked by the math guard (the
+  LLM wrote a wrong ratio) and is NOT recorded. Math check fixes: decimal commas (3,14), middle dot (4·2), U+2011.
+- **Programme:** cycles primaire (1re-6e, NEW, indicative, written by the team), collège (7e-9e), lycée; cycle
+  dropdown + search ("School", "Collège", "Lycée", or a chapter name). Chapter page `ChapterDetailView.tsx`: notions,
+  link to mourajaa.com (primary) or najahni.tn (collège / lycée), "Télécharger le PDF du cours" opens the site (no
+  download or copy by TRACE, docs/NAJAHNI_NOTE.md), chapter study plan built by code (no LLM, works offline).
+  API: `GET /curriculum?cycle=`, `GET /curriculum/chapters/{id}`, `POST /curriculum/chapters/{id}/plan`. Contract 1.12.
+- **Summary reader:** contents follow the scroll, reading progress bar, points per section, reading time, source
+  chips; citations "p. N" for files, "partie N" for YouTube / Wikipedia. Offline cache of the demo PDF re-checked.
+- **YouTube / Wikipedia (`engine/web_sources.py`):** youtube-transcript-api 1.2.5 (captions; no captions = clear
+  message) and the MediaWiki API (plain text, one part per section). Cached in `.cache/web/`; in TRACE_DEMO=1 only the
+  cache is read. Enabled in the quiz, flashcards and summary source pickers. Errors: no internet, bad link, no
+  captions, video unavailable, article missing (FR/AR/EN).
+- **Blocked:** Groq daily cap reached on BOTH models (120b ~319k, 20b ~249k tokens in 24 h). Generating cards /
+  summaries from a YouTube or Wikipedia source was NOT tested end to end with the LLM (extraction tested live; the
+  generation path is the same as pasted text). Estimated free again: 20b ~16:20, 120b ~20:00.
+- **Not checked in the browser:** the running engine on :8000 (old code, contract 1.11) must be restarted to serve
+  the new endpoints. New engine checked on :8001 by HTTP (cycles, chapter, chat, summary, source errors).
+- Tests: 218 passed.
 
 ## Final checks (2026-11-22, before the video)
 - Summary offline: `TRACE_DEMO=1`, `POST /api/v1/practice/summary` on `cours_fractions_relatifs.pdf` (2 pages, fr,

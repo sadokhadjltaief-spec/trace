@@ -65,7 +65,7 @@ def test_quiz_keeps_only_cross_checked_questions_and_hides_the_key(env):
 
 
 def test_sources_and_pasted_text(env):
-    assert api.practice_quiz(source="youtube", text="https://youtube.com/x", lang="fr")["refused"].startswith("Cette source")
+    assert api.practice_quiz(source="youtube", text="https://youtube.com/x", lang="fr")["refused"].startswith("Ce lien")
     assert api.practice_quiz(lang="fr")["refused"]
     r = api.practice_quiz(text="Les fractions.\n\nPour additionner deux fractions on prend le même dénominateur.",
                           source="text", lang="fr")

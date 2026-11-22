@@ -25,9 +25,9 @@ export function QuizSourcePicker({ copy, onBack, kind = 'quiz', lang }: { copy: 
     { id: 'wikipedia', title: copy.quiz.wikipedia, description: copy.quiz.wikipediaDescription, tone: 'bg-accent text-accent-foreground' },
   ]
 
-  // YouTube / Wikipedia need the internet and are not connected to the TRACE engine yet: shown, but marked "coming soon"
+  // YouTube / Wikipedia: the link is sent as text; the engine fetches the transcript or the article
   const SOON = { en: 'Coming soon', fr: 'Bientôt disponible', ar: 'قريبًا' }[lang]
-  const isSoon = (id: SourceId) => id === 'youtube' || id === 'wikipedia'
+  const isSoon = (_id: SourceId) => false // YouTube / Wikipedia: the engine fetches the transcript / article (needs internet the first time)
   const selectedSource = sources.find((item) => item.id === source)
   const isReady = source === 'file' ? fileName.length > 0 : Boolean(value.trim())
   const flashcardCopy = {

@@ -48,10 +48,17 @@ BLIND_SYS = """Answer each multiple-choice question using ONLY the course text b
 single sure answer, answer "?". Return JSON: {"answers": [{"id": "q0", "answer": "A"}]}"""
 
 
-def material(files: list[tuple[str, bytes]], text: str, source: str) -> tuple[list[tuple[str, int, str]], str | None]:
-    """Pages of the student's material, or a refusal reason key."""
+def material(files: list[tuple[str, bytes]], text: str, source: str,
+             lang: str = "fr") -> tuple[list[tuple[str, int, str]], str | None]:
+    """Pages of the student's material, or a refusal reason key. For source youtube / wikipedia, `text` is the link
+    (or a Wikipedia title): the transcript / article is fetched (engine/web_sources.py) and cut into parts."""
     if source in ("youtube", "wikipedia"):
-        return [], "practice_source_unsupported"
+        from engine import web_sources
+        try:
+            got = web_sources.fetch(source, text, lang)
+        except web_sources.SourceError as e:
+            return [], e.key
+        return (got["pages"], None) if got["pages"] else ([], "practice_no_text")
     if files:
         raw = []
         for p in save_uploads(files):
@@ -92,7 +99,7 @@ def _count(details: str, default: int, lo: int, hi: int) -> int:
 
 def make_quiz(files, text: str, source: str, details: str, lang: str, kw: dict, suspects: dict) -> dict:
     lang = lang_of(lang)
-    pages, refusal = material(files, text, source)
+    pages, refusal = material(files, text, source, lang)
     if refusal:
         return PracticeQuiz(quiz_id="", questions=[], sources=[], verification="", refused=tr(refusal, lang)).model_dump()
     body = _budget(_spread(pages, 14), QUIZ_BUDGET)
@@ -156,7 +163,7 @@ def check(quiz_id: str, question_id: str, option: str) -> dict:
 
 def make_cards(files, text: str, source: str, details: str, lang: str, kw: dict, suspects: dict) -> dict:
     lang = lang_of(lang)
-    pages, refusal = material(files, text, source)
+    pages, refusal = material(files, text, source, lang)
     if refusal:
         return PracticeCards(deck_id="", cards=[], sources=[], note="", refused=tr(refusal, lang)).model_dump()
     chosen = _spread(pages, 6)
@@ -202,7 +209,7 @@ Return JSON: {{"title": "...", "overview": "2-3 sentences", "sections": [{{"head
 def make_summary(files, text: str, source: str, focus: str, pages_wanted: int, lang: str, kw: dict,
                  suspects: dict) -> dict:
     lang = lang_of(lang)
-    pages, refusal = material(files, text, source)
+    pages, refusal = material(files, text, source, lang)
     if refusal:
         return PracticeSummary(summary_id="", refused=tr(refusal, lang)).model_dump()
     n_pages = max(1, min(10, int(pages_wanted or 2)))

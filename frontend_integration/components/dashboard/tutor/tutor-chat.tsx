@@ -5,7 +5,7 @@ import type { UIMessage } from 'ai'
 import { WaslaLogo } from '@/components/wasla-logo'
 import type { Lang } from '@/lib/translations'
 import { Composer, type Attachment } from './composer'
-import { TextbookView } from '../textbook/textbook-view'
+import { LessonView } from '../lesson/lesson-view'
 import { authHeader } from '@/lib/auth'
 import { Markdown } from './markdown'
 import { messageText } from './use-conversations'
@@ -74,7 +74,7 @@ export function TutorChat({ chatId, initialMessages, copy, lang, firstName, cont
   const [attachment, setAttachmentState] = useState<Attachment | null>(() => ATTACHED.get(chatId) ?? null)
   const setAttachment = (a: Attachment | null) => { if (a) ATTACHED.set(chatId, a); else ATTACHED.delete(chatId); setAttachmentState(a) }
   const [dragging, setDragging] = useState(false)
-  const [book, setBook] = useState<{ docId?: string; text?: string } | null>(null)
+  const [book, setBook] = useState<{ docId?: string; text?: string; name?: string } | null>(null)
 
   function upload(file: File) {
     const MC = MEDIA_COPY[lang]
@@ -124,7 +124,7 @@ export function TutorChat({ chatId, initialMessages, copy, lang, firstName, cont
   const composer = (
     <Composer copy={copy} lang={lang} busy={busy} onSend={send} onStop={stop} attachment={attachment}
       onAttach={upload} onRemoveAttachment={() => setAttachment(null)}
-      onTextbook={attachment?.docId ? () => setBook({ docId: attachment.docId }) : undefined} />
+      onTextbook={attachment?.docId ? () => setBook({ docId: attachment.docId, name: attachment.name }) : undefined} />
   )
   const dropProps = {
     onDragOver: (e: React.DragEvent) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); setDragging(true) } },
@@ -139,7 +139,7 @@ export function TutorChat({ chatId, initialMessages, copy, lang, firstName, cont
     </div>
   ) : null
 
-  if (book) return <TextbookView lang={lang} source={book} onExit={() => setBook(null)} />
+  if (book) return <LessonView lang={lang} source={book} onExit={() => setBook(null)} />
 
   if (messages.length === 0) {
     return (

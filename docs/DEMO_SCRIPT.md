@@ -152,6 +152,36 @@ All offline: the Study Studio outputs for Amira (FR, M1) are cached; simulations
   "Suivant" / "Précédent".
 - Leave "détails" empty (the cache was recorded with an empty field).
 
+## Showcase · The interactive 3D lesson ("Transformer en manuel 3D") — about 60 s
+
+**What it is.** The button "Transformer en manuel 3D" (under a PDF attached in the AI tutor) no longer opens the old
+page-turning book: it opens an **interactive lesson** in one page, sections **A → G**
+(Introduction · Découverte · Exploration · Règles · Pratique · Vérification · Résumé), with a progress bar, a section
+menu and an activity counter. For the demo course `cours_fractions_relatifs.pdf` it is a hand-built fractions lesson:
+every rule and mistake comes from the 4 course pages (shown as "p. N"), **every result and every answer key is
+computed by code** (exact fractions), it needs **no LLM** and works offline. Three.js is used only for a real solid:
+the fraction "cake" (a cylinder cut into equal sectors). Any other PDF gets the same A → G layout filled with the
+engine's checked lessons (answer keys on the server); a fractions lesson is never shown for another subject.
+
+**Before:** engine + Next running. Have `data/courses/trace_notes/cours_fractions_relatifs.pdf` on the desktop.
+
+1. Sign in (any email + 8 characters; an unknown email creates the account) → **Tuteur IA**.
+2. Drag the PDF into the chat (or the paper clip) → wait for "pages lues" → click **Transformer en manuel 3D**.
+3. **A · Introduction**: move "Parts égales" to **5** and "Parts colorées" to **3** → the 3D cake shows 3/5; drag it
+   to rotate. Say: *"A fraction is equal parts of a whole; equal slices of a cylinder have equal volume."*
+4. **B · Découverte**: slider "Multiplier par" to **2** → 3/5 and 6/10 have the same coloured length. Click
+   **Montrer** → 9/15 → 4/10 (the mistake of p. 4) is visibly shorter.
+5. **C · Exploration**: in the addition, click **8** → red bar 3/8 is shorter than 2/5: *"the sum cannot be smaller
+   than what we added"*. Then click **15** → green bar 11/15. In the number line, type **3** as prediction for
+   (−8) − (−5), click **Vérifier sur la droite** → the arrow jumps from −8 to −3 and TRACE names the misconception
+   ("moins par moins" is a multiplication rule, p. 3).
+6. **E · Pratique**: drag 4/10 into "Pas égale à 3/5" (or click a card, then a box). **F · Vérification**: answer
+   **3/14** first (targeted feedback: "tu as additionné les dénominateurs"), then **3/7**.
+7. **G · Résumé**: the counter shows the activities done (x / 7) and the first-try score.
+
+Pitch line: *"Other apps turn a PDF into slides. TRACE turns it into something the student manipulates, and every
+number on screen is computed, not generated."*
+
 ## 4:15 – 4:40 · Results slide (read from `results/`)
 
 | what | number | source |

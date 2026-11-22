@@ -118,6 +118,21 @@ Last update: 2026-11-22, chat explanations, programme cycles + chapter page, sum
   precedence. `engine/config.py` now loads `.env` with `override=True`. Checked (key never printed): the engine uses
   the `.env` key; both models answer (120b 927/1000 requests left today, 20b 999/1000).
 
+## Login restored + interactive 3D lesson (2026-11-22 ~07:00, team request)
+- **Login as in the first version**: "Sign in" with an unknown email creates the account (accounts and profiles stay
+  in the engine, hashed passwords); a known email with a wrong password is refused. The saved session is cleared at
+  start, so the app always opens on the login screen. Checked in the browser.
+- **"Transformer en manuel 3D" opens an interactive lesson** (`components/dashboard/lesson/`), replacing the
+  page-turning 3D book (old files kept in the app's `_backup_avant_trace/old-3d-book/`). Sections A-G, progress bar,
+  section menu, `motion` animations (reduced-motion respected), keyboard-usable sorting.
+  - Demo course `cours_fractions_relatifs.pdf` -> fractions lesson built from its 4 pages (cited), results and answer
+    keys computed by `fraction-math.ts` (exact integers), no LLM, offline. Three.js only for a real solid: the
+    fraction cake (cylinder cut into equal sectors). Checked in the browser: 3D cake, equal fractions, the 3/8
+    trap, number line (−8) − (−5) with the misconception message, question feedback and retry.
+  - Any other source -> same layout with the engine's checked textbook lessons (unchanged endpoints, keys on the
+    server). NOT checked in the browser this time: the engine answered "no valid lesson" for a 3-sentence test text.
+- Tests: pytest 230 passed; `tsc --noEmit` clean.
+
 ## Final pass before the video (2026-11-22 ~02:30, team request)
 - **Summary judge on gpt-oss-20b** (team decision): the 120b daily cap was reached and the new key is in the SAME
   Groq organisation (shared quota). `config.yaml` `llm.judge_model_by_purpose.practice_summary_judge` sends ONLY the

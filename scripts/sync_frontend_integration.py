@@ -23,6 +23,15 @@ FILES = [
     "components/dashboard/quiz-player.tsx",
     "components/dashboard/flashcard-player.tsx",
     "components/dashboard/study-plan-session.tsx",
+    "lib/engine-proxy.ts",
+    "app/api/practice/quiz/route.ts",
+    "app/api/practice/cards/route.ts",
+    "app/api/practice/summary/route.ts",
+    "components/dashboard/summary-flow.tsx",
+    "components/dashboard/summary-reader.tsx",
+    "components/dashboard/curriculum-view.tsx",
+    "components/dashboard/sidebar.tsx",
+    "components/dashboard/dashboard.tsx",
 ]
 
 

@@ -70,6 +70,14 @@ Last update: 2026-11-22, interactive Quiz, Flashcards and Study session.
   PDF and chap2.pdf → 31/31 LLM calls from the cache, 0 misses. `npx tsc`: 0 errors. Not yet clicked through in the
   browser (the team's servers were running the previous engine).
 
+- Fix (team report "The plan could not be created" on the quiz): the quiz / flashcards calls went through the
+  Next.js `/engine` rewrite, whose proxy cuts requests after ~30 s; the first generation for a file takes ~1 min, so
+  it always failed on a new file (the engine finished and cached the result anyway). They now go through Next route
+  handlers (`app/api/practice/{quiz,cards,summary}`, `lib/engine-proxy.ts`, 280 s). Checked: a never-generated quiz
+  (demo PDF in Arabic) returns 200 after 63 s through the route. Also: one request per screen (React dev mode ran the
+  effect twice), and an error message per screen with the engine's reason. Arabic quiz: only 2 of 8 questions passed
+  the cross-check and guards (thin, but nothing unchecked is shown).
+
 ## Team feedback fixed (2026-11-22): content-based study plan, useful maths chat
 - Why the team saw "Lis la page 1": they uploaded their own PDF with the engine in forced offline mode
   (`TRACE_DEMO=1`), so the plan was not in the cache and the code-built fallback was used. New content needs the

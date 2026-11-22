@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Check, CircleCheck, Gamepad2, LoaderCircle } from 'lucide-react'
 import type { DashboardCopy } from './dashboard-copy'
 import type { Lang } from '@/lib/translations'
@@ -29,6 +29,12 @@ export type PracticeCards = {
   note: string
   refused: string | null
 }
+const ERROR_COPY: Record<Lang, Record<'quiz' | 'plan' | 'flashcards', string>> = {
+  en: { quiz: 'The quiz could not be created.', plan: 'The plan could not be created.', flashcards: 'The flashcards could not be created.' },
+  fr: { quiz: 'Le quiz n’a pas pu être créé.', plan: 'Le plan n’a pas pu être créé.', flashcards: 'Les cartes n’ont pas pu être créées.' },
+  ar: { quiz: 'تعذّر إنشاء الاختبار.', plan: 'تعذّر إنشاء الخطة.', flashcards: 'تعذّر إنشاء البطاقات.' },
+}
+
 const START_COPY: Record<Lang, { quiz: string; cards: string; plan: string }> = {
   en: { quiz: 'Start the quiz', cards: 'Start', plan: 'Start the session' },
   fr: { quiz: 'Commencer le quiz', cards: 'Commencer', plan: 'Commencer la session' },
@@ -76,6 +82,7 @@ export function PreparationExperience({ copy, kind, fileNames, details, lang, on
   const [quiz, setQuiz] = useState<PracticeQuiz | null>(null)
   const [cards, setCards] = useState<PracticeCards | null>(null)
   const [playing, setPlaying] = useState(false)
+  const started = useRef(false) // React dev mode runs effects twice: send the request only once
   const text = copy.preparation
   const hasMaterial = (!!files && files.length > 0) || !!material?.trim()
   const usesEngine = kind === 'plan' ? !!files && files.length > 0 : hasMaterial
@@ -93,7 +100,8 @@ export function PreparationExperience({ copy, kind, fileNames, details, lang, on
         setGameOpen(false)
       }
     }, 100)
-    if (usesEngine) {
+    if (usesEngine && !started.current) {
+      started.current = true
       const form = new FormData()
       ;(files ?? []).forEach((f) => form.append('files', f))
       form.append('details', details)
@@ -102,12 +110,12 @@ export function PreparationExperience({ copy, kind, fileNames, details, lang, on
         form.append('text', material ?? '')
         form.append('source', source ?? 'file')
       }
-      // study plan: Next route; quiz / flashcards: the /engine rewrite to the TRACE API
-      const url = kind === 'plan' ? '/api/study-plan' : kind === 'quiz' ? '/engine/practice/quiz' : '/engine/practice/cards'
+      // Next route handlers (they wait for long generations; the /engine rewrite proxy would time out)
+      const url = kind === 'plan' ? '/api/study-plan' : kind === 'quiz' ? '/api/practice/quiz' : '/api/practice/cards'
       fetch(url, { method: 'POST', body: form })
         .then(async (r) => {
           const data = await r.json().catch(() => ({}))
-          if (!r.ok) throw new Error(typeof data.detail === 'string' ? data.detail : PLAN_COPY[lang].error)
+          if (!r.ok) throw new Error(`${ERROR_COPY[lang][kind]} (${typeof data.detail === 'string' ? data.detail : 'HTTP ' + r.status})`)
           return data
         })
         .then((p) => {
@@ -124,7 +132,7 @@ export function PreparationExperience({ copy, kind, fileNames, details, lang, on
         .catch((e: Error) => {
           done = true
           window.clearInterval(timer)
-          setPlanError(e.message || PLAN_COPY[lang].error)
+          setPlanError(e.message || ERROR_COPY[lang][kind])
           setProgress(100)
           setReady(true)
         })

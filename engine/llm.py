@@ -13,6 +13,7 @@ from __future__ import annotations
 import hashlib
 import json
 import random
+import re
 import sqlite3
 import threading
 import time
@@ -269,6 +270,8 @@ def chat(req: Request, _fallback: bool = True) -> Response:
         if _fallback and "daily cap" in str(e):
             _CAPPED[model] = time.time()
             return _chat_fallback(req, model, str(e))
+        if _fallback and re.search(r"HTTP 400|bad JSON|HTTP 5\d\d", str(e)):
+            return _chat_fallback(req, model, str(e))  # malformed output or server error: the next model may do it
         raise
 
 
@@ -334,6 +337,12 @@ def _chat_live(req: Request, model: str) -> Response:
             time.sleep(min(c["backoff_max_s"], c["backoff_base_s"] * 2 ** attempts))
         except APIStatusError as e:
             last_err = f"HTTP {e.status_code}: {str(e)[:200]}"
+            if e.status_code == 400 and re.search(r"Failed to generate JSON|called a tool|json_validate", str(e)):
+                # the model's output was malformed this time (Groq JSON mode): a new sample usually works
+                req = Request(**{**req.__dict__, "seed_tag": req.seed_tag + "|resample"})
+                if attempts >= 3:
+                    break
+                continue
             if e.status_code < 500 and e.status_code != 408:
                 break  # 4xx (not 429/408) will not succeed on retry
             time.sleep(min(c["backoff_max_s"], c["backoff_base_s"] * 2 ** attempts))

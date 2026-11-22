@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { UIMessage } from 'ai'
 import { WaslaLogo } from '@/components/wasla-logo'
 import type { Lang } from '@/lib/translations'
@@ -9,6 +9,25 @@ import { Markdown } from './markdown'
 import { messageText } from './use-conversations'
 import type { TutorCopy } from './tutor-copy'
 import { useTraceChat } from './use-trace-chat'
+import { Clapperboard, ImageIcon } from 'lucide-react'
+
+const MEDIA_COPY = {
+  fr: { image: 'Générer une image', video: 'Générer une vidéo', hint: 'sur ta dernière question' },
+  en: { image: 'Generate an image', video: 'Generate a video', hint: 'about your last question' },
+  ar: { image: 'أنشئ صورة', video: 'أنشئ فيديو', hint: 'حول سؤالك الأخير' },
+}
+
+// the reply is shown only after the engine's checks passed; it then appears progressively (not in calm mode)
+function Reveal({ text }: { text: string }) {
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    setN(0)
+    const step = Math.max(4, Math.ceil(text.length / 60))
+    const t = window.setInterval(() => setN((x: number) => { if (x + step >= text.length) { window.clearInterval(t); return text.length } return x + step }), 16)
+    return () => window.clearInterval(t)
+  }, [text])
+  return <Markdown>{n >= text.length ? text : text.slice(0, n)}</Markdown>
+}
 
 export type TutorContext = {
   name: string
@@ -17,6 +36,8 @@ export type TutorContext = {
   information: string
   environment: string
   timing: string
+  prefs?: Record<string, string | null>
+  onProgress?: (understood: number) => void
 }
 
 type Props = {
@@ -31,13 +52,18 @@ type Props = {
 
 export function TutorChat({ chatId, initialMessages, copy, lang, firstName, context, onMessages }: Props) {
   // TRACE engine session (diagnosis -> hints -> find the mistake -> new question) instead of a free LLM chat
-  const { messages, sendMessage, status, stop, error, regenerate, quickReplies } = useTraceChat({
+  const { messages, sendMessage, status, stop, error, regenerate, quickReplies, requestMedia } = useTraceChat({
     id: chatId,
     messages: initialMessages,
     lang,
     student: { name: context.name || firstName, level: context.level },
     startText: copy.start,
+    preferences: context.prefs,
+    onProgress: context.onProgress,
   })
+  const calm = context.prefs?.learningEnvironment === 'calm'
+  const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant')?.id
+  const M = MEDIA_COPY[lang]
 
   const initial = useRef(initialMessages)
   useEffect(() => {
@@ -94,7 +120,7 @@ export function TutorChat({ chatId, initialMessages, copy, lang, firstName, cont
                 </span>
                 <div className="min-w-0 flex-1 text-foreground/90">
                   <p className="sr-only">{copy.tutor}:</p>
-                  <Markdown>{text}</Markdown>
+                  {message.id === lastAssistant && !calm ? <Reveal text={text} /> : <Markdown>{text}</Markdown>}
                 </div>
               </li>
             )
@@ -145,6 +171,15 @@ export function TutorChat({ chatId, initialMessages, copy, lang, firstName, cont
 
       <div className="px-4 pb-4">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" disabled={busy} onClick={() => requestMedia('image')} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition hover:border-primary/60 hover:text-primary disabled:opacity-50">
+              <ImageIcon className="size-3.5" aria-hidden="true" />{M.image}
+            </button>
+            <button type="button" disabled={busy} onClick={() => requestMedia('video')} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition hover:border-primary/60 hover:text-primary disabled:opacity-50">
+              <Clapperboard className="size-3.5" aria-hidden="true" />{M.video}
+            </button>
+            <span className="text-xs text-muted-foreground">{M.hint}</span>
+          </div>
           {composer}
           <p className="text-center text-xs text-muted-foreground">{copy.disclaimer}</p>
         </div>

@@ -16,6 +16,8 @@ import { QuizSourcePicker } from './quiz-source-picker'
 import { StudyPlanFlow } from './study-plan-flow'
 import { SummaryFlow } from './summary-flow'
 import { CurriculumView } from './curriculum-view'
+import { ProgressView } from './progress-view'
+import { MediaStudio } from './media-studio'
 import type { ToolId } from './tools'
 import { TutorView } from './tutor/tutor-view'
 import type { TutorContext } from './tutor/tutor-chat'
@@ -56,7 +58,8 @@ export function Dashboard({ profile, onChange, onSignOut }: Props) {
   const todayIndex = (now.getDay() + 6) % 7
   const minutesByDay = Array.from({ length: 7 }, (_, i) => (i === todayIndex ? 5 : 0))
   const streak = 1
-  const points = 0
+  // gamified mode: points come only from genuine progress the tutor observed (10 per notion shown understood)
+  const [points, setPoints] = useState(0)
 
   const preferences = [
     { key: 'explanations', label: t.summary.explanations, value: option('explanation', profile.explanationStyle)?.label },
@@ -143,6 +146,13 @@ export function Dashboard({ profile, onChange, onSignOut }: Props) {
     information: preferences[1].value ?? '',
     environment: preferences[2].value ?? '',
     timing: preferences[3].value ?? '',
+    prefs: {
+      explanationStyle: profile.explanationStyle,
+      informationAmount: profile.informationAmount,
+      learningEnvironment: profile.learningEnvironment,
+      questionTiming: profile.questionTiming,
+    },
+    onProgress: (n: number) => { if (profile.learningEnvironment === 'gamified') setPoints((x) => x + 10 * n) },
   }
 
   return (
@@ -211,6 +221,10 @@ export function Dashboard({ profile, onChange, onSignOut }: Props) {
             </section>
           ) : active === 'curriculum' ? (
             <CurriculumView lang={lang} />
+          ) : active === 'progress' ? (
+            <ProgressView lang={lang} />
+          ) : active === 'media' ? (
+            <MediaStudio lang={lang} />
           ) : active === 'content' ? (
             <ContentSection copy={copy} />
           ) : (

@@ -8,6 +8,7 @@
 import { useCallback, useRef, useState } from 'react'
 import type { UIMessage } from 'ai'
 import type { Lang } from '@/lib/translations'
+import { authHeader } from '@/lib/auth'
 
 type SafeText = { text: string; lang: string; shown_allowed: boolean }
 type QuestionView = { id: string; text: string; options: Record<string, string>; requires_confidence: boolean }
@@ -28,10 +29,20 @@ type ChatAnswer = {
   answer: SafeText
   citations: { file: string; page: number; source_url: string | null }[]
 }
+type Media = { type: 'image' | 'video'; ok: boolean; url: string | null; title: string | null; caption: string | null; error: string | null; duration_s?: number | null }
+type TutorTurn = {
+  session_id: string
+  reply: SafeText
+  mode: string
+  suggestions: string[]
+  media: Media | null
+  citations: { file: string; page: number }[]
+  understood_now: number
+}
 type Summary = { outcome: SafeText; next_step: SafeText; diagnosis_names: Record<string, string>; status: string }
 
 type Pending = { expects: Turn['expects']; question: QuestionView | null; steps: number }
-type Stored = { sessionId: string | null; pending: Pending | null }
+type Stored = { sessionId: string | null; pending: Pending | null; tutorSessionId?: string | null; suggestions?: string[] }
 
 // one TRACE session per conversation (kept while the page is open)
 const SESSIONS = new Map<string, Stored>()
@@ -159,7 +170,7 @@ function parseAnswer(text: string) {
 async function engine<T>(body: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
   const r = await fetch('/api/chat', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
     body: JSON.stringify(body),
     signal,
   })
@@ -177,14 +188,17 @@ type Opts = {
   messages: UIMessage[]
   lang: Lang
   student: { name: string; level: string }
-  startText?: string // the "start the diagnosis" button text; any other free text goes to the course chat
+  startText?: string // the "start the diagnosis" button text; any other free text goes to the personal tutor
+  preferences?: Record<string, string | null> // used only when nobody is signed in (the engine reads the saved profile)
+  onProgress?: (understood: number) => void // gamified mode: genuine progress shown by the tutor's observations
 }
 
-export function useTraceChat({ id, messages: initial, lang, student, startText }: Opts) {
+export function useTraceChat({ id, messages: initial, lang, student, startText, preferences, onProgress }: Opts) {
   const [messages, setMessages] = useState<UIMessage[]>(initial)
   const [status, setStatus] = useState<'ready' | 'submitted' | 'streaming'>('ready')
   const [error, setError] = useState<Error | undefined>()
   const [pending, setPending] = useState<Pending | null>(() => SESSIONS.get(id)?.pending ?? null)
+  const [tutorSuggestions, setTutorSuggestions] = useState<string[]>(() => SESSIONS.get(id)?.suggestions ?? [])
   const abort = useRef<AbortController | null>(null)
   const lastText = useRef<string | null>(null)
   const L = T[lang]
@@ -194,12 +208,14 @@ export function useTraceChat({ id, messages: initial, lang, student, startText }
     const next = { ...cur, ...patch }
     SESSIONS.set(id, next)
     if ('pending' in patch) setPending(next.pending)
+    if ('suggestions' in patch) setTutorSuggestions(next.suggestions ?? [])
   }
 
   const run = useCallback(
-    async (text: string, addUser: boolean) => {
+    async (text: string, addUser: boolean, media: 'image' | 'video' | null = null, shown?: string) => {
       lastText.current = text
-      if (addUser) setMessages((m) => [...m, msg('user', text)])
+      if (addUser) setMessages((m) => [...m, msg('user', shown ?? text)])
+      store({ suggestions: [] })
       setError(undefined)
       setStatus('submitted')
       const ctrl = new AbortController()
@@ -220,10 +236,19 @@ export function useTraceChat({ id, messages: initial, lang, student, startText }
           const r = await engine<ChatAnswer>({ action: 'ask', question: text, lang, sessionId: cur?.sessionId ?? null }, ctrl.signal)
           say(renderChat(r, lang))
         }
+        const tutor = async () => {
+          const r = await engine<TutorTurn>(
+            { action: 'tutor', message: text, lang, tutorSessionId: SESSIONS.get(id)?.tutorSessionId ?? null, preferences: preferences ?? null, media },
+            ctrl.signal,
+          )
+          store({ tutorSessionId: r.session_id, suggestions: r.suggestions })
+          say(renderTutor(r, lang))
+          if (r.understood_now > 0) onProgress?.(r.understood_now)
+        }
         const active = !!(cur?.sessionId && cur.pending && cur.pending.expects !== 'none')
         if (!active) {
           if (text === startText || text === L.newSession) await start()
-          else await ask() // free question: course chat (citations) or polite refusal, decided by the engine
+          else await tutor() // free conversation: the personal tutor, adapted to the student's saved preferences
           return
         }
         const p = cur!.pending!
@@ -286,10 +311,17 @@ export function useTraceChat({ id, messages: initial, lang, student, startText }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [id, lang, student.name, student.level],
+    [id, lang, student.name, student.level, preferences, onProgress],
   )
 
   const sendMessage = useCallback(({ text }: { text: string }) => run(text, true), [run])
+  // image / video on request, about the student's last question (or what they type)
+  const requestMedia = useCallback((kind: 'image' | 'video', topic?: string) => {
+    const lastUser = [...messages].reverse().find((m) => m.role === 'user')
+    const about = (topic ?? '').trim() || (lastUser ? messageTextOf(lastUser) : '')
+    const label = { image: { fr: 'Image', en: 'Image', ar: 'صورة' }, video: { fr: 'Vidéo', en: 'Video', ar: 'فيديو' } }[kind][lang]
+    return run(about || label, true, kind, `${label} : ${about || '…'}`)
+  }, [run, messages, lang])
   const stop = useCallback(() => abort.current?.abort(), [])
   const regenerate = useCallback(() => {
     if (lastText.current !== null) run(lastText.current, false)
@@ -308,6 +340,33 @@ export function useTraceChat({ id, messages: initial, lang, student, startText }
     if (pending.expects === 'none') return [L.newSession]
     return []
   })()
+  const replies = quickReplies.length ? quickReplies : tutorSuggestions
 
-  return { messages, sendMessage, status, stop, error, regenerate, quickReplies }
+  return { messages, sendMessage, status, stop, error, regenerate, quickReplies: replies, requestMedia }
+}
+
+
+function messageTextOf(m: UIMessage) {
+  return m.parts.map((p) => (p.type === 'text' ? p.text : '')).join('')
+}
+
+const TUTOR_L = {
+  fr: { withheld: '_(Réponse retenue : elle n’a pas passé les vérifications.)_', sources: 'Sources du cours', page: 'p.', video: 'Regarder la vidéo', min: 's' },
+  en: { withheld: '_(Answer withheld: it did not pass the checks.)_', sources: 'Course sources', page: 'p.', video: 'Watch the video', min: 's' },
+  ar: { withheld: '_(تم حجب الإجابة: لم تجتز عمليات التحقق.)_', sources: 'مصادر الدرس', page: 'ص', video: 'شاهد الفيديو', min: 'ث' },
+}
+
+function renderTutor(r: TutorTurn, lang: Lang) {
+  const L = TUTOR_L[lang]
+  const parts = [r.reply.shown_allowed ? r.reply.text : L.withheld]
+  if (r.citations.length) {
+    parts.push(`**${L.sources} :** ` + r.citations.map((c) => `${c.file.split('/').pop()} (${L.page} ${c.page})`).join(' · '))
+  }
+  const m = r.media
+  if (m) {
+    if (!m.ok) parts.push(`_${m.error ?? ''}_`)
+    else if (m.type === 'image') parts.push(`![${m.title ?? ''}](${m.url})` + (m.caption ? `\n\n_${m.caption}_` : ''))
+    else parts.push(`[${L.video} : ${m.title ?? ''}](${m.url})` + (m.duration_s ? ` · ${Math.round(m.duration_s)} ${L.min}` : ''))
+  }
+  return parts.join('\n\n')
 }

@@ -2,6 +2,35 @@
 
 Last update: 2026-11-22, chat explanations, programme cycles + chapter page, summary reader, YouTube / Wikipedia.
 
+## Personal AI tutor, accounts, progress, images and videos (2026-11-22 ~04:50, team request)
+- **Accounts:** `engine/students.py` (SQLite `.cache/trace.db`): register / login with PBKDF2-SHA256 (200k, salt), bearer
+  token; the profile (name, level, the 4 onboarding preferences, notes) is saved and restored at login and on reload.
+  Login fields start empty (no browser autofill). API: `/auth/register`, `/auth/login`, `/students/me`, `/students/me/profile`.
+- **Personal tutor (`engine/tutor_chat.py`, `POST /api/v1/tutor/chat`):** system prompt built from the saved
+  preferences (explanation style, amount, environment, timing), the session history, the learning memory and the
+  matching course passages (uploads first, cited). Guided / Socratic, gives the direct answer when the student
+  insists, no timers, never diagnoses a condition. Reply checked by the guards (SymPy, congruency, style, language);
+  one rewrite with the reasons, then an honest fallback. Follow-up buttons. Checked live: same question with
+  short/small/calm vs examples/detailed/gamified gives clearly different answers; a wrong discriminant (b² + 4ac) is
+  recognised and corrected; a 4-turn guided conversation ends with the student finding x = 2 and x = 3.
+- **Learning memory:** per concept counts of understood / struggling / possible misconception (observations from the
+  tutor, only once the student answers). Status computed by code (mastered needs 2+ signs). Page "Ma progression":
+  insight sentence written by code, counts, mastery map, mean mastery by subject. No forecast, no invented score.
+- **Images and videos (`engine/media.py`):** the LLM picks one diagram kind from a whitelist + parameters
+  (pydantic); matplotlib draws it with computed values (roots and vertex with SymPy, hypotenuse, areas); texts pass the
+  SymPy check (a false equality is never drawn). Videos: 3-5 scenes, texts guarded, slides + narration (edge-tts
+  online, Windows voice offline via pyttsx3), ffmpeg (imageio-ffmpeg), WebVTT subtitles. Checked live: Pythagoras
+  video 37 s / 49 s, parabola with roots, steps of x² - 5x + 6 = 0. Page "Images & vidéos" + buttons in the chat.
+- **LLM robustness:** daily-cap fallback also on malformed-output 400s (resample, then next model); tutor runs in text
+  mode with tolerant JSON parsing (LaTeX inside JSON repaired); math check fixes ((-4)^2, ², equation tails like
+  "2x² - 4x - 6 = 0").
+- **Known limits:** the guards check equalities, not every reasoning step: with gpt-oss-20b (fallback model while the
+  120b daily cap is reached) an explanation once contained a wrong modelling step ("2x · 3x"). Free-tier rate limit
+  (~8k tokens/min per model) can make a turn take ~50 s. Answers are shown after the checks with a progressive
+  reveal (token streaming would show unchecked text). Onboarding ids "lycee"/"college" are swapped versus their
+  labels in the frontend (pre-existing); the tutor maps them to the level the student actually chose.
+- Tests: 227 passed (new `tests/test_tutor_chat.py`).
+
 ## Urgent fixes after the team's test (2026-11-22 ~03:45)
 - **Quota fallback (team decision):** when a model hits Groq's DAILY cap, `engine/llm.py` moves the call to the next
   model of `llm.fallback_models` (gpt-oss-120b -> gpt-oss-20b -> qwen/qwen3.8-27b; each has its own daily quota).

@@ -354,3 +354,102 @@ async def practice_summary(files: list[UploadFile] | None = File(None), text: st
                            focus: str = Form(""), pages: int = Form(2), lang: Literal["fr", "ar", "en"] = Form("fr"),
                            session_id: str | None = Form(None)):
     return _call(api.practice_summary, await _read_files(files), text, source, focus, pages, lang, session_id)
+
+
+# ---------------------------------------------------------------- accounts, personal tutor, progress, media (1.13)
+from fastapi import Header  # noqa: E402
+from fastapi.responses import FileResponse  # noqa: E402
+
+from engine.contract import AuthResult, StudentProgress, TutorChatTurn, ChatMedia  # noqa: E402
+
+_AUTH_CODES = {"email_invalid": 400, "password_short": 400, "email_taken": 409, "bad_credentials": 401, "bad_token": 401}
+
+
+def _auth(fn, *a):
+    from engine.students import AuthError
+    try:
+        return _call(fn, *a)
+    except AuthError as e:
+        raise HTTPException(_AUTH_CODES.get(e.code, 400), e.code) from None
+
+
+def _token(authorization: str | None) -> str | None:
+    if authorization and authorization.lower().startswith("bearer "):
+        return authorization[7:].strip() or None
+    return None
+
+
+class AuthBody(BaseModel):
+    email: str
+    password: str
+    profile: dict | None = None
+
+
+class ProfileBody(BaseModel):
+    profile: dict
+
+
+class TutorBody(BaseModel):
+    message: str
+    lang: Literal["fr", "ar", "en"] = "fr"
+    session_id: str | None = None
+    preferences: dict | None = None          # guests only; a signed-in student's saved profile is used
+    media: Literal["image", "video"] | None = None
+
+
+class MediaBody(BaseModel):
+    request: str
+    lang: Literal["fr", "ar", "en"] = "fr"
+
+
+@app.post("/api/v1/auth/register", response_model=AuthResult)
+def auth_register(body: AuthBody):
+    return _auth(api.register, body.email, body.password, body.profile)
+
+
+@app.post("/api/v1/auth/login", response_model=AuthResult)
+def auth_login(body: AuthBody):
+    return _auth(api.login, body.email, body.password)
+
+
+@app.get("/api/v1/students/me")
+def students_me(authorization: str | None = Header(None)):
+    return _auth(api.me, _token(authorization))
+
+
+@app.put("/api/v1/students/me/profile")
+def students_profile(body: ProfileBody, authorization: str | None = Header(None)):
+    return _auth(api.save_profile, _token(authorization), body.profile)
+
+
+@app.get("/api/v1/students/me/progress", response_model=StudentProgress)
+def students_progress(lang: Literal["fr", "ar", "en"] = "fr", authorization: str | None = Header(None)):
+    return _auth(api.progress, _token(authorization), lang)
+
+
+@app.post("/api/v1/tutor/chat", response_model=TutorChatTurn)
+def tutor_chat(body: TutorBody, authorization: str | None = Header(None)):
+    """Personal tutor: adapts to the saved preferences; the reply passes the guards before it is returned."""
+    return _auth(api.tutor_turn, body.message, body.lang, body.session_id, _token(authorization), body.preferences,
+                 body.media)
+
+
+@app.post("/api/v1/media/image", response_model=ChatMedia)
+def media_image(body: MediaBody):
+    return _call(api.make_media, "image", body.request, body.lang)
+
+
+@app.post("/api/v1/media/video", response_model=ChatMedia)
+def media_video(body: MediaBody):
+    return _call(api.make_media, "video", body.request, body.lang)
+
+
+@app.get("/api/v1/media/{name}")
+def media_file(name: str):
+    from engine import media
+    try:
+        p = media.path_of(name)
+    except (KeyError, FileNotFoundError):
+        raise HTTPException(404, "unknown media") from None
+    kind = {"png": "image/png", "mp4": "video/mp4", "vtt": "text/vtt; charset=utf-8"}[p.suffix[1:]]
+    return FileResponse(p, media_type=kind)

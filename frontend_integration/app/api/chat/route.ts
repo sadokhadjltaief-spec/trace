@@ -22,17 +22,26 @@ type Action =
   | { action: 'reply'; sessionId: string; choice?: string | null; text?: string | null }
   | { action: 'state' | 'summary'; sessionId: string }
   | { action: 'ask'; question: string; lang: 'fr' | 'ar' | 'en'; sessionId?: string | null }
+  | {
+      action: 'tutor' // personal tutor: the engine reads the signed-in student's saved preferences (bearer token)
+      message: string
+      lang: 'fr' | 'ar' | 'en'
+      tutorSessionId?: string | null
+      preferences?: Record<string, string | null> | null // guests only
+      media?: 'image' | 'video' | null
+    }
 
 export async function POST(req: Request) {
   const b = (await req.json().catch(() => null)) as Action | null
   if (!b || typeof b !== 'object' || !('action' in b)) {
     return Response.json({ detail: 'Invalid request' }, { status: 400 })
   }
+  const auth = req.headers.get('authorization')
   const sid = 'sessionId' in b && b.sessionId ? encodeURIComponent(b.sessionId) : ''
   const call = (path: string, body?: unknown) =>
     fetch(`${ENGINE}${path}`, {
       method: body === undefined ? 'GET' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(auth ? { Authorization: auth } : {}) },
       body: body === undefined ? undefined : JSON.stringify(body),
       cache: 'no-store',
     })
@@ -61,6 +70,15 @@ export async function POST(req: Request) {
         break
       case 'ask': // course chat: answers from the course files with citations, off-topic refused by the engine
         r = await call('/chat', { question: b.question, lang: b.lang, session_id: b.sessionId ?? null })
+        break
+      case 'tutor':
+        r = await call('/tutor/chat', {
+          message: b.message,
+          lang: b.lang,
+          session_id: b.tutorSessionId ?? null,
+          preferences: b.preferences ?? null,
+          media: b.media ?? null,
+        })
         break
       default:
         return Response.json({ detail: 'Unknown action' }, { status: 400 })

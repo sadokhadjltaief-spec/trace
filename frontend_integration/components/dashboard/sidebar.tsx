@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { BookMarked, ChevronRight, FolderOpen, Gamepad2, House, LogOut, MessageCircle, Settings, SlidersHorizontal, UserRound, X } from 'lucide-react'
+import { BookMarked, ChartNoAxesCombined, Clapperboard, ChevronRight, FolderOpen, Gamepad2, House, LogOut, MessageCircle, Settings, SlidersHorizontal, UserRound, X } from 'lucide-react'
 import { WaslaLogo } from '@/components/wasla-logo'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { cn } from '@/lib/utils'
@@ -9,7 +9,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { TOOLS, type ToolId } from './tools'
 import type { DashboardCopy } from './dashboard-copy'
 
-export type NavId = 'home' | 'tutor' | 'curriculum' | 'content' | 'preferences'
+export type NavId = 'home' | 'tutor' | 'curriculum' | 'progress' | 'media' | 'content' | 'preferences'
 
 type Props = {
   copy: DashboardCopy
@@ -36,6 +36,8 @@ export function Sidebar({ copy, active, onNavigate, onTool, activeTool, showGame
     { id: 'home', label: copy.nav.home, icon: House },
     { id: 'tutor', label: copy.nav.tutor, icon: MessageCircle },
     { id: 'curriculum', label: copy.nav.curriculum, icon: BookMarked },
+    { id: 'progress', label: copy.nav.progress, icon: ChartNoAxesCombined },
+    { id: 'media', label: copy.nav.media, icon: Clapperboard },
     { id: 'content', label: copy.nav.content, icon: FolderOpen },
     { id: 'preferences', label: copy.nav.preferences, icon: SlidersHorizontal },
   ]

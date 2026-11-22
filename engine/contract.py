@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.12"  # 1.12 cycles + chapter page + sources youtube/wikipedia; 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7-1.8 plan; 1.9 practice; 1.10 summary; 1.11 curriculum
+CONTRACT_VERSION = "1.13"  # 1.13 personal tutor, accounts, progress, media; 1.12 cycles + chapter page + sources youtube/wikipedia; 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7-1.8 plan; 1.9 practice; 1.10 summary; 1.11 curriculum
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]
@@ -511,3 +511,64 @@ class ChapterDetail(_M):
 
 
 Curriculum.model_rebuild()
+
+
+# ---------------------------------------------------------------- personal tutor, accounts, media (since 1.13)
+class ChatMedia(_M):
+    """A diagram (computed, drawn by matplotlib) or a short narrated video made on request."""
+    type: Literal["image", "video"]
+    ok: bool = True
+    url: str | None = None             # /engine/media/<hash>.png|mp4
+    title: str | None = None
+    caption: str | None = None
+    subtitles_url: str | None = None   # video: .srt
+    duration_s: float | None = None
+    error: str | None = None           # shown instead when ok is false
+
+
+class TutorChatTurn(_M):
+    """One turn of the personal tutor. Show `reply` only if shown_allowed; `suggestions` as buttons."""
+    contract_version: str = CONTRACT_VERSION
+    session_id: str
+    reply: SafeText
+    mode: str                          # explain | hint | example | guided_question | answer | check | encourage | refusal | fallback
+    suggestions: list[str] = []
+    media: ChatMedia | None = None
+    citations: list[dict] = []         # [{file, page}] course passages used
+    observations: list[dict] = []      # [{concept, status}] what this turn showed (also saved to the learning memory)
+    understood_now: int = 0            # count of "understood" observations this turn (gamified mode shows progress)
+    preferences_used: dict[str, str] = {}
+
+
+class AuthResult(_M):
+    contract_version: str = CONTRACT_VERSION
+    token: str
+    student_id: str
+    email: str
+    profile: dict
+
+
+class ConceptProgress(_M):
+    concept: str
+    subject: str = ""
+    understood: int
+    struggling: int
+    misconception: int
+    signals: int
+    mastery: float                     # understood / signals (computed)
+    status: Literal["mastered", "in_progress", "to_review"]
+    last_status: str | None = None
+    last_note: str = ""
+    helped_by: str = ""
+    updated: float | None = None
+
+
+class StudentProgress(_M):
+    """Learning memory of one student (counts from the tutor's observations; status computed by code)."""
+    contract_version: str = CONTRACT_VERSION
+    concepts: list[ConceptProgress]
+    by_subject: dict[str, float]       # mean mastery per subject
+    counts: dict[str, int]             # mastered / in_progress / to_review
+    sessions: int
+    messages: int
+    insight: str                       # written by code from the numbers above, not by the LLM

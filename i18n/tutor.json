@@ -664,5 +664,35 @@
   "fr": "Cette source n'est pas disponible sur ce serveur.",
   "en": "This source is not available on this server.",
   "ar": "هذا المصدر غير متاح على هذا الخادم."
+ },
+ "media_empty": {
+  "fr": "Dis-moi ce que tu veux voir.",
+  "en": "Tell me what you want to see.",
+  "ar": "قل لي ماذا تريد أن ترى."
+ },
+ "media_unavailable": {
+  "fr": "Je ne peux pas créer ce média maintenant. Réessaie dans un moment.",
+  "en": "I cannot create this media right now. Try again in a moment.",
+  "ar": "لا أستطيع إنشاء هذه الوسيلة الآن. أعد المحاولة بعد قليل."
+ },
+ "media_off_topic": {
+  "fr": "Je crée seulement des images et des vidéos pour apprendre.",
+  "en": "I only create images and videos for learning.",
+  "ar": "أنشئ فقط صورًا وفيديوهات للتعلّم."
+ },
+ "media_invalid": {
+  "fr": "Je n'ai pas réussi à faire un schéma juste pour cette demande. Essaie de la préciser.",
+  "en": "I could not make a correct diagram for this request. Try to make it more precise.",
+  "ar": "لم أتمكّن من رسم مخطط صحيح لهذا الطلب. حاول أن توضّحه أكثر."
+ },
+ "media_render": {
+  "fr": "La vidéo n'a pas pu être assemblée. Réessaie.",
+  "en": "The video could not be assembled. Try again.",
+  "ar": "تعذّر تجميع الفيديو. أعد المحاولة."
+ },
+ "media_voice": {
+  "fr": "Aucune voix n'est disponible pour la narration.",
+  "en": "No voice is available for the narration.",
+  "ar": "لا يوجد صوت متاح للسرد."
  }
 }

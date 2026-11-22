@@ -761,3 +761,47 @@ def read_results(name: str) -> dict:
         raise ValueError("bad results name")
     p = ROOT / "results" / f"{name}.json"
     return copy.deepcopy(json.loads(p.read_text(encoding="utf-8")))
+
+
+# ---------------------------------------------------------------- accounts, personal tutor, progress, media (1.13)
+def register(email: str, password: str, profile: dict | None = None) -> dict:
+    from engine import students
+    from engine.contract import AuthResult
+    return AuthResult(**students.register(email, password, profile)).model_dump()
+
+
+def login(email: str, password: str) -> dict:
+    from engine import students
+    from engine.contract import AuthResult
+    return AuthResult(**students.login(email, password)).model_dump()
+
+
+def me(token: str) -> dict:
+    from engine import students
+    return students.from_token(token)
+
+
+def save_profile(token: str, profile: dict) -> dict:
+    from engine import students
+    st = students.from_token(token)
+    return {**st, "profile": students.save_profile(st["student_id"], profile)}
+
+
+def tutor_turn(message: str, lang: str = "fr", session_id: str | None = None, token: str | None = None,
+               prefs: dict | None = None, want_media: str | None = None) -> dict:
+    """Personal tutor turn: preferences read from the student's saved profile (or `prefs` for a guest)."""
+    from engine import students, tutor_chat
+    student = students.from_token(token) if token else None
+    return tutor_chat.turn(message, lang, session_id, student, prefs, want_media)
+
+
+def progress(token: str, lang: str = "fr") -> dict:
+    from engine import students
+    from engine.contract import StudentProgress
+    st = students.from_token(token)
+    return StudentProgress(**students.progress(st["student_id"], lang)).model_dump()
+
+
+def make_media(kind: str, request: str, lang: str = "fr") -> dict:
+    from engine import tutor_chat
+    return tutor_chat.make_media(kind, request, lang_of(lang))

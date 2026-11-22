@@ -23,7 +23,9 @@ def latex_to_plain(s: str) -> str:
     t = re.sub(r"\\[a-zA-Z]+", " ", t)
     t = t.replace("{", "(").replace("}", ")")
     # (9)/(12) -> 9/12 ; (-8)-(-5) -> -8--5 ; but keep 2(3) and f(x) untouched
-    t = re.sub(r"(?<![\w)])\(\s*(-?\d+(?:\.\d+)?)\s*\)", r"\1", t)
+    # ... except before a power: (-4)^2 = 16, not -4^2 = -16
+    t = re.sub(r"(?<![\w)])\(\s*(-?\d+(?:\.\d+)?)\s*\)(?!\s*(?:\^|\*\*|²|³))", r"\1", t)
+    t = t.replace("²", "^2").replace("³", "^3")
     return re.sub(r"\s+", " ", t).strip()
 
 
@@ -90,6 +92,8 @@ def check_equalities(text: str) -> list[dict]:
         prev = t[:m.start()].rstrip().split(" ")[-1] if t[:m.start()].strip() else ""
         if prev and (prev[-1] in "*/+-×÷−=·⋅²³^√," or (len(prev) == 1 and prev.isalpha())):
             continue  # lhs is the tail of a longer expression we cannot see whole (e.g. 'A x 15 = ...')
+        if prev and m.group(1).lstrip()[:1] in "+-" and re.search(r"[\w)]$", prev):
+            continue  # '2x^2 - 4x - 6 = 0': '- 6 = 0' is the end of an equation, not a claim
         lhs, rhs = m.group(1).strip(), m.group(2).strip()
         ok = equal(lhs, rhs)
         out.append({"claim": f"{lhs} = {rhs}", "ok": ok})

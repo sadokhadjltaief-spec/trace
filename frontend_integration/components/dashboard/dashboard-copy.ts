@@ -1,7 +1,7 @@
 import type { Lang } from '@/lib/translations'
 
 const en = {
-  nav: { home: 'Home', tutor: 'AI tutor', curriculum: 'Programme', content: 'My content', preferences: 'Learning preferences' },
+  nav: { home: 'Home', tutor: 'AI tutor', curriculum: 'Programme', progress: 'My progress', media: 'Images & videos', content: 'My content', preferences: 'Learning preferences' },
   createLabel: 'Create',
   welcome: {
     title: (name: string) => `Welcome, ${name}!`,
@@ -111,7 +111,7 @@ const en = {
 export type DashboardCopy = typeof en
 
 const fr: DashboardCopy = {
-  nav: { home: 'Accueil', tutor: 'Tuteur IA', curriculum: 'Programme', content: 'Mon contenu', preferences: 'Préférences' },
+  nav: { home: 'Accueil', tutor: 'Tuteur IA', curriculum: 'Programme', progress: 'Ma progression', media: 'Images & vidéos', content: 'Mon contenu', preferences: 'Préférences' },
   createLabel: 'Créer',
   welcome: {
     title: (name: string) => `Bienvenue, ${name} !`,
@@ -219,7 +219,7 @@ const fr: DashboardCopy = {
 }
 
 const ar: DashboardCopy = {
-  nav: { home: 'الرئيسية', tutor: 'المعلم الذكي', curriculum: 'البرنامج', content: 'محتواي', preferences: 'تفضيلات التعلم' },
+  nav: { home: 'الرئيسية', tutor: 'المعلم الذكي', curriculum: 'البرنامج', progress: 'تقدّمي', media: 'صور وفيديوهات', content: 'محتواي', preferences: 'تفضيلات التعلم' },
   createLabel: 'إنشاء',
   welcome: {
     title: (name: string) => `أهلًا ${name}!`,

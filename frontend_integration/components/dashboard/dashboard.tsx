@@ -15,6 +15,7 @@ import { ContentSection } from './content-section'
 import { QuizSourcePicker } from './quiz-source-picker'
 import { StudyPlanFlow } from './study-plan-flow'
 import { SummaryFlow } from './summary-flow'
+import { CurriculumView } from './curriculum-view'
 import type { ToolId } from './tools'
 import { TutorView } from './tutor/tutor-view'
 import type { TutorContext } from './tutor/tutor-chat'
@@ -208,6 +209,8 @@ export function Dashboard({ profile, onChange, onSignOut }: Props) {
                 onNoteChange={(key, note) => onChange({ ...profile, notes: { ...profile.notes, [key]: note } })}
               />
             </section>
+          ) : active === 'curriculum' ? (
+            <CurriculumView lang={lang} />
           ) : active === 'content' ? (
             <ContentSection copy={copy} />
           ) : (

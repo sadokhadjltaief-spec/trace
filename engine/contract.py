@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.10"  # 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7-1.8 plan; 1.9 practice; 1.10 summary
+CONTRACT_VERSION = "1.11"  # 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7-1.8 plan; 1.9 practice; 1.10 summary; 1.11 curriculum
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]
@@ -455,3 +455,29 @@ class PracticeSummary(_M):
     sources: list[Source] = []
     note: str = ""
     refused: str | None = None
+
+
+class CurriculumChapter(_M):
+    id: str
+    domain: str                    # key of Curriculum.domains
+    title: dict[str, str]          # fr / ar / en
+    notions: list[str] = []        # French
+
+
+class CurriculumLevel(_M):
+    id: str
+    cycle: str                     # "base" | "secondaire"
+    name: dict[str, str]
+    chapters: list[CurriculumChapter] = []
+
+
+class Curriculum(_M):
+    """Maths programme by level. INDICATIVE reference written by the TRACE team (status + disclaimer: show them), not
+    the official Ministry document. `levels` lists every level (chapters only for the requested one, if any)."""
+    contract_version: str = CONTRACT_VERSION
+    subject: str
+    status: str
+    disclaimer: dict[str, str]
+    domains: dict[str, dict[str, str]]
+    levels: list[CurriculumLevel]
+    level: CurriculumLevel | None = None

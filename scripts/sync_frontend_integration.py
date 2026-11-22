@@ -32,6 +32,7 @@ FILES = [
     "components/dashboard/curriculum-view.tsx",
     "components/dashboard/sidebar.tsx",
     "components/dashboard/dashboard.tsx",
+    "components/dashboard/dashboard-copy.ts",
 ]
 
 

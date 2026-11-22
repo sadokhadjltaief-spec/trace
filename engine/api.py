@@ -500,6 +500,12 @@ def practice_summary(files: list[tuple[str, bytes]] | None = None, text: str = "
     return practice.make_summary(files or [], text, source, focus, pages, lang, kw, suspects)
 
 
+def curriculum(level: str | None = None) -> dict:
+    """Maths programme: every level, plus the chapters of `level` (indicative TRACE reference, not official)."""
+    from engine import curriculum as cur
+    return cur.get(level)
+
+
 def _lesson_refs(mv: dict, k: int = 2) -> list[LessonRef]:
     """Curriculum-grounded remediation: lesson pages for the diagnosed misconception (only if courses exist)."""
     if mv["id"] == "M0":

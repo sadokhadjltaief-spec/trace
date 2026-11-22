@@ -1,0 +1,1779 @@
+{
+ "subject": "mathematiques",
+ "country": "TN",
+ "status": "indicative",
+ "disclaimer": {
+  "fr": "Programme de référence indicatif rédigé par l'équipe TRACE. Ce n'est pas le document officiel du ministère de l'Éducation. Vérifie avec le programme officiel.",
+  "ar": "برنامج مرجعي تقريبي كتبه فريق TRACE. ليس الوثيقة الرسمية لوزارة التربية. تحقّق من البرنامج الرسمي.",
+  "en": "Indicative reference programme written by the TRACE team. It is not the official Ministry of Education document. Check the official programme."
+ },
+ "domains": {
+  "algebre": {
+   "fr": "Nombres et algèbre",
+   "ar": "الأعداد والجبر",
+   "en": "Numbers and algebra"
+  },
+  "analyse": {
+   "fr": "Fonctions et analyse",
+   "ar": "الدوال والتحليل",
+   "en": "Functions and analysis"
+  },
+  "geometrie": {
+   "fr": "Géométrie",
+   "ar": "الهندسة",
+   "en": "Geometry"
+  },
+  "statistiques": {
+   "fr": "Statistiques et probabilités",
+   "ar": "الإحصاء والاحتمالات",
+   "en": "Statistics and probability"
+  }
+ },
+ "levels": [
+  {
+   "id": "7e",
+   "cycle": "base",
+   "name": {
+    "fr": "7e année de base",
+    "ar": "السنة السابعة أساسي",
+    "en": "7th grade (basic)"
+   },
+   "chapters": [
+    {
+     "id": "7e-01",
+     "domain": "algebre",
+     "title": {
+      "fr": "Nombres entiers naturels",
+      "ar": "الأعداد الصحيحة الطبيعية",
+      "en": "Whole numbers"
+     },
+     "notions": [
+      "Opérations",
+      "Puissances d'un entier",
+      "Priorités de calcul"
+     ]
+    },
+    {
+     "id": "7e-02",
+     "domain": "algebre",
+     "title": {
+      "fr": "Divisibilité",
+      "ar": "قابلية القسمة",
+      "en": "Divisibility"
+     },
+     "notions": [
+      "Multiples et diviseurs",
+      "Critères de divisibilité",
+      "Nombres premiers"
+     ]
+    },
+    {
+     "id": "7e-03",
+     "domain": "algebre",
+     "title": {
+      "fr": "Fractions",
+      "ar": "الكسور",
+      "en": "Fractions"
+     },
+     "notions": [
+      "Fractions égales",
+      "Comparaison",
+      "Addition et soustraction",
+      "Multiplication"
+     ]
+    },
+    {
+     "id": "7e-04",
+     "domain": "algebre",
+     "title": {
+      "fr": "Nombres décimaux",
+      "ar": "الأعداد العشرية",
+      "en": "Decimal numbers"
+     },
+     "notions": [
+      "Écriture décimale",
+      "Opérations",
+      "Arrondi et troncature"
+     ]
+    },
+    {
+     "id": "7e-05",
+     "domain": "algebre",
+     "title": {
+      "fr": "Proportionnalité",
+      "ar": "التناسبية",
+      "en": "Proportionality"
+     },
+     "notions": [
+      "Tableau de proportionnalité",
+      "Pourcentages",
+      "Échelles"
+     ]
+    },
+    {
+     "id": "7e-06",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Droites, demi-droites et segments",
+      "ar": "المستقيمات ونصف المستقيمات والقطع",
+      "en": "Lines, rays and segments"
+     },
+     "notions": [
+      "Droites parallèles et perpendiculaires",
+      "Médiatrice d'un segment"
+     ]
+    },
+    {
+     "id": "7e-07",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Angles",
+      "ar": "الزوايا",
+      "en": "Angles"
+     },
+     "notions": [
+      "Mesure d'un angle",
+      "Bissectrice",
+      "Angles particuliers"
+     ]
+    },
+    {
+     "id": "7e-08",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Triangles et quadrilatères",
+      "ar": "المثلثات والرباعيات",
+      "en": "Triangles and quadrilaterals"
+     },
+     "notions": [
+      "Construction de triangles",
+      "Triangles particuliers",
+      "Quadrilatères usuels"
+     ]
+    },
+    {
+     "id": "7e-09",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Symétrie axiale",
+      "ar": "التناظر المحوري",
+      "en": "Line symmetry"
+     },
+     "notions": [
+      "Symétrique d'un point, d'une figure",
+      "Axes de symétrie"
+     ]
+    },
+    {
+     "id": "7e-10",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Périmètres, aires et volumes",
+      "ar": "المحيطات والمساحات والأحجام",
+      "en": "Perimeters, areas and volumes"
+     },
+     "notions": [
+      "Aire du rectangle, du triangle, du disque",
+      "Volume du pavé droit"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "8e",
+   "cycle": "base",
+   "name": {
+    "fr": "8e année de base",
+    "ar": "السنة الثامنة أساسي",
+    "en": "8th grade (basic)"
+   },
+   "chapters": [
+    {
+     "id": "8e-01",
+     "domain": "algebre",
+     "title": {
+      "fr": "Nombres décimaux relatifs",
+      "ar": "الأعداد العشرية النسبية",
+      "en": "Signed numbers"
+     },
+     "notions": [
+      "Opposé, valeur absolue",
+      "Addition et soustraction",
+      "Multiplication et division",
+      "Règle des signes"
+     ]
+    },
+    {
+     "id": "8e-02",
+     "domain": "algebre",
+     "title": {
+      "fr": "Nombres rationnels",
+      "ar": "الأعداد الكسرية النسبية",
+      "en": "Rational numbers"
+     },
+     "notions": [
+      "Opérations sur les fractions",
+      "Comparaison",
+      "Fraction irréductible"
+     ]
+    },
+    {
+     "id": "8e-03",
+     "domain": "algebre",
+     "title": {
+      "fr": "Puissances",
+      "ar": "القوى",
+      "en": "Powers"
+     },
+     "notions": [
+      "Puissances d'exposant entier",
+      "Puissances de 10",
+      "Écriture scientifique"
+     ]
+    },
+    {
+     "id": "8e-04",
+     "domain": "algebre",
+     "title": {
+      "fr": "Calcul littéral",
+      "ar": "الحساب الحرفي",
+      "en": "Algebraic expressions"
+     },
+     "notions": [
+      "Développement",
+      "Factorisation",
+      "Réduction d'une expression"
+     ]
+    },
+    {
+     "id": "8e-05",
+     "domain": "algebre",
+     "title": {
+      "fr": "Équations du premier degré",
+      "ar": "معادلات من الدرجة الأولى",
+      "en": "Linear equations"
+     },
+     "notions": [
+      "Résolution",
+      "Mise en équation d'un problème"
+     ]
+    },
+    {
+     "id": "8e-06",
+     "domain": "algebre",
+     "title": {
+      "fr": "Proportionnalité et pourcentages",
+      "ar": "التناسبية والنسب المائوية",
+      "en": "Proportionality and percentages"
+     },
+     "notions": [
+      "Grandeurs proportionnelles",
+      "Augmentation et réduction en pourcentage"
+     ]
+    },
+    {
+     "id": "8e-07",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Statistiques",
+      "ar": "الإحصاء",
+      "en": "Statistics"
+     },
+     "notions": [
+      "Effectifs et fréquences",
+      "Diagrammes",
+      "Moyenne"
+     ]
+    },
+    {
+     "id": "8e-08",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Symétrie centrale",
+      "ar": "التناظر المركزي",
+      "en": "Point symmetry"
+     },
+     "notions": [
+      "Symétrique d'un point, d'une figure",
+      "Centre de symétrie"
+     ]
+    },
+    {
+     "id": "8e-09",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Parallélogramme et quadrilatères particuliers",
+      "ar": "متوازي الأضلاع والرباعيات الخاصة",
+      "en": "Parallelograms"
+     },
+     "notions": [
+      "Propriétés du parallélogramme",
+      "Rectangle, losange, carré"
+     ]
+    },
+    {
+     "id": "8e-10",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Droites remarquables du triangle",
+      "ar": "المستقيمات الخاصة في المثلث",
+      "en": "Special lines of a triangle"
+     },
+     "notions": [
+      "Médiatrices",
+      "Hauteurs",
+      "Médianes",
+      "Bissectrices"
+     ]
+    },
+    {
+     "id": "8e-11",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Théorème de Pythagore",
+      "ar": "مبرهنة بيتاغور",
+      "en": "Pythagorean theorem"
+     },
+     "notions": [
+      "Théorème direct",
+      "Réciproque"
+     ]
+    },
+    {
+     "id": "8e-12",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Prisme droit et cylindre",
+      "ar": "الموشور القائم والأسطوانة",
+      "en": "Prism and cylinder"
+     },
+     "notions": [
+      "Patron",
+      "Aire latérale",
+      "Volume"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "9e",
+   "cycle": "base",
+   "name": {
+    "fr": "9e année de base",
+    "ar": "السنة التاسعة أساسي",
+    "en": "9th grade (basic)"
+   },
+   "chapters": [
+    {
+     "id": "9e-01",
+     "domain": "algebre",
+     "title": {
+      "fr": "Nombres réels et racines carrées",
+      "ar": "الأعداد الحقيقية والجذور التربيعية",
+      "en": "Real numbers and square roots"
+     },
+     "notions": [
+      "Racine carrée",
+      "Opérations sur les radicaux",
+      "Ordre dans IR"
+     ]
+    },
+    {
+     "id": "9e-02",
+     "domain": "algebre",
+     "title": {
+      "fr": "Calcul algébrique et identités remarquables",
+      "ar": "الحساب الجبري والمتطابقات الهامة",
+      "en": "Algebra and special products"
+     },
+     "notions": [
+      "(a+b)², (a−b)², (a+b)(a−b)",
+      "Factorisation"
+     ]
+    },
+    {
+     "id": "9e-03",
+     "domain": "algebre",
+     "title": {
+      "fr": "Équations et inéquations du premier degré",
+      "ar": "المعادلات والمتراجحات من الدرجة الأولى",
+      "en": "Linear equations and inequalities"
+     },
+     "notions": [
+      "Équation produit",
+      "Inéquations",
+      "Problèmes"
+     ]
+    },
+    {
+     "id": "9e-04",
+     "domain": "algebre",
+     "title": {
+      "fr": "Systèmes de deux équations à deux inconnues",
+      "ar": "جمل معادلتين بمجهولين",
+      "en": "Systems of two equations"
+     },
+     "notions": [
+      "Substitution",
+      "Combinaison",
+      "Interprétation graphique"
+     ]
+    },
+    {
+     "id": "9e-05",
+     "domain": "analyse",
+     "title": {
+      "fr": "Applications linéaires et affines",
+      "ar": "الدوال الخطية والتآلفية",
+      "en": "Linear and affine functions"
+     },
+     "notions": [
+      "Coefficient directeur",
+      "Représentation graphique",
+      "Lecture graphique"
+     ]
+    },
+    {
+     "id": "9e-06",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Statistiques",
+      "ar": "الإحصاء",
+      "en": "Statistics"
+     },
+     "notions": [
+      "Moyenne, médiane, étendue",
+      "Effectifs cumulés"
+     ]
+    },
+    {
+     "id": "9e-07",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Théorème de Thalès",
+      "ar": "مبرهنة طالس",
+      "en": "Thales' theorem"
+     },
+     "notions": [
+      "Théorème direct",
+      "Réciproque",
+      "Agrandissement et réduction"
+     ]
+    },
+    {
+     "id": "9e-08",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Relations métriques dans le triangle rectangle",
+      "ar": "العلاقات القياسية في المثلث القائم",
+      "en": "Right-triangle relations"
+     },
+     "notions": [
+      "Hauteur relative à l'hypoténuse",
+      "Projections"
+     ]
+    },
+    {
+     "id": "9e-09",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Trigonométrie",
+      "ar": "حساب المثلثات",
+      "en": "Trigonometry"
+     },
+     "notions": [
+      "Cosinus, sinus, tangente d'un angle aigu",
+      "Relations trigonométriques"
+     ]
+    },
+    {
+     "id": "9e-10",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Vecteurs et translation",
+      "ar": "المتجهات والانسحاب",
+      "en": "Vectors and translation"
+     },
+     "notions": [
+      "Égalité de vecteurs",
+      "Somme de vecteurs",
+      "Translation"
+     ]
+    },
+    {
+     "id": "9e-11",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Angles inscrits",
+      "ar": "الزوايا المحيطية",
+      "en": "Inscribed angles"
+     },
+     "notions": [
+      "Angle inscrit et angle au centre",
+      "Polygones réguliers"
+     ]
+    },
+    {
+     "id": "9e-12",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Géométrie dans l'espace",
+      "ar": "الهندسة الفضائية",
+      "en": "Solid geometry"
+     },
+     "notions": [
+      "Pyramide",
+      "Cône",
+      "Sphère et boule"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "1s",
+   "cycle": "secondaire",
+   "name": {
+    "fr": "1ère année secondaire",
+    "ar": "السنة الأولى ثانوي",
+    "en": "1st year secondary"
+   },
+   "chapters": [
+    {
+     "id": "1s-01",
+     "domain": "algebre",
+     "title": {
+      "fr": "Calcul dans IR",
+      "ar": "الحساب في IR",
+      "en": "Computing in IR"
+     },
+     "notions": [
+      "Puissances et radicaux",
+      "Ordre et encadrement",
+      "Valeur absolue"
+     ]
+    },
+    {
+     "id": "1s-02",
+     "domain": "algebre",
+     "title": {
+      "fr": "Arithmétique",
+      "ar": "الحسابيات",
+      "en": "Arithmetic"
+     },
+     "notions": [
+      "PGCD et PPCM",
+      "Nombres premiers",
+      "Décomposition en facteurs premiers"
+     ]
+    },
+    {
+     "id": "1s-03",
+     "domain": "algebre",
+     "title": {
+      "fr": "Équations et inéquations du premier degré",
+      "ar": "المعادلات والمتراجحات من الدرجة الأولى",
+      "en": "Linear equations and inequalities"
+     },
+     "notions": [
+      "Équations à une inconnue",
+      "Inéquations",
+      "Systèmes"
+     ]
+    },
+    {
+     "id": "1s-04",
+     "domain": "analyse",
+     "title": {
+      "fr": "Fonctions linéaires et affines",
+      "ar": "الدوال الخطية والتآلفية",
+      "en": "Linear and affine functions"
+     },
+     "notions": [
+      "Sens de variation",
+      "Représentation graphique"
+     ]
+    },
+    {
+     "id": "1s-05",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Statistiques",
+      "ar": "الإحصاء",
+      "en": "Statistics"
+     },
+     "notions": [
+      "Caractères qualitatifs et quantitatifs",
+      "Moyenne et médiane",
+      "Histogrammes"
+     ]
+    },
+    {
+     "id": "1s-06",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Théorème de Thalès et applications",
+      "ar": "مبرهنة طالس وتطبيقاتها",
+      "en": "Thales' theorem"
+     },
+     "notions": [
+      "Configurations de Thalès",
+      "Constructions"
+     ]
+    },
+    {
+     "id": "1s-07",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Vecteurs et repérage",
+      "ar": "المتجهات والمعالم",
+      "en": "Vectors and coordinates"
+     },
+     "notions": [
+      "Coordonnées d'un vecteur",
+      "Milieu, distance",
+      "Colinéarité"
+     ]
+    },
+    {
+     "id": "1s-08",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Trigonométrie",
+      "ar": "حساب المثلثات",
+      "en": "Trigonometry"
+     },
+     "notions": [
+      "Rapports trigonométriques",
+      "Angles remarquables"
+     ]
+    },
+    {
+     "id": "1s-09",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Isométries du plan",
+      "ar": "التقايسات في المستوي",
+      "en": "Plane isometries"
+     },
+     "notions": [
+      "Symétries",
+      "Translations",
+      "Rotations"
+     ]
+    },
+    {
+     "id": "1s-10",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Géométrie dans l'espace",
+      "ar": "الهندسة الفضائية",
+      "en": "Solid geometry"
+     },
+     "notions": [
+      "Positions relatives de droites et plans",
+      "Solides usuels"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "2s",
+   "cycle": "secondaire",
+   "name": {
+    "fr": "2e année Sciences",
+    "ar": "السنة الثانية علوم",
+    "en": "2nd year Sciences"
+   },
+   "chapters": [
+    {
+     "id": "2s-01",
+     "domain": "algebre",
+     "title": {
+      "fr": "Polynômes et second degré",
+      "ar": "كثيرات الحدود والدرجة الثانية",
+      "en": "Polynomials and quadratics"
+     },
+     "notions": [
+      "Discriminant",
+      "Équations et inéquations du second degré",
+      "Factorisation"
+     ]
+    },
+    {
+     "id": "2s-02",
+     "domain": "algebre",
+     "title": {
+      "fr": "Systèmes d'équations linéaires",
+      "ar": "جمل المعادلات الخطية",
+      "en": "Linear systems"
+     },
+     "notions": [
+      "Méthode de Cramer / substitution",
+      "Problèmes"
+     ]
+    },
+    {
+     "id": "2s-03",
+     "domain": "analyse",
+     "title": {
+      "fr": "Généralités sur les fonctions",
+      "ar": "عموميات حول الدوال",
+      "en": "Functions"
+     },
+     "notions": [
+      "Ensemble de définition",
+      "Sens de variation",
+      "Parité"
+     ]
+    },
+    {
+     "id": "2s-04",
+     "domain": "analyse",
+     "title": {
+      "fr": "Fonctions de référence",
+      "ar": "الدوال المرجعية",
+      "en": "Reference functions"
+     },
+     "notions": [
+      "x ↦ ax²",
+      "x ↦ a/x",
+      "x ↦ √x"
+     ]
+    },
+    {
+     "id": "2s-05",
+     "domain": "analyse",
+     "title": {
+      "fr": "Suites arithmétiques et géométriques",
+      "ar": "المتتاليات الحسابية والهندسية",
+      "en": "Arithmetic and geometric sequences"
+     },
+     "notions": [
+      "Terme général",
+      "Somme de termes consécutifs"
+     ]
+    },
+    {
+     "id": "2s-06",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Trigonométrie",
+      "ar": "حساب المثلثات",
+      "en": "Trigonometry"
+     },
+     "notions": [
+      "Cercle trigonométrique",
+      "Angles orientés",
+      "Formules usuelles"
+     ]
+    },
+    {
+     "id": "2s-07",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Calcul vectoriel et barycentre",
+      "ar": "الحساب المتجهي والمرجح",
+      "en": "Vectors and barycentre"
+     },
+     "notions": [
+      "Barycentre de points pondérés",
+      "Colinéarité"
+     ]
+    },
+    {
+     "id": "2s-08",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Produit scalaire",
+      "ar": "الجداء السلمي",
+      "en": "Dot product"
+     },
+     "notions": [
+      "Définitions",
+      "Orthogonalité",
+      "Applications"
+     ]
+    },
+    {
+     "id": "2s-09",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Transformations du plan",
+      "ar": "التحويلات في المستوي",
+      "en": "Plane transformations"
+     },
+     "notions": [
+      "Homothétie",
+      "Rotation",
+      "Translation"
+     ]
+    },
+    {
+     "id": "2s-10",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Statistiques",
+      "ar": "الإحصاء",
+      "en": "Statistics"
+     },
+     "notions": [
+      "Variance et écart-type",
+      "Séries regroupées en classes"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3m",
+   "cycle": "secondaire",
+   "name": {
+    "fr": "3e année Mathématiques",
+    "ar": "السنة الثالثة رياضيات",
+    "en": "3rd year Mathematics"
+   },
+   "chapters": [
+    {
+     "id": "3m-01",
+     "domain": "analyse",
+     "title": {
+      "fr": "Continuité et limites",
+      "ar": "الاتصال والنهايات",
+      "en": "Continuity and limits"
+     },
+     "notions": [
+      "Limite finie et infinie",
+      "Opérations sur les limites",
+      "Asymptotes"
+     ]
+    },
+    {
+     "id": "3m-02",
+     "domain": "analyse",
+     "title": {
+      "fr": "Dérivabilité",
+      "ar": "الاشتقاق",
+      "en": "Derivatives"
+     },
+     "notions": [
+      "Nombre dérivé",
+      "Fonctions dérivées",
+      "Tangente"
+     ]
+    },
+    {
+     "id": "3m-03",
+     "domain": "analyse",
+     "title": {
+      "fr": "Étude de fonctions",
+      "ar": "دراسة الدوال",
+      "en": "Function analysis"
+     },
+     "notions": [
+      "Variations",
+      "Extremums",
+      "Représentation graphique"
+     ]
+    },
+    {
+     "id": "3m-04",
+     "domain": "analyse",
+     "title": {
+      "fr": "Suites réelles",
+      "ar": "المتتاليات الحقيقية",
+      "en": "Real sequences"
+     },
+     "notions": [
+      "Monotonie",
+      "Raisonnement par récurrence",
+      "Suites bornées"
+     ]
+    },
+    {
+     "id": "3m-05",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Trigonométrie",
+      "ar": "حساب المثلثات",
+      "en": "Trigonometry"
+     },
+     "notions": [
+      "Formules d'addition",
+      "Équations trigonométriques"
+     ]
+    },
+    {
+     "id": "3m-06",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Produit scalaire dans le plan",
+      "ar": "الجداء السلمي في المستوي",
+      "en": "Dot product in the plane"
+     },
+     "notions": [
+      "Équation de droite et de cercle",
+      "Lignes de niveau"
+     ]
+    },
+    {
+     "id": "3m-07",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Géométrie dans l'espace",
+      "ar": "الهندسة الفضائية",
+      "en": "Solid geometry"
+     },
+     "notions": [
+      "Vecteurs de l'espace",
+      "Repérage dans l'espace"
+     ]
+    },
+    {
+     "id": "3m-08",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Isométries et déplacements",
+      "ar": "التقايسات والإزاحات",
+      "en": "Isometries"
+     },
+     "notions": [
+      "Composition",
+      "Déplacements et antidéplacements"
+     ]
+    },
+    {
+     "id": "3m-09",
+     "domain": "algebre",
+     "title": {
+      "fr": "Arithmétique",
+      "ar": "الحسابيات",
+      "en": "Arithmetic"
+     },
+     "notions": [
+      "Division euclidienne",
+      "PGCD",
+      "Nombres premiers"
+     ]
+    },
+    {
+     "id": "3m-10",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Dénombrement et probabilités",
+      "ar": "التعداد والاحتمالات",
+      "en": "Counting and probability"
+     },
+     "notions": [
+      "Arrangements, combinaisons",
+      "Probabilité d'un événement"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3se",
+   "cycle": "secondaire",
+   "name": {
+    "fr": "3e année Sciences expérimentales",
+    "ar": "السنة الثالثة علوم تجريبية",
+    "en": "3rd year Experimental sciences"
+   },
+   "chapters": [
+    {
+     "id": "3se-01",
+     "domain": "analyse",
+     "title": {
+      "fr": "Généralités sur les fonctions",
+      "ar": "عموميات حول الدوال",
+      "en": "Functions"
+     },
+     "notions": [
+      "Fonctions composées",
+      "Parité, périodicité"
+     ]
+    },
+    {
+     "id": "3se-02",
+     "domain": "analyse",
+     "title": {
+      "fr": "Continuité et limites",
+      "ar": "الاتصال والنهايات",
+      "en": "Continuity and limits"
+     },
+     "notions": [
+      "Limites usuelles",
+      "Asymptotes"
+     ]
+    },
+    {
+     "id": "3se-03",
+     "domain": "analyse",
+     "title": {
+      "fr": "Dérivabilité et étude de fonctions",
+      "ar": "الاشتقاق ودراسة الدوال",
+      "en": "Derivatives and function analysis"
+     },
+     "notions": [
+      "Dérivées usuelles",
+      "Variations",
+      "Tangente"
+     ]
+    },
+    {
+     "id": "3se-04",
+     "domain": "analyse",
+     "title": {
+      "fr": "Suites réelles",
+      "ar": "المتتاليات الحقيقية",
+      "en": "Real sequences"
+     },
+     "notions": [
+      "Suites arithmétiques et géométriques",
+      "Récurrence"
+     ]
+    },
+    {
+     "id": "3se-05",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Trigonométrie",
+      "ar": "حساب المثلثات",
+      "en": "Trigonometry"
+     },
+     "notions": [
+      "Formules de transformation",
+      "Équations"
+     ]
+    },
+    {
+     "id": "3se-06",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Produit scalaire",
+      "ar": "الجداء السلمي",
+      "en": "Dot product"
+     },
+     "notions": [
+      "Calcul dans un repère orthonormé",
+      "Applications"
+     ]
+    },
+    {
+     "id": "3se-07",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Géométrie dans l'espace",
+      "ar": "الهندسة الفضائية",
+      "en": "Solid geometry"
+     },
+     "notions": [
+      "Droites et plans",
+      "Repérage"
+     ]
+    },
+    {
+     "id": "3se-08",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Dénombrement",
+      "ar": "التعداد",
+      "en": "Counting"
+     },
+     "notions": [
+      "Permutations",
+      "Arrangements",
+      "Combinaisons"
+     ]
+    },
+    {
+     "id": "3se-09",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Probabilités",
+      "ar": "الاحتمالات",
+      "en": "Probability"
+     },
+     "notions": [
+      "Événements",
+      "Équiprobabilité"
+     ]
+    },
+    {
+     "id": "3se-10",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Statistiques",
+      "ar": "الإحصاء",
+      "en": "Statistics"
+     },
+     "notions": [
+      "Paramètres de position et de dispersion"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bac-m",
+   "cycle": "secondaire",
+   "name": {
+    "fr": "Bac Mathématiques (4e année)",
+    "ar": "باكالوريا رياضيات (السنة الرابعة)",
+    "en": "Bac Mathematics (4th year)"
+   },
+   "chapters": [
+    {
+     "id": "bac-m-01",
+     "domain": "analyse",
+     "title": {
+      "fr": "Continuité et limites",
+      "ar": "الاتصال والنهايات",
+      "en": "Continuity and limits"
+     },
+     "notions": [
+      "Théorème des valeurs intermédiaires",
+      "Limites et ordre"
+     ]
+    },
+    {
+     "id": "bac-m-02",
+     "domain": "analyse",
+     "title": {
+      "fr": "Suites réelles",
+      "ar": "المتتاليات الحقيقية",
+      "en": "Real sequences"
+     },
+     "notions": [
+      "Suites convergentes",
+      "Suites adjacentes"
+     ]
+    },
+    {
+     "id": "bac-m-03",
+     "domain": "analyse",
+     "title": {
+      "fr": "Dérivabilité et fonction réciproque",
+      "ar": "الاشتقاق والدالة العكسية",
+      "en": "Derivatives and inverse functions"
+     },
+     "notions": [
+      "Théorème des accroissements finis",
+      "Fonction réciproque",
+      "Fonctions x ↦ x^(1/n)"
+     ]
+    },
+    {
+     "id": "bac-m-04",
+     "domain": "analyse",
+     "title": {
+      "fr": "Primitives et intégrales",
+      "ar": "الدوال الأصلية والتكامل",
+      "en": "Antiderivatives and integrals"
+     },
+     "notions": [
+      "Primitives usuelles",
+      "Intégration par parties",
+      "Calcul d'aires et de volumes"
+     ]
+    },
+    {
+     "id": "bac-m-05",
+     "domain": "analyse",
+     "title": {
+      "fr": "Fonction logarithme népérien",
+      "ar": "دالة اللوغاريتم النيبيري",
+      "en": "Natural logarithm"
+     },
+     "notions": [
+      "Propriétés algébriques",
+      "Limites",
+      "Étude de fonctions"
+     ]
+    },
+    {
+     "id": "bac-m-06",
+     "domain": "analyse",
+     "title": {
+      "fr": "Fonction exponentielle",
+      "ar": "الدالة الأسية",
+      "en": "Exponential function"
+     },
+     "notions": [
+      "Propriétés",
+      "Limites",
+      "Croissances comparées"
+     ]
+    },
+    {
+     "id": "bac-m-07",
+     "domain": "analyse",
+     "title": {
+      "fr": "Équations différentielles",
+      "ar": "المعادلات التفاضلية",
+      "en": "Differential equations"
+     },
+     "notions": [
+      "y' = ay + b",
+      "y'' + ω²y = 0"
+     ]
+    },
+    {
+     "id": "bac-m-08",
+     "domain": "algebre",
+     "title": {
+      "fr": "Nombres complexes",
+      "ar": "الأعداد العقدية",
+      "en": "Complex numbers"
+     },
+     "notions": [
+      "Forme algébrique, trigonométrique, exponentielle",
+      "Équations du second degré",
+      "Racines n-ièmes"
+     ]
+    },
+    {
+     "id": "bac-m-09",
+     "domain": "algebre",
+     "title": {
+      "fr": "Arithmétique",
+      "ar": "الحسابيات",
+      "en": "Arithmetic"
+     },
+     "notions": [
+      "Congruences",
+      "PGCD et théorème de Bézout",
+      "Théorème de Gauss"
+     ]
+    },
+    {
+     "id": "bac-m-10",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Isométries et similitudes",
+      "ar": "التقايسات والتشابهات",
+      "en": "Isometries and similarities"
+     },
+     "notions": [
+      "Déplacements",
+      "Similitudes directes"
+     ]
+    },
+    {
+     "id": "bac-m-11",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Coniques",
+      "ar": "المخروطيات",
+      "en": "Conics"
+     },
+     "notions": [
+      "Parabole",
+      "Ellipse",
+      "Hyperbole"
+     ]
+    },
+    {
+     "id": "bac-m-12",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Géométrie dans l'espace",
+      "ar": "الهندسة الفضائية",
+      "en": "Solid geometry"
+     },
+     "notions": [
+      "Produit scalaire et vectoriel",
+      "Droites, plans et sphères"
+     ]
+    },
+    {
+     "id": "bac-m-13",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Probabilités et statistiques",
+      "ar": "الاحتمالات والإحصاء",
+      "en": "Probability and statistics"
+     },
+     "notions": [
+      "Probabilités conditionnelles",
+      "Loi binomiale",
+      "Lois continues",
+      "Séries à deux variables"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bac-se",
+   "cycle": "secondaire",
+   "name": {
+    "fr": "Bac Sciences expérimentales (4e année)",
+    "ar": "باكالوريا علوم تجريبية (السنة الرابعة)",
+    "en": "Bac Experimental sciences (4th year)"
+   },
+   "chapters": [
+    {
+     "id": "bac-se-01",
+     "domain": "analyse",
+     "title": {
+      "fr": "Continuité et limites",
+      "ar": "الاتصال والنهايات",
+      "en": "Continuity and limits"
+     },
+     "notions": [
+      "Théorème des valeurs intermédiaires",
+      "Asymptotes"
+     ]
+    },
+    {
+     "id": "bac-se-02",
+     "domain": "analyse",
+     "title": {
+      "fr": "Suites réelles",
+      "ar": "المتتاليات الحقيقية",
+      "en": "Real sequences"
+     },
+     "notions": [
+      "Convergence",
+      "Suites récurrentes"
+     ]
+    },
+    {
+     "id": "bac-se-03",
+     "domain": "analyse",
+     "title": {
+      "fr": "Dérivabilité et étude de fonctions",
+      "ar": "الاشتقاق ودراسة الدوال",
+      "en": "Derivatives and function analysis"
+     },
+     "notions": [
+      "Fonction réciproque",
+      "Tableau de variation"
+     ]
+    },
+    {
+     "id": "bac-se-04",
+     "domain": "analyse",
+     "title": {
+      "fr": "Primitives et intégrales",
+      "ar": "الدوال الأصلية والتكامل",
+      "en": "Antiderivatives and integrals"
+     },
+     "notions": [
+      "Primitives usuelles",
+      "Calcul d'aires"
+     ]
+    },
+    {
+     "id": "bac-se-05",
+     "domain": "analyse",
+     "title": {
+      "fr": "Fonction logarithme népérien",
+      "ar": "دالة اللوغاريتم النيبيري",
+      "en": "Natural logarithm"
+     },
+     "notions": [
+      "Propriétés",
+      "Limites",
+      "Dérivée"
+     ]
+    },
+    {
+     "id": "bac-se-06",
+     "domain": "analyse",
+     "title": {
+      "fr": "Fonction exponentielle",
+      "ar": "الدالة الأسية",
+      "en": "Exponential function"
+     },
+     "notions": [
+      "Propriétés",
+      "Limites",
+      "Dérivée"
+     ]
+    },
+    {
+     "id": "bac-se-07",
+     "domain": "analyse",
+     "title": {
+      "fr": "Équations différentielles",
+      "ar": "المعادلات التفاضلية",
+      "en": "Differential equations"
+     },
+     "notions": [
+      "y' = ay + b"
+     ]
+    },
+    {
+     "id": "bac-se-08",
+     "domain": "algebre",
+     "title": {
+      "fr": "Nombres complexes",
+      "ar": "الأعداد العقدية",
+      "en": "Complex numbers"
+     },
+     "notions": [
+      "Forme algébrique et trigonométrique",
+      "Équations du second degré"
+     ]
+    },
+    {
+     "id": "bac-se-09",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Géométrie dans l'espace",
+      "ar": "الهندسة الفضائية",
+      "en": "Solid geometry"
+     },
+     "notions": [
+      "Produit scalaire et vectoriel",
+      "Équations de plans et de droites"
+     ]
+    },
+    {
+     "id": "bac-se-10",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Probabilités",
+      "ar": "الاحتمالات",
+      "en": "Probability"
+     },
+     "notions": [
+      "Probabilités conditionnelles",
+      "Loi binomiale",
+      "Variable aléatoire"
+     ]
+    },
+    {
+     "id": "bac-se-11",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Statistiques",
+      "ar": "الإحصاء",
+      "en": "Statistics"
+     },
+     "notions": [
+      "Séries statistiques à deux variables",
+      "Ajustement affine"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bac-t",
+   "cycle": "secondaire",
+   "name": {
+    "fr": "Bac Sciences techniques (4e année)",
+    "ar": "باكالوريا علوم تقنية (السنة الرابعة)",
+    "en": "Bac Technical sciences (4th year)"
+   },
+   "chapters": [
+    {
+     "id": "bac-t-01",
+     "domain": "analyse",
+     "title": {
+      "fr": "Continuité, limites et dérivabilité",
+      "ar": "الاتصال والنهايات والاشتقاق",
+      "en": "Continuity, limits and derivatives"
+     },
+     "notions": [
+      "Étude de fonctions",
+      "Fonction réciproque"
+     ]
+    },
+    {
+     "id": "bac-t-02",
+     "domain": "analyse",
+     "title": {
+      "fr": "Suites réelles",
+      "ar": "المتتاليات الحقيقية",
+      "en": "Real sequences"
+     },
+     "notions": [
+      "Convergence",
+      "Suites récurrentes"
+     ]
+    },
+    {
+     "id": "bac-t-03",
+     "domain": "analyse",
+     "title": {
+      "fr": "Primitives et intégrales",
+      "ar": "الدوال الأصلية والتكامل",
+      "en": "Antiderivatives and integrals"
+     },
+     "notions": [
+      "Calcul d'aires et de volumes"
+     ]
+    },
+    {
+     "id": "bac-t-04",
+     "domain": "analyse",
+     "title": {
+      "fr": "Logarithme et exponentielle",
+      "ar": "اللوغاريتم والدالة الأسية",
+      "en": "Logarithm and exponential"
+     },
+     "notions": [
+      "Propriétés",
+      "Limites",
+      "Étude de fonctions"
+     ]
+    },
+    {
+     "id": "bac-t-05",
+     "domain": "analyse",
+     "title": {
+      "fr": "Équations différentielles",
+      "ar": "المعادلات التفاضلية",
+      "en": "Differential equations"
+     },
+     "notions": [
+      "y' = ay + b",
+      "y'' + ω²y = 0"
+     ]
+    },
+    {
+     "id": "bac-t-06",
+     "domain": "algebre",
+     "title": {
+      "fr": "Nombres complexes",
+      "ar": "الأعداد العقدية",
+      "en": "Complex numbers"
+     },
+     "notions": [
+      "Formes algébrique et exponentielle",
+      "Applications géométriques"
+     ]
+    },
+    {
+     "id": "bac-t-07",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Géométrie dans l'espace",
+      "ar": "الهندسة الفضائية",
+      "en": "Solid geometry"
+     },
+     "notions": [
+      "Produit vectoriel",
+      "Plans et droites"
+     ]
+    },
+    {
+     "id": "bac-t-08",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Probabilités et statistiques",
+      "ar": "الاحتمالات والإحصاء",
+      "en": "Probability and statistics"
+     },
+     "notions": [
+      "Loi binomiale",
+      "Séries à deux variables"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bac-eg",
+   "cycle": "secondaire",
+   "name": {
+    "fr": "Bac Économie et gestion (4e année)",
+    "ar": "باكالوريا اقتصاد وتصرف (السنة الرابعة)",
+    "en": "Bac Economics and management (4th year)"
+   },
+   "chapters": [
+    {
+     "id": "bac-eg-01",
+     "domain": "analyse",
+     "title": {
+      "fr": "Fonctions et limites",
+      "ar": "الدوال والنهايات",
+      "en": "Functions and limits"
+     },
+     "notions": [
+      "Étude de fonctions",
+      "Fonctions coût, recette, bénéfice"
+     ]
+    },
+    {
+     "id": "bac-eg-02",
+     "domain": "analyse",
+     "title": {
+      "fr": "Logarithme et exponentielle",
+      "ar": "اللوغاريتم والدالة الأسية",
+      "en": "Logarithm and exponential"
+     },
+     "notions": [
+      "Propriétés",
+      "Applications économiques"
+     ]
+    },
+    {
+     "id": "bac-eg-03",
+     "domain": "analyse",
+     "title": {
+      "fr": "Suites et mathématiques financières",
+      "ar": "المتتاليات والرياضيات المالية",
+      "en": "Sequences and financial maths"
+     },
+     "notions": [
+      "Intérêts simples et composés",
+      "Suites arithmétiques et géométriques"
+     ]
+    },
+    {
+     "id": "bac-eg-04",
+     "domain": "analyse",
+     "title": {
+      "fr": "Intégrales",
+      "ar": "التكامل",
+      "en": "Integrals"
+     },
+     "notions": [
+      "Primitives",
+      "Valeur moyenne"
+     ]
+    },
+    {
+     "id": "bac-eg-05",
+     "domain": "algebre",
+     "title": {
+      "fr": "Matrices et systèmes linéaires",
+      "ar": "المصفوفات والجمل الخطية",
+      "en": "Matrices and linear systems"
+     },
+     "notions": [
+      "Calcul matriciel",
+      "Résolution de systèmes"
+     ]
+    },
+    {
+     "id": "bac-eg-06",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Probabilités",
+      "ar": "الاحتمالات",
+      "en": "Probability"
+     },
+     "notions": [
+      "Probabilités conditionnelles",
+      "Loi binomiale"
+     ]
+    },
+    {
+     "id": "bac-eg-07",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Statistiques",
+      "ar": "الإحصاء",
+      "en": "Statistics"
+     },
+     "notions": [
+      "Séries à deux variables",
+      "Ajustement affine"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bac-si",
+   "cycle": "secondaire",
+   "name": {
+    "fr": "Bac Sciences de l'informatique (4e année)",
+    "ar": "باكالوريا علوم الإعلامية (السنة الرابعة)",
+    "en": "Bac Computer science (4th year)"
+   },
+   "chapters": [
+    {
+     "id": "bac-si-01",
+     "domain": "analyse",
+     "title": {
+      "fr": "Continuité, limites et dérivabilité",
+      "ar": "الاتصال والنهايات والاشتقاق",
+      "en": "Continuity, limits and derivatives"
+     },
+     "notions": [
+      "Étude de fonctions"
+     ]
+    },
+    {
+     "id": "bac-si-02",
+     "domain": "analyse",
+     "title": {
+      "fr": "Suites réelles",
+      "ar": "المتتاليات الحقيقية",
+      "en": "Real sequences"
+     },
+     "notions": [
+      "Convergence",
+      "Suites récurrentes"
+     ]
+    },
+    {
+     "id": "bac-si-03",
+     "domain": "analyse",
+     "title": {
+      "fr": "Logarithme, exponentielle et intégrales",
+      "ar": "اللوغاريتم والأسية والتكامل",
+      "en": "Logarithm, exponential and integrals"
+     },
+     "notions": [
+      "Propriétés",
+      "Primitives",
+      "Calcul d'aires"
+     ]
+    },
+    {
+     "id": "bac-si-04",
+     "domain": "algebre",
+     "title": {
+      "fr": "Nombres complexes",
+      "ar": "الأعداد العقدية",
+      "en": "Complex numbers"
+     },
+     "notions": [
+      "Formes algébrique et trigonométrique"
+     ]
+    },
+    {
+     "id": "bac-si-05",
+     "domain": "algebre",
+     "title": {
+      "fr": "Arithmétique",
+      "ar": "الحسابيات",
+      "en": "Arithmetic"
+     },
+     "notions": [
+      "Divisibilité",
+      "Congruences",
+      "Systèmes de numération"
+     ]
+    },
+    {
+     "id": "bac-si-06",
+     "domain": "algebre",
+     "title": {
+      "fr": "Matrices et systèmes",
+      "ar": "المصفوفات والجمل",
+      "en": "Matrices and systems"
+     },
+     "notions": [
+      "Calcul matriciel",
+      "Systèmes linéaires"
+     ]
+    },
+    {
+     "id": "bac-si-07",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Probabilités et statistiques",
+      "ar": "الاحتمالات والإحصاء",
+      "en": "Probability and statistics"
+     },
+     "notions": [
+      "Loi binomiale",
+      "Séries à deux variables"
+     ]
+    }
+   ]
+  }
+ ]
+}

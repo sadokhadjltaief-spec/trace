@@ -44,6 +44,24 @@ Last update: 2026-11-22, interactive Quiz, Flashcards and Study session.
   precedence. `engine/config.py` now loads `.env` with `override=True`. Checked (key never printed): the engine uses
   the `.env` key; both models answer (120b 927/1000 requests left today, 20b 999/1000).
 
+## Summary, quiz fix and "Programme" page (2026-11-22, team request)
+- **Quiz / flashcards fixed:** the browser called the `/engine` rewrite, whose proxy cuts at ~30 s; the first
+  generation takes ~60 s. They now go through Next route handlers (`lib/engine-proxy.ts`, 280 s). Verified: an
+  uncached quiz returned 200 after 63 s.
+- **Real summary:** `POST /api/v1/practice/summary` (`engine/practice.make_summary`): sections of bullets, key formulas,
+  common mistakes. Every bullet must cite a page of the material (others dropped). Every text passes the guards (SymPy
+  drops false equalities). Contract 1.10. Frontend: `summary-flow.tsx` calls `/api/practice/summary` (the fake 4.4 s
+  timer is gone); `summary-reader.tsx` is the reading view (contents, page badges, sources, print).
+- **Programme (curriculum):** `data/curriculum/tunisie_maths.json` (built by `scripts/make_curriculum.py`): 12 levels,
+  120 chapters, 7e de base to the Bac. **INDICATIVE reference written by the TRACE team from general knowledge, NOT the
+  official Ministry programme**; the API and the page always show this disclaimer. `GET /api/v1/curriculum?level=`
+  (contract 1.11, no LLM). Frontend: `curriculum-view.tsx` (level dropdown, domain filter, chapter cards) + a
+  "Programme" link in the sidebar.
+- **Blocked:** the offline cache for the summary is NOT recorded yet. Groq returned 429 (gpt-oss-120b daily cap:
+  199,246 / 200,000 tokens used). In `TRACE_DEMO=1` a summary of a file that was never recorded is refused
+  ("could not be generated"). Record it live once the quota frees up.
+- Tests: 198 passed.
+
 ## Interactive practice pages (2026-11-22, team request)
 - Step 1, Quiz: `engine/practice.py` + `POST /api/v1/practice/quiz` (file or pasted text) and
   `POST /api/v1/practice/quiz/{id}/check`. One LLM call writes the questions; a second, independent call answers

@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.9"  # 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7-1.8 plan; 1.9 practice
+CONTRACT_VERSION = "1.10"  # 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7-1.8 plan; 1.9 practice; 1.10 summary
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]
@@ -428,4 +428,30 @@ class PracticeCards(_M):
     cards: list[dict]              # {id, front SafeText, back SafeText}
     sources: list[Source]
     note: str                      # e.g. generated and checked by the guards, not reviewed by a teacher
+    refused: str | None = None
+
+
+class SummaryPoint(_M):
+    """One bullet of a summary; sources = the page(s) of the student's material it comes from."""
+    text: SafeText
+    sources: list[Source] = []
+
+
+class SummarySection(_M):
+    heading: SafeText
+    points: list[SummaryPoint]
+
+
+class PracticeSummary(_M):
+    """Structured summary of the student's material: every bullet cites its page (bullets without a valid page are
+    dropped). Generated and checked by the guards, not reviewed by a teacher (note)."""
+    contract_version: str = CONTRACT_VERSION
+    summary_id: str
+    title: SafeText | None = None
+    overview: SafeText | None = None
+    sections: list[SummarySection] = []
+    formulas: list[SummaryPoint] = []
+    mistakes: list[SummaryPoint] = []
+    sources: list[Source] = []
+    note: str = ""
     refused: str | None = None

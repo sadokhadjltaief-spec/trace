@@ -492,6 +492,14 @@ def practice_cards(files: list[tuple[str, bytes]] | None = None, text: str = "",
     return practice.make_cards(files or [], text, source, details, lang, kw, suspects)
 
 
+def practice_summary(files: list[tuple[str, bytes]] | None = None, text: str = "", source: str = "file",
+                     focus: str = "", pages: int = 2, lang: str = "fr", session_id: str | None = None) -> dict:
+    """Summary of the student's file or pasted text; every bullet cites its page (guarded)."""
+    from engine import practice
+    kw, suspects = _practice_ctx(session_id, lang)
+    return practice.make_summary(files or [], text, source, focus, pages, lang, kw, suspects)
+
+
 def _lesson_refs(mv: dict, k: int = 2) -> list[LessonRef]:
     """Curriculum-grounded remediation: lesson pages for the diagnosed misconception (only if courses exist)."""
     if mv["id"] == "M0":

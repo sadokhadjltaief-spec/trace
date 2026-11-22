@@ -13,6 +13,8 @@ Quiz ("practice", NOT the diagnosis bank):
   questions are practice, labelled as generated and cross-checked, not teacher-verified. Diagnosis and the tutor
   still use only the human-verified bank.
 Flashcards: engine/studio/flashcards.py from the material's passages (guarded; drafts, not teacher-reviewed).
+Summary: ONE LLM call writes sections of bullets, each citing its page [file p.N]; bullets whose page is not in the
+material are dropped; every text passes the guards (make_summary).
 All LLM calls go through engine/llm.py (cached, so a recorded file replays offline).
 """
 from __future__ import annotations
@@ -21,7 +23,8 @@ import hashlib
 import re
 
 from engine import guards, llm, rag
-from engine.contract import PracticeCards, PracticeCheck, PracticeQuestion, PracticeQuiz, Source
+from engine.contract import (PracticeCards, PracticeCheck, PracticeQuestion, PracticeQuiz, PracticeSummary, Source,
+                             SummaryPoint, SummarySection)
 from engine.i18n import lang_of, t as tr
 from engine.studio import flashcards
 from engine.studio.flashcards import guards_safetext
@@ -180,3 +183,85 @@ def _guard_batches(texts: dict[str, str], suspects: dict, lang: str, kw: dict, s
                                      purpose="practice_quiz_judge")
         out.update({k: judged[x] for x, k in ids.items()})
     return out
+
+
+SUMMARY_BUDGET = 11000
+SUMMARY_SYS = """Write a structured summary in {lang} of the course text below for a student (each part starts with its
+label [file p.N]). Length: about {pages} page(s), so {sections} sections with 3-6 bullets each. Cover the whole text in
+its order. {focus}Each bullet is one or two clear sentences that state a fact, definition, rule or method from the
+text, and cites the label of the part it comes from. Also list the key formulas exactly as in the text (plain text, no
+LaTeX) and the common mistakes the text warns about or that the rules imply (empty list if none). Use ONLY the text; do
+not add facts; every numeric equality must be true; at most {max_words} words per sentence; no praise, no exclamation
+marks.
+Return JSON: {{"title": "...", "overview": "2-3 sentences", "sections": [{{"heading": "...", "points": [{{"text": "...",
+"source": {{"file": "...", "page": 1}}}}]}}], "formulas": [{{"text": "...", "source": {{"file": "...", "page": 1}}}}],
+"mistakes": [{{"text": "...", "source": {{"file": "...", "page": 1}}}}]}}"""
+
+
+def make_summary(files, text: str, source: str, focus: str, pages_wanted: int, lang: str, kw: dict,
+                 suspects: dict) -> dict:
+    lang = lang_of(lang)
+    pages, refusal = material(files, text, source)
+    if refusal:
+        return PracticeSummary(summary_id="", refused=tr(refusal, lang)).model_dump()
+    n_pages = max(1, min(10, int(pages_wanted or 2)))
+    body = _budget(_spread(pages, 24), SUMMARY_BUDGET)
+    focus = (focus or "").strip()[:300]
+    summary_id = "sum-" + hashlib.sha1(f"{body}|{n_pages}|{focus}|{lang}".encode("utf-8")).hexdigest()[:10]
+    try:
+        d = llm.ask_json(SUMMARY_SYS.format(
+            lang=LANG[lang], pages=n_pages, sections=min(3 + n_pages, 10), max_words=max(kw["max_words_per_sentence"], 25),
+            focus=f"Give priority to what the student asked: \"{focus}\". " if focus else ""),
+            f"Course text:\n{body}", purpose="practice_summary", max_tokens=2500 + 400 * n_pages) or {}
+    except Exception:  # noqa: BLE001  offline and not recorded, or API error
+        return PracticeSummary(summary_id="", refused=tr("practice_unavailable", lang)).model_dump()
+    valid = {(f, p) for f, p, _ in pages}
+
+    def cite(item) -> list[Source]:
+        src = item.get("source") if isinstance(item, dict) else None
+        if not isinstance(src, dict):
+            return []
+        try:
+            key = (str(src.get("file")), int(src.get("page")))
+        except (TypeError, ValueError):
+            return []
+        return [Source(file=key[0], page=key[1])] if key in valid else []
+
+    texts, refs = {}, {}
+    def add(key, value, item=None):
+        if isinstance(value, str) and value.strip():
+            texts[key] = value.strip()
+            if item is not None:
+                refs[key] = cite(item)
+    add("title", d.get("title"))
+    add("overview", d.get("overview"))
+    secs = [s for s in (d.get("sections") or []) if isinstance(s, dict)][:10]
+    for i, s in enumerate(secs):
+        add(f"h{i}", s.get("heading"))
+        for j, pt in enumerate([p for p in (s.get("points") or []) if isinstance(p, dict)][:8]):
+            add(f"p{i}_{j}", pt.get("text"), pt)
+    for kind in ("formulas", "mistakes"):
+        for j, pt in enumerate([p for p in (d.get(kind) or []) if isinstance(p, dict)][:8]):
+            add(f"{kind[0]}{j}", pt.get("text"), pt)
+    checks = _guard_batches(texts, suspects, lang, kw)
+    safe = {k: guards_safetext(v, checks[k], lang) for k, v in texts.items()}
+    ok = lambda k: k in safe and safe[k].shown_allowed  # noqa: E731
+    dropped = sum(1 for k in texts if not ok(k) or (k in refs and not refs[k]))
+
+    def point(k):
+        return SummaryPoint(text=safe[k], sources=refs[k]) if ok(k) and refs.get(k) else None
+
+    sections = []
+    for i, s in enumerate(secs):
+        pts = [pt for j in range(8) if (pt := point(f"p{i}_{j}"))]
+        if pts and ok(f"h{i}"):
+            sections.append(SummarySection(heading=safe[f"h{i}"], points=pts))
+    formulas = [pt for j in range(8) if (pt := point(f"f{j}"))]
+    mistakes = [pt for j in range(8) if (pt := point(f"m{j}"))]
+    cited = sorted({(s.file, s.page) for sec in sections for pt in sec.points for s in pt.sources}
+                   | {(s.file, s.page) for pt in formulas + mistakes for s in pt.sources}, key=lambda x: (x[0], x[1]))
+    return PracticeSummary(
+        summary_id=summary_id, title=safe["title"] if ok("title") else None,
+        overview=safe["overview"] if ok("overview") else None, sections=sections, formulas=formulas, mistakes=mistakes,
+        sources=[Source(file=f, page=p) for f, p in cited], note=tr("practice_summary_note", lang, dropped=dropped),
+        refused=None if sections else tr("practice_unavailable", lang)).model_dump()

@@ -89,3 +89,41 @@ def test_practice_http(env):
     cards = c.post("/api/v1/practice/cards", data={"text": "Une fraction a un numérateur et un dénominateur.", "source": "text",
                                                    "lang": "fr"}).json()
     assert "cards" in cards
+
+
+SUMMARY = {"title": "Fractions et nombres relatifs",
+           "overview": "Ce cours présente les opérations sur les fractions et les nombres relatifs.",
+           "sections": [{"heading": "Additionner des fractions", "points": [
+               {"text": "Pour additionner deux fractions, on les met au même dénominateur.",
+                "source": {"file": "cours_fractions_relatifs.pdf", "page": 1}},
+               {"text": "On additionne ensuite les numérateurs.", "source": {"file": "autre.pdf", "page": 9}}]},  # bad page
+                        {"heading": "Soustraire des relatifs", "points": [
+               {"text": "Soustraire un nombre revient à ajouter son opposé : (-8) - (-5) = -3.",
+                "source": {"file": "cours_fractions_relatifs.pdf", "page": 3}}]}],
+           "formulas": [{"text": "1/5 + 2/5 = 4/5", "source": {"file": "cours_fractions_relatifs.pdf", "page": 1}}],  # false
+           "mistakes": [{"text": "Additionner les dénominateurs est une erreur.",
+                         "source": {"file": "cours_fractions_relatifs.pdf", "page": 1}}]}
+
+
+def test_summary_cites_pages_and_drops_bad_points(env, monkeypatch):
+    def fake2(system, user, *, purpose, **kw):
+        return SUMMARY if purpose == "practice_summary" else fake(system, user, purpose=purpose, **kw)
+    monkeypatch.setattr(llm, "ask_json", fake2)
+    from engine.contract import PracticeSummary
+    r = api.practice_summary([(NOTES.name, NOTES.read_bytes())], focus="les fractions", pages=2, lang="fr")
+    PracticeSummary.model_validate(r)
+    assert not r["refused"] and r["title"]["text"].startswith("Fractions")
+    assert [len(s["points"]) for s in r["sections"]] == [1, 1]              # uncited point dropped
+    assert all(p["sources"] for s in r["sections"] for p in s["points"])
+    assert r["formulas"] == [] and len(r["mistakes"]) == 1                  # false equality dropped by SymPy
+    assert "(2 retirés)" in r["note"] and {s["page"] for s in r["sources"]} == {1, 3}
+    assert api.practice_summary(source="wikipedia", text="https://x", lang="fr")["refused"]
+
+
+def test_summary_http(env, monkeypatch):
+    monkeypatch.setattr(llm, "ask_json", lambda s, u, *, purpose, **kw: SUMMARY if purpose == "practice_summary"
+                        else fake(s, u, purpose=purpose, **kw))
+    c = TestClient(app)
+    r = c.post("/api/v1/practice/summary", data={"text": "Les fractions.\n\nOn prend le même dénominateur.",
+                                                 "source": "text", "pages": "4", "lang": "fr"})
+    assert r.status_code == 200 and r.json()["refused"]          # pasted text: the fake cites a PDF page, so all dropped

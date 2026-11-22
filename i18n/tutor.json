@@ -569,5 +569,10 @@
   "en": "Cards generated from your material. The guards checked them ({dropped} removed). No teacher has reviewed them.",
   "fr": "Cartes générées depuis ton contenu. Les garde-fous les ont vérifiées ({dropped} retirées). Aucun enseignant ne les a relues.",
   "ar": "بطاقات مولّدة من محتواك. فحصتها الضوابط ({dropped} حُذفت). لم يراجعها أي معلّم."
+ },
+ "practice_summary_note": {
+  "en": "Summary generated from your material. Each point cites its page. The guards checked every text ({dropped} removed). No teacher has reviewed it.",
+  "fr": "Résumé généré depuis ton contenu. Chaque point cite sa page. Les garde-fous ont vérifié chaque texte ({dropped} retirés). Aucun enseignant ne l'a relu.",
+  "ar": "ملخّص مولّد من محتواك. كل نقطة تذكر صفحتها. فحصت الضوابط كل نصّ ({dropped} حُذفت). لم يراجعه أي معلّم."
  }
 }

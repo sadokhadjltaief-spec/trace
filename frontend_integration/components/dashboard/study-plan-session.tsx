@@ -7,6 +7,8 @@ import { useMemo, useState } from 'react'
 import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Circle, Clock, PartyPopper } from 'lucide-react'
 import type { Lang } from '@/lib/translations'
 import { cn } from '@/lib/utils'
+import { PageText } from './page-text'
+import { MathText } from './math-text'
 
 type SafeText = { text: string; shown_allowed: boolean }
 export type SessionPlan = {
@@ -77,17 +79,29 @@ export function StudyPlanSession({ plan, lang, onExit }: { plan: SessionPlan; la
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         {header}
 
-        <ol className="flex gap-1.5" aria-label={c.day}>
-          {plan.days.map((d, di) => (
-            <li key={d.day} className={cn('h-1.5 flex-1 rounded-full', di < step.di ? 'bg-primary' : di === step.di ? 'bg-gradient-to-r from-primary to-brand-cyan' : 'bg-primary/20')} />
-          ))}
-        </ol>
+        <div className="flex flex-col gap-4 rounded-[2rem] border border-border bg-gradient-to-br from-primary/15 via-card to-brand-cyan/10 p-5 shadow-sm sm:p-6">
+          <p className="text-lg font-bold leading-snug text-foreground sm:text-xl">{shown(plan.title)}</p>
+          <ol className="flex flex-wrap gap-2" aria-label={c.day}>
+            {plan.days.map((d, di) => {
+              const first = steps.findIndex((x) => x.di === di)
+              return (
+                <li key={d.day} className="min-w-0 flex-1 basis-24">
+                  <button type="button" onClick={() => first >= 0 && setI(first)} aria-current={di === step.di ? 'step' : undefined}
+                    className={cn('flex w-full flex-col gap-1.5 rounded-xl px-2 py-1.5 text-start transition hover:bg-background/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring')}>
+                    <span className={cn('text-xs font-bold', di === step.di ? 'text-primary' : 'text-muted-foreground')}>{c.day} {d.day}</span>
+                    <span className={cn('h-1.5 w-full rounded-full', di < step.di ? 'bg-primary' : di === step.di ? 'bg-gradient-to-r from-primary to-brand-cyan' : 'bg-primary/20')} />
+                  </button>
+                </li>
+              )
+            })}
+          </ol>
+        </div>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
-          <aside className="flex flex-col gap-4 rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <aside className="flex flex-col gap-4 self-start rounded-3xl border border-border bg-card p-6 shadow-sm lg:sticky lg:top-6">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-primary">{c.day} {day.day} {c.of} {plan.days.length}</p>
-              <h1 id="session-day" className="mt-1 text-xl font-bold leading-snug text-foreground">{shown(day.title)}</h1>
+              <h1 id="session-day" className="mt-1 text-xl font-bold leading-snug text-foreground"><MathText text={shown(day.title)} /></h1>
               {day.duration_min ? (
                 <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-muted-foreground"><Clock className="size-4" aria-hidden="true" />{day.duration_min} {c.min}</p>
               ) : null}
@@ -96,7 +110,7 @@ export function StudyPlanSession({ plan, lang, onExit }: { plan: SessionPlan; la
               <div>
                 <p className="text-sm font-semibold text-foreground">{c.goals}</p>
                 <ul className="mt-1.5 flex list-disc flex-col gap-1 ps-5 text-sm text-muted-foreground">
-                  {day.goals.map(shown).filter(Boolean).map((g, k) => <li key={k}>{g}</li>)}
+                  {day.goals.map(shown).filter(Boolean).map((g, k) => <li key={k}><MathText text={g} /></li>)}
                 </ul>
               </div>
             ) : null}
@@ -115,7 +129,7 @@ export function StudyPlanSession({ plan, lang, onExit }: { plan: SessionPlan; la
                         className="flex w-full items-start gap-2.5 rounded-xl border border-border bg-background/70 px-3 py-2.5 text-start text-sm transition hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         {on ? <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" /> : <Circle className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />}
-                        <span className={cn('text-foreground', on && 'text-muted-foreground line-through')}>{tk}</span>
+                        <span className={cn('text-foreground', on && 'text-muted-foreground line-through')}><MathText text={tk} /></span>
                       </button>
                     </li>
                   )
@@ -125,15 +139,15 @@ export function StudyPlanSession({ plan, lang, onExit }: { plan: SessionPlan; la
           </aside>
 
           <article className="flex min-h-[28rem] flex-col rounded-3xl border border-border bg-card p-6 shadow-sm sm:p-8" aria-label={c.content}>
-            <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
-                <BookOpen className="size-4 text-primary" aria-hidden="true" />
-                {step.src ? `${step.src.file} · ${c.page} ${step.src.page}` : c.content}
+            <div className="flex items-center justify-between gap-3 border-b border-border pb-4">
+              <span className="inline-flex min-w-0 items-center gap-2.5 text-sm font-semibold text-foreground">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary"><BookOpen className="size-4" aria-hidden="true" /></span>
+                <span className="flex min-w-0 flex-col"><span className="truncate">{step.src ? step.src.file : c.content}</span>{step.src ? <span className="text-xs font-normal text-muted-foreground">{c.page} {step.src.page}</span> : null}</span>
               </span>
               {step.pages ? <span className="text-xs tabular-nums text-muted-foreground">{step.pi + 1} {c.of} {step.pages}</span> : null}
             </div>
             {pageText ? (
-              <div className="mt-4 flex-1 whitespace-pre-wrap text-pretty text-base leading-relaxed text-foreground">{pageText}</div>
+              <div className="mt-5 flex-1"><PageText text={pageText} /></div>
             ) : (
               <p className="mt-4 flex-1 text-muted-foreground">{c.noText}</p>
             )}

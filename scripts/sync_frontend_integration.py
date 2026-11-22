@@ -31,6 +31,7 @@ FILES = [
     "components/dashboard/summary-reader.tsx",
     "components/dashboard/curriculum-view.tsx",
     "components/dashboard/ChapterDetailView.tsx",
+    "components/dashboard/page-text.tsx",
     "components/dashboard/sidebar.tsx",
     "components/dashboard/dashboard.tsx",
     "components/dashboard/dashboard-copy.ts",

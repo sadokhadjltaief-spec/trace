@@ -91,6 +91,37 @@ def test_daily_cap_fails_fast(monkeypatch, tmp_path):
     monkeypatch.setattr(llm, "_cache_dir", lambda: tmp_path)
     monkeypatch.setattr(llm, "_throttle", lambda *a, **k: None)
     monkeypatch.setattr(llm, "_log", lambda *a, **k: None)  # never write test rows into the real call log
+    monkeypatch.setattr(llm, "_CAPPED", {})
     with pytest.raises(llm.LLMError, match="daily cap"):
         llm.chat(llm.Request(messages=[{"role": "user", "content": "x"}], purpose="test_tpd"))
-    assert len(calls) == 1
+    assert len(calls) == len(llm._c()["fallback_models"])  # one try per model, no retries
+
+
+def test_daily_cap_moves_to_the_next_model_and_replays_offline(monkeypatch, tmp_path):
+    import httpx
+    from types import SimpleNamespace
+    from groq import RateLimitError
+    used = []
+
+    class Fake:
+        class chat:
+            class completions:
+                @staticmethod
+                def create(**kw):
+                    used.append(kw["model"])
+                    if kw["model"] == "openai/gpt-oss-120b":
+                        r = httpx.Response(429, request=httpx.Request("POST", "https://x"))
+                        raise RateLimitError("Rate limit reached ... tokens per day (TPD)", response=r, body=None)
+                    return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content='{"ok": 1}'))],
+                                           usage=SimpleNamespace(prompt_tokens=3, completion_tokens=2))
+    monkeypatch.setattr(llm, "_groq", lambda: Fake)
+    monkeypatch.setattr(llm, "_cache_dir", lambda: tmp_path)
+    monkeypatch.setattr(llm, "_throttle", lambda *a, **k: None)
+    monkeypatch.setattr(llm, "_log", lambda *a, **k: None)
+    monkeypatch.setattr(llm, "_CAPPED", {})
+    req = dict(messages=[{"role": "user", "content": "x"}], purpose="t", json_mode=True, model="openai/gpt-oss-120b")
+    r = llm.chat(llm.Request(**req))
+    assert r.data == {"ok": 1} and r.model == "openai/gpt-oss-20b"
+    assert used == ["openai/gpt-oss-120b", "openai/gpt-oss-20b"]
+    monkeypatch.setattr(llm, "_demo_mode", True)                     # offline: the fallback answer replays
+    assert llm.chat(llm.Request(**req)).data == {"ok": 1} and len(used) == 2

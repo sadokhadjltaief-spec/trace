@@ -230,19 +230,65 @@ def _parse_json(text: str) -> Any:
         raise
 
 
-def chat(req: Request) -> Response:
+_CAPPED: dict[str, float] = {}  # model -> time its daily cap was hit (skip it for a while, go to the fallback)
+
+
+def _fallbacks(model: str) -> list[str]:
+    """config llm.fallback_models: tried in order when `model` hits Groq's DAILY cap (team decision 2026-11-22)."""
+    return [m for m in (_c().get("fallback_models") or []) if m != model]
+
+
+def _from_cache(req: Request, model: str) -> Response | None:
+    cpath = _cache_dir() / f"{_key(req, model)}.json"
+    if not cpath.exists():
+        return None
+    d = json.loads(cpath.read_text(encoding="utf-8"))
+    resp = Response(d["text"], d.get("data"), model, d.get("prompt_tokens", 0), d.get("completion_tokens", 0), True, 0.0)
+    _log(req, model, resp, 0)
+    return resp
+
+
+def chat(req: Request, _fallback: bool = True) -> Response:
     model = req.model or default_model()
-    key = _key(req, model)
-    cpath = _cache_dir() / f"{key}.json"
-    if cpath.exists():
-        d = json.loads(cpath.read_text(encoding="utf-8"))
-        resp = Response(d["text"], d.get("data"), model, d.get("prompt_tokens", 0),
-                        d.get("completion_tokens", 0), True, 0.0)
-        _log(req, model, resp, 0)
-        return resp
+    hit = _from_cache(req, model)
+    if hit:
+        return hit
+    if _fallback:  # an answer recorded earlier by a fallback model (quota day) replays offline too
+        for fb in _fallbacks(model):
+            hit = _from_cache(req, fb)
+            if hit:
+                return hit
     if demo_mode():
         _log(req, model, None, 0, "cache miss in demo mode")
         raise CacheMiss(f"not cached (demo mode): purpose={req.purpose}")
+    if _fallback and time.time() - _CAPPED.get(model, 0) < 3600:
+        return _chat_fallback(req, model, "daily cap hit earlier")
+    try:
+        return _chat_live(req, model)
+    except LLMError as e:
+        if _fallback and "daily cap" in str(e):
+            _CAPPED[model] = time.time()
+            return _chat_fallback(req, model, str(e))
+        raise
+
+
+def _chat_fallback(req: Request, model: str, why: str) -> Response:
+    last = why
+    for fb in _fallbacks(model):
+        if time.time() - _CAPPED.get(fb, 0) < 3600:
+            continue
+        try:
+            return _chat_live(Request(**{**req.__dict__, "model": fb}), fb)
+        except LLMError as e:
+            last = str(e)
+            if "daily cap" in last:
+                _CAPPED[fb] = time.time()
+    raise LLMError(f"all models unavailable: {last[:200]}")
+
+
+def _chat_live(req: Request, model: str) -> Response:
+    key = _key(req, model)
+    cpath = _cache_dir() / f"{key}.json"
 
     from groq import APIConnectionError, APIStatusError, APITimeoutError, RateLimitError
 

@@ -161,6 +161,14 @@ def check(quiz_id: str, question_id: str, option: str) -> dict:
                          correct_option=ans["correct"], explanation=ans["explanation"]).model_dump()
 
 
+_INLINE_CITE = re.compile(r"\s*\((?:[^()]*?\.(?:txt|pdf|md)|texte)\s+p\.?\s*\d+(?:\s*[-,]\s*\d+)*\)", re.I)
+
+
+def _uncite(safe: dict) -> dict:
+    """Cards list their sources separately: drop '(file.pdf p.2)' labels the model copied into the text."""
+    return {**safe, "text": _INLINE_CITE.sub("", safe.get("text") or "").strip()} if isinstance(safe, dict) else safe
+
+
 def make_cards(files, text: str, source: str, details: str, lang: str, kw: dict, suspects: dict) -> dict:
     lang = lang_of(lang)
     pages, refusal = material(files, text, source, lang)
@@ -173,7 +181,8 @@ def make_cards(files, text: str, source: str, details: str, lang: str, kw: dict,
         cards, dropped = flashcards.make(deck_id, lang, kw, suspects, None, passages, n=_count(details, 10, 4, 16))
     except Exception:  # noqa: BLE001
         return PracticeCards(deck_id="", cards=[], sources=[], note="", refused=tr("practice_unavailable", lang)).model_dump()
-    return PracticeCards(deck_id=deck_id, cards=[{"id": c["id"], "front": c["front"], "back": c["back"]} for c in cards],
+    return PracticeCards(deck_id=deck_id, cards=[{"id": c["id"], "front": _uncite(c["front"]), "back": _uncite(c["back"])}
+                                                 for c in cards],
                          sources=[Source(file=f, page=p) for f, p, _ in chosen],
                          note=tr("practice_cards_note", lang, dropped=dropped),
                          refused=None if cards else tr("practice_unavailable", lang)).model_dump()

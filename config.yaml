@@ -30,6 +30,9 @@ llm:
   judge_model: openai/gpt-oss-120b
   # team decision 2026-11-22 ~02:00: the 120b daily cap was reached, so ONLY the summary judge runs on 20b
   # (separate daily quota). Every other judge keeps 120b (and its recorded cache).
+  # team decision 2026-11-22 ~03:40: when a model hits Groq's DAILY token cap, the call moves to the next model here
+  # (each model has its own daily quota). The answer is cached under the model that wrote it, and replays offline.
+  fallback_models: [openai/gpt-oss-120b, openai/gpt-oss-20b, qwen/qwen3.8-27b]
   judge_model_by_purpose:
     practice_summary_judge: openai/gpt-oss-20b
   cache_dir: .cache/llm

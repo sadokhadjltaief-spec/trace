@@ -16,9 +16,9 @@ type Cycle = { name: Tri; aliases: string[]; resource: { name: string; url: stri
 type Curriculum = { status: string; disclaimer: Tri; domains: Record<string, Tri>; levels: Level[]; level: Level | null; cycles: Record<string, Cycle> }
 
 const COPY: Record<Lang, Record<string, string>> = {
-  en: { title: 'Programme', intro: 'The maths chapters of each level, from primary school to the Bac.', cycle: 'Cycle', search: 'Search: “School”, “Collège”, “Lycée” or a chapter', open: 'Open the chapter', noMatch: 'No chapter matches this search.', level: 'Level', base: 'Basic education', secondary: 'Secondary', chapters: 'chapters', chapter: 'Chapter', all: 'All', error: 'The programme could not be loaded.', notions: 'Key notions' },
-  fr: { title: 'Programme', intro: 'Les chapitres de maths de chaque niveau, du primaire au Bac.', cycle: 'Cycle', search: 'Rechercher : « School », « Collège », « Lycée » ou un chapitre', open: 'Ouvrir le chapitre', noMatch: 'Aucun chapitre ne correspond à cette recherche.', level: 'Niveau', base: 'Enseignement de base', secondary: 'Secondaire', chapters: 'chapitres', chapter: 'Chapitre', all: 'Tous', error: 'Le programme n’a pas pu être chargé.', notions: 'Notions clés' },
-  ar: { title: 'البرنامج', intro: 'فصول الرياضيات لكل مستوى، من الابتدائي إلى الباكالوريا.', cycle: 'المرحلة', search: 'ابحث: ابتدائي، إعدادي، ثانوي أو فصل', open: 'افتح الفصل', noMatch: 'لا يوجد فصل يطابق هذا البحث.', level: 'المستوى', base: 'التعليم الأساسي', secondary: 'التعليم الثانوي', chapters: 'فصول', chapter: 'الفصل', all: 'الكل', error: 'تعذّر تحميل البرنامج.', notions: 'المفاهيم الأساسية' },
+  en: { title: 'Programme', intro: 'The maths chapters of each level, from primary school to the Bac.', cycle: 'Cycle', search: 'Search: “School”, “Collège”, “Lycée” or a chapter', open: 'Open the chapter', levelsWord: 'levels', noMatch: 'No chapter matches this search.', level: 'Level', base: 'Basic education', secondary: 'Secondary', chapters: 'chapters', chapter: 'Chapter', all: 'All', error: 'The programme could not be loaded.', notions: 'Key notions' },
+  fr: { title: 'Programme', intro: 'Les chapitres de maths de chaque niveau, du primaire au Bac.', cycle: 'Cycle', search: 'Rechercher : « School », « Collège », « Lycée » ou un chapitre', open: 'Ouvrir le chapitre', levelsWord: 'niveaux', noMatch: 'Aucun chapitre ne correspond à cette recherche.', level: 'Niveau', base: 'Enseignement de base', secondary: 'Secondaire', chapters: 'chapitres', chapter: 'Chapitre', all: 'Tous', error: 'Le programme n’a pas pu être chargé.', notions: 'Notions clés' },
+  ar: { title: 'البرنامج', intro: 'فصول الرياضيات لكل مستوى، من الابتدائي إلى الباكالوريا.', cycle: 'المرحلة', search: 'ابحث: ابتدائي، إعدادي، ثانوي أو فصل', open: 'افتح الفصل', levelsWord: 'مستويات', noMatch: 'لا يوجد فصل يطابق هذا البحث.', level: 'المستوى', base: 'التعليم الأساسي', secondary: 'التعليم الثانوي', chapters: 'فصول', chapter: 'الفصل', all: 'الكل', error: 'تعذّر تحميل البرنامج.', notions: 'المفاهيم الأساسية' },
 }
 const ICONS: Record<string, typeof Sigma> = { algebre: Sigma, analyse: TrendingUp, geometrie: Shapes, statistiques: BarChart3, mesures: Ruler }
 const fold = (x: string) => x.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
@@ -79,13 +79,13 @@ export function CurriculumView({ lang }: { lang: Lang }) {
 
   return (
     <section aria-labelledby="curriculum-title" className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 rounded-[2rem] border border-border bg-gradient-to-br from-accent via-card to-secondary/70 p-6 shadow-sm sm:flex-row sm:items-end sm:justify-between sm:p-8">
+      <div className="flex flex-col gap-4 rounded-[2rem] border border-border bg-gradient-to-br from-accent via-card to-secondary/70 p-6 shadow-sm sm:p-8 xl:flex-row xl:items-end xl:justify-between">
         <div className="flex flex-col gap-2">
           <span className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-primary"><BookMarked className="size-6" aria-hidden="true" /></span>
           <h1 id="curriculum-title" className="text-3xl font-bold tracking-tight text-foreground">{c.title}</h1>
           <p className="max-w-xl text-muted-foreground">{c.intro}</p>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <label className="flex min-w-44 flex-col gap-2 text-sm font-semibold text-foreground">
             {c.cycle}
             <span className="relative">
@@ -114,6 +114,24 @@ export function CurriculumView({ lang }: { lang: Lang }) {
         <Search className="pointer-events-none absolute start-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
         <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={c.search} className="h-12 w-full rounded-2xl border border-input bg-card ps-11 pe-4 text-base outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/25" />
       </label>
+
+      {data ? (
+        <nav aria-label={c.level} className="flex flex-col gap-2">
+          <p className="text-sm font-semibold text-muted-foreground">{data.cycles?.[cycle] ? pick(data.cycles[cycle].name) : ''} · {data.levels.filter((lv) => lv.cycle === cycle).length} {c.levelsWord}</p>
+          <ol className="grid grid-cols-2 gap-2 sm:grid-cols-3 2xl:grid-cols-6">
+            {data.levels.filter((lv) => lv.cycle === cycle).map((lv, k) => (
+              <li key={lv.id}>
+                <button type="button" onClick={() => { setLevel(lv.id); setDomain('all') }} aria-pressed={lv.id === level}
+                  className={cn('flex h-full w-full items-center gap-2.5 rounded-2xl border px-3 py-2.5 text-start text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    lv.id === level ? 'border-primary bg-primary text-primary-foreground shadow-sm' : 'border-border bg-card text-foreground hover:border-primary/50')}>
+                  <span className={cn('flex size-8 shrink-0 items-center justify-center rounded-xl text-sm font-bold', lv.id === level ? 'bg-primary-foreground/20' : 'bg-secondary text-primary')}>{k + 1}</span>
+                  <span className="min-w-0 leading-tight">{pick(lv.name).replace(/\s*\(.*\)\s*$/, '')}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      ) : null}
 
       {data ? (
         <p className="flex items-start gap-2 rounded-2xl border border-border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">

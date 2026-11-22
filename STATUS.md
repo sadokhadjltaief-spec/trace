@@ -2,6 +2,17 @@
 
 Last update: 2026-11-22, chat explanations, programme cycles + chapter page, summary reader, YouTube / Wikipedia.
 
+## Urgent fixes after the team's test (2026-11-22 ~03:45)
+- **Quota fallback (team decision):** when a model hits Groq's DAILY cap, `engine/llm.py` moves the call to the next
+  model of `llm.fallback_models` (gpt-oss-120b -> gpt-oss-20b -> qwen/qwen3.8-27b; each has its own daily quota).
+  The answer is cached under the model that wrote it and replays offline. Checked live: summary of the team's
+  `chap1 (1).pdf` (5 sections, written by 20b after a 120b 429) and 10 flashcards from the team's YouTube video
+  GoV3zj0wWDQ (French, forme canonique). Card texts no longer carry "(file p.N)" labels.
+- **Study session reader:** `page-text.tsx` re-arranges the extracted PDF text (paragraphs, headings, bullets, one box
+  per formula, TeX big brackets restored, slide counters dropped); day buttons, plan title header.
+- **Programme:** the cycle's levels are shown as a row (School -> 1re to 6e), responsive header.
+- Tests: 219 passed.
+
 ## Four requests before the video (2026-11-22, team request)
 - **Chat:** a general course question ("Explique-moi l'équation du second degré", "C'est quoi le théorème de
   Pythagore ?") gets a structured teacher explanation on gpt-oss-120b (idea, rule, method, worked example, common

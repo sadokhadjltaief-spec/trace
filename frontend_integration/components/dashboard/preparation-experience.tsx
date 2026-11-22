@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, BookOpen, CalendarDays, Check, CircleCheck, Clock, Gamepad2, HelpCircle, LoaderCircle, Sigma, Target } from 'lucide-react'
+import { ArrowLeft, BookOpen, CalendarDays, Check, CircleAlert, CircleCheck, Clock, Gamepad2, HelpCircle, LoaderCircle, Sigma, Target } from 'lucide-react'
 import { MathText } from './math-text'
 
 // one colour per day of the plan (rotates)
@@ -83,6 +83,12 @@ const FLOW_COPY: Record<Lang, { preparing: string; ready: string }> = {
   ar: { preparing: 'جارٍ تجهيز بطاقات المراجعة', ready: 'بطاقات المراجعة جاهزة' },
 }
 
+const FAILED_COPY: Record<Lang, Record<string, string>> = {
+  fr: { flashcards: 'Les cartes mémo n’ont pas pu être créées', quiz: 'Le quiz n’a pas pu être créé', plan: 'Le plan n’a pas pu être créé', hint: 'La raison est indiquée ci-dessous.' },
+  en: { flashcards: 'The flashcards could not be created', quiz: 'The quiz could not be created', plan: 'The plan could not be created', hint: 'The reason is shown below.' },
+  ar: { flashcards: 'تعذّر إنشاء البطاقات', quiz: 'تعذّر إنشاء الاختبار', plan: 'تعذّر إنشاء الخطة', hint: 'السبب مذكور أدناه.' },
+}
+
 export function PreparationExperience({ copy, kind, fileNames, details, lang, onBack, files, text: material, source }: Props) {
   const [progress, setProgress] = useState(0)
   const [ready, setReady] = useState(false)
@@ -96,6 +102,8 @@ export function PreparationExperience({ copy, kind, fileNames, details, lang, on
   const text = copy.preparation
   const hasMaterial = (!!files && files.length > 0) || !!material?.trim()
   const usesEngine = kind === 'plan' ? !!files && files.length > 0 : hasMaterial
+  // nothing was produced (engine refusal, no internet, quota): say so instead of "ready"
+  const failed = usesEngine && Boolean(planError)
 
   useEffect(() => {
     const startedAt = Date.now()
@@ -172,13 +180,13 @@ export function PreparationExperience({ copy, kind, fileNames, details, lang, on
         <div className="rounded-3xl border border-border bg-card p-6 shadow-sm sm:p-9">
           <div className="flex flex-col items-center text-center">
             <span className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-secondary text-primary">
-              {ready ? <CircleCheck className="size-7" aria-hidden="true" /> : <LoaderCircle className="size-7 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
+              {ready && failed ? <CircleAlert className="size-7 text-destructive" aria-hidden="true" /> : ready ? <CircleCheck className="size-7" aria-hidden="true" /> : <LoaderCircle className="size-7 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
             </span>
             <h1 id="preparation-title" className="text-balance text-2xl font-bold text-foreground sm:text-3xl">
-              {kind === 'flashcards' ? (ready ? FLOW_COPY[lang].ready : FLOW_COPY[lang].preparing) : ready ? (kind === 'quiz' ? text.readyQuiz : text.readyPlan) : (kind === 'quiz' ? text.preparingQuiz : text.preparingPlan)}
+              {ready && failed ? FAILED_COPY[lang][kind] : kind === 'flashcards' ? (ready ? FLOW_COPY[lang].ready : FLOW_COPY[lang].preparing) : ready ? (kind === 'quiz' ? text.readyQuiz : text.readyPlan) : (kind === 'quiz' ? text.preparingQuiz : text.preparingPlan)}
             </h1>
             <p className="mt-2 max-w-lg text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-              {ready ? text.readyDescription : text.preparingDescription}
+              {ready && failed ? FAILED_COPY[lang].hint : ready ? text.readyDescription : text.preparingDescription}
             </p>
           </div>
 

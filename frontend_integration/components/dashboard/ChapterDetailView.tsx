@@ -30,9 +30,9 @@ const COPY: Record<Lang, Record<string, string>> = {
   ar: { back: 'العودة إلى البرنامج', chapter: 'الفصل', notions: 'المفاهيم الأساسية', lesson: 'الدرس', lessonText: 'اقرأ درس هذا الفصل على', open: 'افتح الدرس', pdf: 'حمّل ملف PDF للدرس', pdfNote: 'يُحمَّل الملف من الموقع المصدر. لا ينسخ TRACE الدروس.', plan: 'أنشئ خطة مراجعة لهذا الفصل', planTitle: 'خطة مراجعتك', start: 'ابدأ الجلسة', day: 'اليوم', min: 'د', error: 'تعذّر تحميل الفصل.', planError: 'تعذّر إنشاء الخطة.', site: 'الموقع المصدر' },
 }
 const CYCLE_STYLE: Record<string, string> = {
-  primaire: 'from-amber-100 via-card to-orange-50 dark:from-amber-950/40',
-  college: 'from-sky-100 via-card to-teal-50 dark:from-sky-950/40',
-  lycee: 'from-violet-100 via-card to-fuchsia-50 dark:from-violet-950/40',
+  primaire: 'from-amber-500/20 via-card to-orange-500/10',
+  college: 'from-sky-500/20 via-card to-teal-500/10',
+  lycee: 'from-violet-500/20 via-card to-fuchsia-500/10',
 }
 const shown = (s?: SafeText | null) => (s && s.shown_allowed ? s.text : '')
 
@@ -115,7 +115,7 @@ export function ChapterDetailView({ chapterId, lang, onBack }: { chapterId: stri
                 </span>
                 <ExternalLink className="size-5 shrink-0 text-primary transition group-hover:translate-x-0.5" aria-hidden="true" />
               </a>
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-col gap-3">
                 <a href={d.resource.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border px-4 py-2.5 font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <Download className="size-4" aria-hidden="true" />{c.pdf}
                 </a>

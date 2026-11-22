@@ -81,7 +81,7 @@ export function SummaryFlow({ lang, onBack }: Props) {
   }
 
   const sourceIsReady = source === 'file' ? Boolean(file) : Boolean(value.trim())
-  const selectedName = file?.name ?? (source === 'youtube' ? 'YouTube video' : source === 'wikipedia' ? 'Wikipedia article' : 'Pasted text')
+  const selectedName = file?.name ?? (source === 'youtube' ? text.youtube : source === 'wikipedia' ? text.wikipedia : text.paste)
 
   function acceptFile(next: File | undefined) {
     if (!next) return

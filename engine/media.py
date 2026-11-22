@@ -464,8 +464,15 @@ def _ffmpeg() -> str:
     return imageio_ffmpeg.get_ffmpeg_exe()
 
 
+def _run(cmd: list[str]) -> subprocess.CompletedProcess:
+    """Run ffmpeg with its own empty stdin and no console window. Inheriting the server's stdin failed when the engine
+    had been started from a shell that has since exited (the inherited handle is no longer valid on Windows)."""
+    return subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding="utf-8",
+                          errors="replace", creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+
+
 def _duration(audio: Path) -> float:
-    r = subprocess.run([_ffmpeg(), "-i", str(audio)], capture_output=True, text=True, encoding="utf-8", errors="replace")
+    r = _run([_ffmpeg(), "-i", str(audio)])
     m = re.search(r"Duration: (\d+):(\d+):([\d.]+)", r.stderr)
     return int(m.group(1)) * 3600 + int(m.group(2)) * 60 + float(m.group(3)) if m else 5.0
 
@@ -518,10 +525,9 @@ def video(request: str, lang: str = "fr", context: str = "", calm: bool = False)
             audio = _tts(s["narration"], lang, work / f"s{i}")
             dur = _duration(audio) + 0.6
             part = work / f"s{i}.mp4"
-            r = subprocess.run([_ffmpeg(), "-y", "-loop", "1", "-i", str(png), "-i", str(audio), "-c:v", "libx264",
-                                "-tune", "stillimage", "-pix_fmt", "yuv420p", "-r", "25", "-c:a", "aac", "-b:a", "128k",
-                                "-ar", "44100", "-ac", "1", "-t", f"{dur:.2f}", "-af", "apad", str(part)],
-                               capture_output=True, text=True, encoding="utf-8", errors="replace")
+            r = _run([_ffmpeg(), "-y", "-loop", "1", "-i", str(png), "-i", str(audio), "-c:v", "libx264",
+                      "-tune", "stillimage", "-pix_fmt", "yuv420p", "-r", "25", "-c:a", "aac", "-b:a", "128k",
+                      "-ar", "44100", "-ac", "1", "-t", f"{dur:.2f}", "-af", "apad", str(part)])
             if r.returncode != 0:
                 raise MediaError("media_render", r.stderr[-300:])
             parts.append(part)
@@ -529,8 +535,7 @@ def video(request: str, lang: str = "fr", context: str = "", calm: bool = False)
             t0 += dur
         lst = work / "list.txt"
         lst.write_text("".join(f"file '{p.as_posix()}'\n" for p in parts), encoding="utf-8")
-        r = subprocess.run([_ffmpeg(), "-y", "-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy", str(mp4)],
-                           capture_output=True, text=True, encoding="utf-8", errors="replace")
+        r = _run([_ffmpeg(), "-y", "-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy", str(mp4)])
         if r.returncode != 0 or not mp4.exists():
             raise MediaError("media_render", r.stderr[-300:])
         vtt.write_text("WEBVTT\n\n" + "\n".join(cues), encoding="utf-8")

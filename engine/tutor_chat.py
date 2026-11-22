@@ -329,7 +329,13 @@ def turn(message: str, lang: str = "fr", session_id: str | None = None, student:
         # earlier tutor turns are replayed in the same JSON shape, so the model keeps answering in that shape
         msgs.append({"role": h["role"], "content": json.dumps({"reply": c}, ensure_ascii=False)
                      if h["role"] == "assistant" else c})
-    msgs.append({"role": "user", "content": message + "\n\n(Reply with the JSON object described above.)"})
+    # a picture / video asked for: TRACE draws it itself and shows it under the reply, so the tutor must not answer
+    # "I cannot create videos" (it did, while the video was attached)
+    asked = want_media or (("video" if _VIDEO_ASK.search(message) else "image") if _MEDIA_ASK.search(message) else None)
+    media_note = ("\n\n(TRACE generates the " + ("narrated video" if asked == "video" else "diagram") + " itself and "
+                  "shows it right under your reply. Never say you cannot create videos or images. Introduce it in one "
+                  "short sentence, then explain the idea briefly.)") if asked else ""
+    msgs.append({"role": "user", "content": message + media_note + "\n\n(Reply with the JSON object described above.)"})
     kw = _style_kwargs(profile, lang)
     suspects = {}
     d, text, checks = {}, "", []
@@ -414,3 +420,14 @@ def make_media(kind: str, request: str, lang: str, profile: dict | None = None, 
     except media.MediaError as e:
         from engine.i18n import t as tr
         return ChatMedia(type=kind, ok=False, error=tr(e.key, lang)).model_dump()
+    except Exception:  # noqa: BLE001  unexpected failure (ffmpeg, voice, disk): the tutor reply is still returned
+        import traceback
+        from engine.i18n import t as tr
+        try:
+            log = media.OUT / "errors.log"
+            log.parent.mkdir(parents=True, exist_ok=True)
+            with log.open("a", encoding="utf-8") as f:
+                f.write(f"--- {kind}: {request[:120]!r}\n{traceback.format_exc()}\n")
+        except OSError:
+            pass
+        return ChatMedia(type=kind, ok=False, error=tr("media_unavailable", lang)).model_dump()

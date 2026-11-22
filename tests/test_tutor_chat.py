@@ -159,3 +159,19 @@ def test_every_reply_starts_with_the_opener(fake):
     r = tutor_chat.turn("C'est quoi une fraction ?", "fr", None, None, {"learningEnvironment": "interactive"})
     first = r["reply"]["text"].split("\n\n")[0]
     assert first in sum(tutor_chat.OPENERS["fr"].values(), []) and "part d'un tout" in r["reply"]["text"]
+
+
+def test_video_failure_keeps_the_reply_and_the_tutor_knows_a_video_comes(fake, monkeypatch):
+    seen = []
+    chat = fake.chat
+    monkeypatch.setattr(llm, "chat", lambda req: (seen.append(req.messages[-1]["content"]), chat(req))[1])
+
+    def broken(*a, **k):  # e.g. ffmpeg cannot start: OSError [WinError 6] The handle is invalid
+        raise OSError(6, "The handle is invalid")
+    monkeypatch.setattr(media, "video", broken)
+    r = tutor_chat.turn("expliquer equation second degre", "fr", None, None, {}, want_media="video")
+    assert r["reply"]["text"] and r["media"]["type"] == "video" and not r["media"]["ok"] and r["media"]["error"]
+    assert "Never say you cannot create videos" in seen[-1] and "narrated video" in seen[-1]
+    assert "The handle is invalid" in (media.OUT / "errors.log").read_text(encoding="utf-8")
+    tutor_chat.turn("Bonjour", "fr", None, None, {})
+    assert "Never say you cannot create" not in seen[-1]          # ordinary turns: prompt unchanged (cache kept)

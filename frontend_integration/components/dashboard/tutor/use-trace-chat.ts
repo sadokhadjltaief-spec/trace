@@ -319,7 +319,8 @@ export function useTraceChat({ id, messages: initial, lang, student, startText, 
   // image / video on request, about the student's last question (or what they type)
   const requestMedia = useCallback((kind: 'image' | 'video', topic?: string) => {
     const lastUser = [...messages].reverse().find((m) => m.role === 'user')
-    const about = (topic ?? '').trim() || (lastUser ? messageTextOf(lastUser) : '')
+    // a second press reuses the last question without its "Vidéo : " / "Image : " label (no "Video : Video : ...")
+    const about = ((topic ?? '').trim() || (lastUser ? messageTextOf(lastUser) : '')).replace(/^(?:\s*(?:Image|Vidéo|Video|صورة|فيديو)\s*:\s*)+/i, '').trim()
     const label = { image: { fr: 'Image', en: 'Image', ar: 'صورة' }, video: { fr: 'Vidéo', en: 'Video', ar: 'فيديو' } }[kind][lang]
     return run(about || label, true, kind, `${label} : ${about || '…'}`)
   }, [run, messages, lang])

@@ -1,17 +1,62 @@
 """Writes data/curriculum/tunisie_maths.json: an INDICATIVE maths reference programme written by the TRACE team from
-general knowledge of the Tunisian curriculum (7e de base to the Bac). Not the official Ministry document: check it
+general knowledge of the Tunisian curriculum (1re année primaire to the Bac). Not the official Ministry document: check it
 against the official programmes before any real use. Usage: python scripts/make_curriculum.py
 """
 import json
 from pathlib import Path
 
-A, G, S, N = "algebre", "geometrie", "statistiques", "analyse"
+A, G, S, N, M = "algebre", "geometrie", "statistiques", "analyse", "mesures"
 
 def ch(domain, fr, ar, en, notions):
     return {"domain": domain, "title": {"fr": fr, "ar": ar, "en": en}, "notions": notions}
 
 LEVELS = [
- ("7e", "base", ("7e année de base", "السنة السابعة أساسي", "7th grade (basic)"), [
+ ("1p", "primaire", ("1re année primaire", "السنة الأولى ابتدائي", "1st grade (primary)"), [
+  ch(A, "Les nombres jusqu'à 100", "الأعداد إلى 100", "Numbers up to 100", ["Compter, lire et écrire", "Dizaines et unités", "Comparer et ranger"]),
+  ch(A, "Addition et soustraction", "الجمع والطرح", "Addition and subtraction", ["Sens de l'addition", "Sens de la soustraction", "Calcul mental"]),
+  ch(G, "Formes et repérage", "الأشكال والتموضع", "Shapes and position", ["Carré, rectangle, triangle, cercle", "Gauche, droite, dessus, dessous"]),
+  ch(M, "Premières mesures", "القيس الأوّلي", "First measures", ["Comparer des longueurs", "La monnaie", "Les jours de la semaine"]),
+ ]),
+ ("2p", "primaire", ("2e année primaire", "السنة الثانية ابتدائي", "2nd grade (primary)"), [
+  ch(A, "Les nombres jusqu'à 1000", "الأعداد إلى 1000", "Numbers up to 1000", ["Centaines, dizaines, unités", "Comparer et ranger"]),
+  ch(A, "Addition et soustraction avec retenue", "الجمع والطرح بالاحتفاظ", "Addition and subtraction with carrying", ["Technique opératoire", "Problèmes"]),
+  ch(A, "Initiation à la multiplication", "مدخل إلى الضرب", "Introduction to multiplication", ["Addition répétée", "Tables de 2, 3, 4, 5"]),
+  ch(G, "Lignes et figures", "الخطوط والأشكال", "Lines and figures", ["Lignes droites et courbes", "Reproduire une figure sur quadrillage"]),
+  ch(M, "Mesures : longueur, monnaie, temps", "القيس: الطول والنقود والزمن", "Length, money and time", ["Le mètre et le centimètre", "Lire l'heure"]),
+ ]),
+ ("3p", "primaire", ("3e année primaire", "السنة الثالثة ابتدائي", "3rd grade (primary)"), [
+  ch(A, "Les nombres jusqu'à 10 000", "الأعداد إلى 10000", "Numbers up to 10,000", ["Lire et écrire", "Valeur de position"]),
+  ch(A, "La multiplication", "الضرب", "Multiplication", ["Tables de multiplication", "Multiplier par un nombre à un chiffre"]),
+  ch(A, "Initiation à la division", "مدخل إلى القسمة", "Introduction to division", ["Partage équitable", "Quotient et reste"]),
+  ch(A, "Premières fractions", "الكسور الأولى", "First fractions", ["Demi, tiers, quart", "Fraction d'une quantité"]),
+  ch(G, "Angles droits, carré et rectangle", "الزاوية القائمة والمربع والمستطيل", "Right angles, squares and rectangles", ["Reconnaître un angle droit", "Propriétés du carré et du rectangle"]),
+  ch(M, "Longueurs, masses et durées", "الأطوال والكتل والمدد", "Lengths, masses and durations", ["km, m, cm", "kg et g", "Heures et minutes"]),
+ ]),
+ ("4p", "primaire", ("4e année primaire", "السنة الرابعة ابتدائي", "4th grade (primary)"), [
+  ch(A, "Les grands nombres", "الأعداد الكبيرة", "Large numbers", ["Classes des milliers et des millions", "Comparer et arrondir"]),
+  ch(A, "Les quatre opérations", "العمليات الأربع", "The four operations", ["Multiplication à deux chiffres", "Division euclidienne", "Problèmes à étapes"]),
+  ch(A, "Les fractions", "الكسور", "Fractions", ["Lire et écrire une fraction", "Comparer des fractions simples"]),
+  ch(A, "Initiation aux nombres décimaux", "مدخل إلى الأعداد العشرية", "Introduction to decimals", ["Dixièmes et centièmes", "Écriture à virgule"]),
+  ch(G, "Droites parallèles et perpendiculaires", "المستقيمات المتوازية والمتعامدة", "Parallel and perpendicular lines", ["Tracer avec l'équerre et la règle"]),
+  ch(M, "Le périmètre", "المحيط", "Perimeter", ["Périmètre du carré et du rectangle", "Unités de longueur"]),
+ ]),
+ ("5p", "primaire", ("5e année primaire", "السنة الخامسة ابتدائي", "5th grade (primary)"), [
+  ch(A, "Les nombres décimaux", "الأعداد العشرية", "Decimal numbers", ["Comparer et ranger", "Addition et soustraction", "Multiplication par un entier"]),
+  ch(A, "Opérations sur les fractions", "العمليات على الكسور", "Operations on fractions", ["Fractions égales", "Addition de fractions de même dénominateur"]),
+  ch(A, "La proportionnalité", "التناسبية", "Proportionality", ["Tableau de proportionnalité", "Règle de trois"]),
+  ch(G, "Le cercle", "الدائرة", "The circle", ["Centre, rayon, diamètre", "Tracer au compas"]),
+  ch(M, "Les aires", "المساحات", "Areas", ["Aire du carré et du rectangle", "Aire du triangle", "Unités d'aire"]),
+  ch(M, "Capacités et masses", "السعات والكتل", "Capacities and masses", ["Litre et ses sous-multiples", "Conversions"]),
+ ]),
+ ("6p", "primaire", ("6e année primaire", "السنة السادسة ابتدائي", "6th grade (primary)"), [
+  ch(A, "Décimaux et fractions", "الأعداد العشرية والكسور", "Decimals and fractions", ["Les quatre opérations", "Passer d'une fraction à un décimal"]),
+  ch(A, "Pourcentages et échelles", "النسب المائوية والمقاييس", "Percentages and scales", ["Calculer un pourcentage", "Lire une carte à l'échelle"]),
+  ch(A, "Proportionnalité et problèmes", "التناسبية والمسائل", "Proportionality and problems", ["Vitesse moyenne", "Partages proportionnels"]),
+  ch(G, "Solides : cube et pavé droit", "المجسمات: المكعب ومتوازي المستطيلات", "Solids: cube and cuboid", ["Faces, arêtes, sommets", "Patrons"]),
+  ch(M, "Aires et volumes", "المساحات والأحجام", "Areas and volumes", ["Aire du disque", "Volume du cube et du pavé droit"]),
+  ch(S, "Tableaux et graphiques", "الجداول والرسوم البيانية", "Tables and charts", ["Lire un tableau", "Diagramme en bâtons", "Moyenne"]),
+ ]),
+ ("7e", "college", ("7e année de base", "السنة السابعة أساسي", "7th grade (basic)"), [
   ch(A, "Nombres entiers naturels", "الأعداد الصحيحة الطبيعية", "Whole numbers", ["Opérations", "Puissances d'un entier", "Priorités de calcul"]),
   ch(A, "Divisibilité", "قابلية القسمة", "Divisibility", ["Multiples et diviseurs", "Critères de divisibilité", "Nombres premiers"]),
   ch(A, "Fractions", "الكسور", "Fractions", ["Fractions égales", "Comparaison", "Addition et soustraction", "Multiplication"]),
@@ -23,7 +68,7 @@ LEVELS = [
   ch(G, "Symétrie axiale", "التناظر المحوري", "Line symmetry", ["Symétrique d'un point, d'une figure", "Axes de symétrie"]),
   ch(G, "Périmètres, aires et volumes", "المحيطات والمساحات والأحجام", "Perimeters, areas and volumes", ["Aire du rectangle, du triangle, du disque", "Volume du pavé droit"]),
  ]),
- ("8e", "base", ("8e année de base", "السنة الثامنة أساسي", "8th grade (basic)"), [
+ ("8e", "college", ("8e année de base", "السنة الثامنة أساسي", "8th grade (basic)"), [
   ch(A, "Nombres décimaux relatifs", "الأعداد العشرية النسبية", "Signed numbers", ["Opposé, valeur absolue", "Addition et soustraction", "Multiplication et division", "Règle des signes"]),
   ch(A, "Nombres rationnels", "الأعداد الكسرية النسبية", "Rational numbers", ["Opérations sur les fractions", "Comparaison", "Fraction irréductible"]),
   ch(A, "Puissances", "القوى", "Powers", ["Puissances d'exposant entier", "Puissances de 10", "Écriture scientifique"]),
@@ -37,7 +82,7 @@ LEVELS = [
   ch(G, "Théorème de Pythagore", "مبرهنة بيتاغور", "Pythagorean theorem", ["Théorème direct", "Réciproque"]),
   ch(G, "Prisme droit et cylindre", "الموشور القائم والأسطوانة", "Prism and cylinder", ["Patron", "Aire latérale", "Volume"]),
  ]),
- ("9e", "base", ("9e année de base", "السنة التاسعة أساسي", "9th grade (basic)"), [
+ ("9e", "college", ("9e année de base", "السنة التاسعة أساسي", "9th grade (basic)"), [
   ch(A, "Nombres réels et racines carrées", "الأعداد الحقيقية والجذور التربيعية", "Real numbers and square roots", ["Racine carrée", "Opérations sur les radicaux", "Ordre dans IR"]),
   ch(A, "Calcul algébrique et identités remarquables", "الحساب الجبري والمتطابقات الهامة", "Algebra and special products", ["(a+b)², (a−b)², (a+b)(a−b)", "Factorisation"]),
   ch(A, "Équations et inéquations du premier degré", "المعادلات والمتراجحات من الدرجة الأولى", "Linear equations and inequalities", ["Équation produit", "Inéquations", "Problèmes"]),
@@ -51,7 +96,7 @@ LEVELS = [
   ch(G, "Angles inscrits", "الزوايا المحيطية", "Inscribed angles", ["Angle inscrit et angle au centre", "Polygones réguliers"]),
   ch(G, "Géométrie dans l'espace", "الهندسة الفضائية", "Solid geometry", ["Pyramide", "Cône", "Sphère et boule"]),
  ]),
- ("1s", "secondaire", ("1ère année secondaire", "السنة الأولى ثانوي", "1st year secondary"), [
+ ("1s", "lycee", ("1ère année secondaire", "السنة الأولى ثانوي", "1st year secondary"), [
   ch(A, "Calcul dans IR", "الحساب في IR", "Computing in IR", ["Puissances et radicaux", "Ordre et encadrement", "Valeur absolue"]),
   ch(A, "Arithmétique", "الحسابيات", "Arithmetic", ["PGCD et PPCM", "Nombres premiers", "Décomposition en facteurs premiers"]),
   ch(A, "Équations et inéquations du premier degré", "المعادلات والمتراجحات من الدرجة الأولى", "Linear equations and inequalities", ["Équations à une inconnue", "Inéquations", "Systèmes"]),
@@ -63,7 +108,7 @@ LEVELS = [
   ch(G, "Isométries du plan", "التقايسات في المستوي", "Plane isometries", ["Symétries", "Translations", "Rotations"]),
   ch(G, "Géométrie dans l'espace", "الهندسة الفضائية", "Solid geometry", ["Positions relatives de droites et plans", "Solides usuels"]),
  ]),
- ("2s", "secondaire", ("2e année Sciences", "السنة الثانية علوم", "2nd year Sciences"), [
+ ("2s", "lycee", ("2e année Sciences", "السنة الثانية علوم", "2nd year Sciences"), [
   ch(A, "Polynômes et second degré", "كثيرات الحدود والدرجة الثانية", "Polynomials and quadratics", ["Discriminant", "Équations et inéquations du second degré", "Factorisation"]),
   ch(A, "Systèmes d'équations linéaires", "جمل المعادلات الخطية", "Linear systems", ["Méthode de Cramer / substitution", "Problèmes"]),
   ch(N, "Généralités sur les fonctions", "عموميات حول الدوال", "Functions", ["Ensemble de définition", "Sens de variation", "Parité"]),
@@ -75,7 +120,7 @@ LEVELS = [
   ch(G, "Transformations du plan", "التحويلات في المستوي", "Plane transformations", ["Homothétie", "Rotation", "Translation"]),
   ch(S, "Statistiques", "الإحصاء", "Statistics", ["Variance et écart-type", "Séries regroupées en classes"]),
  ]),
- ("3m", "secondaire", ("3e année Mathématiques", "السنة الثالثة رياضيات", "3rd year Mathematics"), [
+ ("3m", "lycee", ("3e année Mathématiques", "السنة الثالثة رياضيات", "3rd year Mathematics"), [
   ch(N, "Continuité et limites", "الاتصال والنهايات", "Continuity and limits", ["Limite finie et infinie", "Opérations sur les limites", "Asymptotes"]),
   ch(N, "Dérivabilité", "الاشتقاق", "Derivatives", ["Nombre dérivé", "Fonctions dérivées", "Tangente"]),
   ch(N, "Étude de fonctions", "دراسة الدوال", "Function analysis", ["Variations", "Extremums", "Représentation graphique"]),
@@ -87,7 +132,7 @@ LEVELS = [
   ch(A, "Arithmétique", "الحسابيات", "Arithmetic", ["Division euclidienne", "PGCD", "Nombres premiers"]),
   ch(S, "Dénombrement et probabilités", "التعداد والاحتمالات", "Counting and probability", ["Arrangements, combinaisons", "Probabilité d'un événement"]),
  ]),
- ("3se", "secondaire", ("3e année Sciences expérimentales", "السنة الثالثة علوم تجريبية", "3rd year Experimental sciences"), [
+ ("3se", "lycee", ("3e année Sciences expérimentales", "السنة الثالثة علوم تجريبية", "3rd year Experimental sciences"), [
   ch(N, "Généralités sur les fonctions", "عموميات حول الدوال", "Functions", ["Fonctions composées", "Parité, périodicité"]),
   ch(N, "Continuité et limites", "الاتصال والنهايات", "Continuity and limits", ["Limites usuelles", "Asymptotes"]),
   ch(N, "Dérivabilité et étude de fonctions", "الاشتقاق ودراسة الدوال", "Derivatives and function analysis", ["Dérivées usuelles", "Variations", "Tangente"]),
@@ -99,7 +144,7 @@ LEVELS = [
   ch(S, "Probabilités", "الاحتمالات", "Probability", ["Événements", "Équiprobabilité"]),
   ch(S, "Statistiques", "الإحصاء", "Statistics", ["Paramètres de position et de dispersion"]),
  ]),
- ("bac-m", "secondaire", ("Bac Mathématiques (4e année)", "باكالوريا رياضيات (السنة الرابعة)", "Bac Mathematics (4th year)"), [
+ ("bac-m", "lycee", ("Bac Mathématiques (4e année)", "باكالوريا رياضيات (السنة الرابعة)", "Bac Mathematics (4th year)"), [
   ch(N, "Continuité et limites", "الاتصال والنهايات", "Continuity and limits", ["Théorème des valeurs intermédiaires", "Limites et ordre"]),
   ch(N, "Suites réelles", "المتتاليات الحقيقية", "Real sequences", ["Suites convergentes", "Suites adjacentes"]),
   ch(N, "Dérivabilité et fonction réciproque", "الاشتقاق والدالة العكسية", "Derivatives and inverse functions", ["Théorème des accroissements finis", "Fonction réciproque", "Fonctions x ↦ x^(1/n)"]),
@@ -114,7 +159,7 @@ LEVELS = [
   ch(G, "Géométrie dans l'espace", "الهندسة الفضائية", "Solid geometry", ["Produit scalaire et vectoriel", "Droites, plans et sphères"]),
   ch(S, "Probabilités et statistiques", "الاحتمالات والإحصاء", "Probability and statistics", ["Probabilités conditionnelles", "Loi binomiale", "Lois continues", "Séries à deux variables"]),
  ]),
- ("bac-se", "secondaire", ("Bac Sciences expérimentales (4e année)", "باكالوريا علوم تجريبية (السنة الرابعة)", "Bac Experimental sciences (4th year)"), [
+ ("bac-se", "lycee", ("Bac Sciences expérimentales (4e année)", "باكالوريا علوم تجريبية (السنة الرابعة)", "Bac Experimental sciences (4th year)"), [
   ch(N, "Continuité et limites", "الاتصال والنهايات", "Continuity and limits", ["Théorème des valeurs intermédiaires", "Asymptotes"]),
   ch(N, "Suites réelles", "المتتاليات الحقيقية", "Real sequences", ["Convergence", "Suites récurrentes"]),
   ch(N, "Dérivabilité et étude de fonctions", "الاشتقاق ودراسة الدوال", "Derivatives and function analysis", ["Fonction réciproque", "Tableau de variation"]),
@@ -127,7 +172,7 @@ LEVELS = [
   ch(S, "Probabilités", "الاحتمالات", "Probability", ["Probabilités conditionnelles", "Loi binomiale", "Variable aléatoire"]),
   ch(S, "Statistiques", "الإحصاء", "Statistics", ["Séries statistiques à deux variables", "Ajustement affine"]),
  ]),
- ("bac-t", "secondaire", ("Bac Sciences techniques (4e année)", "باكالوريا علوم تقنية (السنة الرابعة)", "Bac Technical sciences (4th year)"), [
+ ("bac-t", "lycee", ("Bac Sciences techniques (4e année)", "باكالوريا علوم تقنية (السنة الرابعة)", "Bac Technical sciences (4th year)"), [
   ch(N, "Continuité, limites et dérivabilité", "الاتصال والنهايات والاشتقاق", "Continuity, limits and derivatives", ["Étude de fonctions", "Fonction réciproque"]),
   ch(N, "Suites réelles", "المتتاليات الحقيقية", "Real sequences", ["Convergence", "Suites récurrentes"]),
   ch(N, "Primitives et intégrales", "الدوال الأصلية والتكامل", "Antiderivatives and integrals", ["Calcul d'aires et de volumes"]),
@@ -137,7 +182,7 @@ LEVELS = [
   ch(G, "Géométrie dans l'espace", "الهندسة الفضائية", "Solid geometry", ["Produit vectoriel", "Plans et droites"]),
   ch(S, "Probabilités et statistiques", "الاحتمالات والإحصاء", "Probability and statistics", ["Loi binomiale", "Séries à deux variables"]),
  ]),
- ("bac-eg", "secondaire", ("Bac Économie et gestion (4e année)", "باكالوريا اقتصاد وتصرف (السنة الرابعة)", "Bac Economics and management (4th year)"), [
+ ("bac-eg", "lycee", ("Bac Économie et gestion (4e année)", "باكالوريا اقتصاد وتصرف (السنة الرابعة)", "Bac Economics and management (4th year)"), [
   ch(N, "Fonctions et limites", "الدوال والنهايات", "Functions and limits", ["Étude de fonctions", "Fonctions coût, recette, bénéfice"]),
   ch(N, "Logarithme et exponentielle", "اللوغاريتم والدالة الأسية", "Logarithm and exponential", ["Propriétés", "Applications économiques"]),
   ch(N, "Suites et mathématiques financières", "المتتاليات والرياضيات المالية", "Sequences and financial maths", ["Intérêts simples et composés", "Suites arithmétiques et géométriques"]),
@@ -146,7 +191,7 @@ LEVELS = [
   ch(S, "Probabilités", "الاحتمالات", "Probability", ["Probabilités conditionnelles", "Loi binomiale"]),
   ch(S, "Statistiques", "الإحصاء", "Statistics", ["Séries à deux variables", "Ajustement affine"]),
  ]),
- ("bac-si", "secondaire", ("Bac Sciences de l'informatique (4e année)", "باكالوريا علوم الإعلامية (السنة الرابعة)", "Bac Computer science (4th year)"), [
+ ("bac-si", "lycee", ("Bac Sciences de l'informatique (4e année)", "باكالوريا علوم الإعلامية (السنة الرابعة)", "Bac Computer science (4th year)"), [
   ch(N, "Continuité, limites et dérivabilité", "الاتصال والنهايات والاشتقاق", "Continuity, limits and derivatives", ["Étude de fonctions"]),
   ch(N, "Suites réelles", "المتتاليات الحقيقية", "Real sequences", ["Convergence", "Suites récurrentes"]),
   ch(N, "Logarithme, exponentielle et intégrales", "اللوغاريتم والأسية والتكامل", "Logarithm, exponential and integrals", ["Propriétés", "Primitives", "Calcul d'aires"]),
@@ -171,6 +216,19 @@ out = {
         "analyse": {"fr": "Fonctions et analyse", "ar": "الدوال والتحليل", "en": "Functions and analysis"},
         "geometrie": {"fr": "Géométrie", "ar": "الهندسة", "en": "Geometry"},
         "statistiques": {"fr": "Statistiques et probabilités", "ar": "الإحصاء والاحتمالات", "en": "Statistics and probability"},
+        "mesures": {"fr": "Grandeurs et mesures", "ar": "المقادير والقيس", "en": "Quantities and measures"},
+    },
+    # where to read the lesson: the app only LINKS to these sites (no download, no copy; see docs/NAJAHNI_NOTE.md)
+    "cycles": {
+        "primaire": {"name": {"fr": "Primaire", "ar": "الابتدائي", "en": "Primary school"},
+                     "aliases": ["primaire", "primary", "school", "ecole", "école", "ابتدائي"],
+                     "resource": {"name": "mourajaa.com", "url": "https://mourajaa.com/"}},
+        "college": {"name": {"fr": "Collège", "ar": "الإعدادي", "en": "Middle school"},
+                    "aliases": ["college", "collège", "middle school", "base", "إعدادي", "اعدادي"],
+                    "resource": {"name": "najahni.tn", "url": "https://www.najahni.tn/"}},
+        "lycee": {"name": {"fr": "Lycée", "ar": "الثانوي", "en": "High school"},
+                  "aliases": ["lycee", "lycée", "secondaire", "high school", "bac", "ثانوي"],
+                  "resource": {"name": "najahni.tn", "url": "https://www.najahni.tn/"}},
     },
     "levels": [],
 }

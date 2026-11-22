@@ -20,7 +20,7 @@ from engine import api
 from engine.config import cfg
 from engine.contract import (CONTRACT_VERSION, CourseAnswer, MisconceptionView, NextQuestion, SessionState,
                              SessionSummary, SimItemView, SimRun, SimTurn, StudioOutput, TutorTurn, GameTurn,
-                             ReportExport, ChatAnswer, StudyPlan, PracticeCards, PracticeCheck, PracticeQuiz, PracticeSummary, Curriculum)
+                             ReportExport, ChatAnswer, StudyPlan, PracticeCards, PracticeCheck, PracticeQuiz, PracticeSummary, Curriculum, ChapterDetail)
 
 app = FastAPI(title="TRACE engine API", version=CONTRACT_VERSION,
               description="Thin HTTP wrapper over engine/api.py. Shapes: docs/INTERFACE.md.")
@@ -335,8 +335,18 @@ async def practice_cards(files: list[UploadFile] | None = File(None), text: str 
 
 
 @app.get("/api/v1/curriculum", response_model=Curriculum)
-def curriculum(level: str | None = None):
-    return _call(api.curriculum, level)
+def curriculum(level: str | None = None, cycle: str | None = None):
+    return _call(api.curriculum, level, cycle)
+
+
+@app.get("/api/v1/curriculum/chapters/{chapter_id}", response_model=ChapterDetail)
+def curriculum_chapter(chapter_id: str):
+    return _call(api.curriculum_chapter, chapter_id)
+
+
+@app.post("/api/v1/curriculum/chapters/{chapter_id}/plan", response_model=StudyPlan)
+def curriculum_chapter_plan(chapter_id: str, lang: Literal["fr", "ar", "en"] = "fr"):
+    return _call(api.curriculum_chapter_plan, chapter_id, lang)
 
 
 @app.post("/api/v1/practice/summary", response_model=PracticeSummary)

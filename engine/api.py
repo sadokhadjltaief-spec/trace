@@ -510,10 +510,23 @@ def practice_summary(files: list[tuple[str, bytes]] | None = None, text: str = "
     return practice.make_summary(files or [], text, source, focus, pages, lang, kw, suspects)
 
 
-def curriculum(level: str | None = None) -> dict:
-    """Maths programme: every level, plus the chapters of `level` (indicative TRACE reference, not official)."""
+def curriculum(level: str | None = None, cycle: str | None = None) -> dict:
+    """Maths programme: every level (or those of `cycle`: 'primaire' / 'School', 'collège', 'lycée'), plus the chapters
+    of `level` (indicative TRACE reference, not official)."""
     from engine import curriculum as cur
-    return cur.get(level)
+    return cur.get(level, cycle)
+
+
+def curriculum_chapter(chapter_id: str) -> dict:
+    """One chapter: notions, level, cycle and the site where the lesson is read (link only)."""
+    from engine import curriculum as cur
+    return cur.chapter(chapter_id)
+
+
+def curriculum_chapter_plan(chapter_id: str, lang: str = "fr") -> dict:
+    """Study plan for one chapter, built by code (no LLM): one day per notion + a review day."""
+    from engine import curriculum as cur
+    return cur.chapter_plan(chapter_id, lang)
 
 
 def _lesson_refs(mv: dict, k: int = 2) -> list[LessonRef]:

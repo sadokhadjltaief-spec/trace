@@ -27,12 +27,578 @@
    "fr": "Statistiques et probabilités",
    "ar": "الإحصاء والاحتمالات",
    "en": "Statistics and probability"
+  },
+  "mesures": {
+   "fr": "Grandeurs et mesures",
+   "ar": "المقادير والقيس",
+   "en": "Quantities and measures"
+  }
+ },
+ "cycles": {
+  "primaire": {
+   "name": {
+    "fr": "Primaire",
+    "ar": "الابتدائي",
+    "en": "Primary school"
+   },
+   "aliases": [
+    "primaire",
+    "primary",
+    "school",
+    "ecole",
+    "école",
+    "ابتدائي"
+   ],
+   "resource": {
+    "name": "mourajaa.com",
+    "url": "https://mourajaa.com/"
+   }
+  },
+  "college": {
+   "name": {
+    "fr": "Collège",
+    "ar": "الإعدادي",
+    "en": "Middle school"
+   },
+   "aliases": [
+    "college",
+    "collège",
+    "middle school",
+    "base",
+    "إعدادي",
+    "اعدادي"
+   ],
+   "resource": {
+    "name": "najahni.tn",
+    "url": "https://www.najahni.tn/"
+   }
+  },
+  "lycee": {
+   "name": {
+    "fr": "Lycée",
+    "ar": "الثانوي",
+    "en": "High school"
+   },
+   "aliases": [
+    "lycee",
+    "lycée",
+    "secondaire",
+    "high school",
+    "bac",
+    "ثانوي"
+   ],
+   "resource": {
+    "name": "najahni.tn",
+    "url": "https://www.najahni.tn/"
+   }
   }
  },
  "levels": [
   {
+   "id": "1p",
+   "cycle": "primaire",
+   "name": {
+    "fr": "1re année primaire",
+    "ar": "السنة الأولى ابتدائي",
+    "en": "1st grade (primary)"
+   },
+   "chapters": [
+    {
+     "id": "1p-01",
+     "domain": "algebre",
+     "title": {
+      "fr": "Les nombres jusqu'à 100",
+      "ar": "الأعداد إلى 100",
+      "en": "Numbers up to 100"
+     },
+     "notions": [
+      "Compter, lire et écrire",
+      "Dizaines et unités",
+      "Comparer et ranger"
+     ]
+    },
+    {
+     "id": "1p-02",
+     "domain": "algebre",
+     "title": {
+      "fr": "Addition et soustraction",
+      "ar": "الجمع والطرح",
+      "en": "Addition and subtraction"
+     },
+     "notions": [
+      "Sens de l'addition",
+      "Sens de la soustraction",
+      "Calcul mental"
+     ]
+    },
+    {
+     "id": "1p-03",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Formes et repérage",
+      "ar": "الأشكال والتموضع",
+      "en": "Shapes and position"
+     },
+     "notions": [
+      "Carré, rectangle, triangle, cercle",
+      "Gauche, droite, dessus, dessous"
+     ]
+    },
+    {
+     "id": "1p-04",
+     "domain": "mesures",
+     "title": {
+      "fr": "Premières mesures",
+      "ar": "القيس الأوّلي",
+      "en": "First measures"
+     },
+     "notions": [
+      "Comparer des longueurs",
+      "La monnaie",
+      "Les jours de la semaine"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "2p",
+   "cycle": "primaire",
+   "name": {
+    "fr": "2e année primaire",
+    "ar": "السنة الثانية ابتدائي",
+    "en": "2nd grade (primary)"
+   },
+   "chapters": [
+    {
+     "id": "2p-01",
+     "domain": "algebre",
+     "title": {
+      "fr": "Les nombres jusqu'à 1000",
+      "ar": "الأعداد إلى 1000",
+      "en": "Numbers up to 1000"
+     },
+     "notions": [
+      "Centaines, dizaines, unités",
+      "Comparer et ranger"
+     ]
+    },
+    {
+     "id": "2p-02",
+     "domain": "algebre",
+     "title": {
+      "fr": "Addition et soustraction avec retenue",
+      "ar": "الجمع والطرح بالاحتفاظ",
+      "en": "Addition and subtraction with carrying"
+     },
+     "notions": [
+      "Technique opératoire",
+      "Problèmes"
+     ]
+    },
+    {
+     "id": "2p-03",
+     "domain": "algebre",
+     "title": {
+      "fr": "Initiation à la multiplication",
+      "ar": "مدخل إلى الضرب",
+      "en": "Introduction to multiplication"
+     },
+     "notions": [
+      "Addition répétée",
+      "Tables de 2, 3, 4, 5"
+     ]
+    },
+    {
+     "id": "2p-04",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Lignes et figures",
+      "ar": "الخطوط والأشكال",
+      "en": "Lines and figures"
+     },
+     "notions": [
+      "Lignes droites et courbes",
+      "Reproduire une figure sur quadrillage"
+     ]
+    },
+    {
+     "id": "2p-05",
+     "domain": "mesures",
+     "title": {
+      "fr": "Mesures : longueur, monnaie, temps",
+      "ar": "القيس: الطول والنقود والزمن",
+      "en": "Length, money and time"
+     },
+     "notions": [
+      "Le mètre et le centimètre",
+      "Lire l'heure"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3p",
+   "cycle": "primaire",
+   "name": {
+    "fr": "3e année primaire",
+    "ar": "السنة الثالثة ابتدائي",
+    "en": "3rd grade (primary)"
+   },
+   "chapters": [
+    {
+     "id": "3p-01",
+     "domain": "algebre",
+     "title": {
+      "fr": "Les nombres jusqu'à 10 000",
+      "ar": "الأعداد إلى 10000",
+      "en": "Numbers up to 10,000"
+     },
+     "notions": [
+      "Lire et écrire",
+      "Valeur de position"
+     ]
+    },
+    {
+     "id": "3p-02",
+     "domain": "algebre",
+     "title": {
+      "fr": "La multiplication",
+      "ar": "الضرب",
+      "en": "Multiplication"
+     },
+     "notions": [
+      "Tables de multiplication",
+      "Multiplier par un nombre à un chiffre"
+     ]
+    },
+    {
+     "id": "3p-03",
+     "domain": "algebre",
+     "title": {
+      "fr": "Initiation à la division",
+      "ar": "مدخل إلى القسمة",
+      "en": "Introduction to division"
+     },
+     "notions": [
+      "Partage équitable",
+      "Quotient et reste"
+     ]
+    },
+    {
+     "id": "3p-04",
+     "domain": "algebre",
+     "title": {
+      "fr": "Premières fractions",
+      "ar": "الكسور الأولى",
+      "en": "First fractions"
+     },
+     "notions": [
+      "Demi, tiers, quart",
+      "Fraction d'une quantité"
+     ]
+    },
+    {
+     "id": "3p-05",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Angles droits, carré et rectangle",
+      "ar": "الزاوية القائمة والمربع والمستطيل",
+      "en": "Right angles, squares and rectangles"
+     },
+     "notions": [
+      "Reconnaître un angle droit",
+      "Propriétés du carré et du rectangle"
+     ]
+    },
+    {
+     "id": "3p-06",
+     "domain": "mesures",
+     "title": {
+      "fr": "Longueurs, masses et durées",
+      "ar": "الأطوال والكتل والمدد",
+      "en": "Lengths, masses and durations"
+     },
+     "notions": [
+      "km, m, cm",
+      "kg et g",
+      "Heures et minutes"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "4p",
+   "cycle": "primaire",
+   "name": {
+    "fr": "4e année primaire",
+    "ar": "السنة الرابعة ابتدائي",
+    "en": "4th grade (primary)"
+   },
+   "chapters": [
+    {
+     "id": "4p-01",
+     "domain": "algebre",
+     "title": {
+      "fr": "Les grands nombres",
+      "ar": "الأعداد الكبيرة",
+      "en": "Large numbers"
+     },
+     "notions": [
+      "Classes des milliers et des millions",
+      "Comparer et arrondir"
+     ]
+    },
+    {
+     "id": "4p-02",
+     "domain": "algebre",
+     "title": {
+      "fr": "Les quatre opérations",
+      "ar": "العمليات الأربع",
+      "en": "The four operations"
+     },
+     "notions": [
+      "Multiplication à deux chiffres",
+      "Division euclidienne",
+      "Problèmes à étapes"
+     ]
+    },
+    {
+     "id": "4p-03",
+     "domain": "algebre",
+     "title": {
+      "fr": "Les fractions",
+      "ar": "الكسور",
+      "en": "Fractions"
+     },
+     "notions": [
+      "Lire et écrire une fraction",
+      "Comparer des fractions simples"
+     ]
+    },
+    {
+     "id": "4p-04",
+     "domain": "algebre",
+     "title": {
+      "fr": "Initiation aux nombres décimaux",
+      "ar": "مدخل إلى الأعداد العشرية",
+      "en": "Introduction to decimals"
+     },
+     "notions": [
+      "Dixièmes et centièmes",
+      "Écriture à virgule"
+     ]
+    },
+    {
+     "id": "4p-05",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Droites parallèles et perpendiculaires",
+      "ar": "المستقيمات المتوازية والمتعامدة",
+      "en": "Parallel and perpendicular lines"
+     },
+     "notions": [
+      "Tracer avec l'équerre et la règle"
+     ]
+    },
+    {
+     "id": "4p-06",
+     "domain": "mesures",
+     "title": {
+      "fr": "Le périmètre",
+      "ar": "المحيط",
+      "en": "Perimeter"
+     },
+     "notions": [
+      "Périmètre du carré et du rectangle",
+      "Unités de longueur"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "5p",
+   "cycle": "primaire",
+   "name": {
+    "fr": "5e année primaire",
+    "ar": "السنة الخامسة ابتدائي",
+    "en": "5th grade (primary)"
+   },
+   "chapters": [
+    {
+     "id": "5p-01",
+     "domain": "algebre",
+     "title": {
+      "fr": "Les nombres décimaux",
+      "ar": "الأعداد العشرية",
+      "en": "Decimal numbers"
+     },
+     "notions": [
+      "Comparer et ranger",
+      "Addition et soustraction",
+      "Multiplication par un entier"
+     ]
+    },
+    {
+     "id": "5p-02",
+     "domain": "algebre",
+     "title": {
+      "fr": "Opérations sur les fractions",
+      "ar": "العمليات على الكسور",
+      "en": "Operations on fractions"
+     },
+     "notions": [
+      "Fractions égales",
+      "Addition de fractions de même dénominateur"
+     ]
+    },
+    {
+     "id": "5p-03",
+     "domain": "algebre",
+     "title": {
+      "fr": "La proportionnalité",
+      "ar": "التناسبية",
+      "en": "Proportionality"
+     },
+     "notions": [
+      "Tableau de proportionnalité",
+      "Règle de trois"
+     ]
+    },
+    {
+     "id": "5p-04",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Le cercle",
+      "ar": "الدائرة",
+      "en": "The circle"
+     },
+     "notions": [
+      "Centre, rayon, diamètre",
+      "Tracer au compas"
+     ]
+    },
+    {
+     "id": "5p-05",
+     "domain": "mesures",
+     "title": {
+      "fr": "Les aires",
+      "ar": "المساحات",
+      "en": "Areas"
+     },
+     "notions": [
+      "Aire du carré et du rectangle",
+      "Aire du triangle",
+      "Unités d'aire"
+     ]
+    },
+    {
+     "id": "5p-06",
+     "domain": "mesures",
+     "title": {
+      "fr": "Capacités et masses",
+      "ar": "السعات والكتل",
+      "en": "Capacities and masses"
+     },
+     "notions": [
+      "Litre et ses sous-multiples",
+      "Conversions"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "6p",
+   "cycle": "primaire",
+   "name": {
+    "fr": "6e année primaire",
+    "ar": "السنة السادسة ابتدائي",
+    "en": "6th grade (primary)"
+   },
+   "chapters": [
+    {
+     "id": "6p-01",
+     "domain": "algebre",
+     "title": {
+      "fr": "Décimaux et fractions",
+      "ar": "الأعداد العشرية والكسور",
+      "en": "Decimals and fractions"
+     },
+     "notions": [
+      "Les quatre opérations",
+      "Passer d'une fraction à un décimal"
+     ]
+    },
+    {
+     "id": "6p-02",
+     "domain": "algebre",
+     "title": {
+      "fr": "Pourcentages et échelles",
+      "ar": "النسب المائوية والمقاييس",
+      "en": "Percentages and scales"
+     },
+     "notions": [
+      "Calculer un pourcentage",
+      "Lire une carte à l'échelle"
+     ]
+    },
+    {
+     "id": "6p-03",
+     "domain": "algebre",
+     "title": {
+      "fr": "Proportionnalité et problèmes",
+      "ar": "التناسبية والمسائل",
+      "en": "Proportionality and problems"
+     },
+     "notions": [
+      "Vitesse moyenne",
+      "Partages proportionnels"
+     ]
+    },
+    {
+     "id": "6p-04",
+     "domain": "geometrie",
+     "title": {
+      "fr": "Solides : cube et pavé droit",
+      "ar": "المجسمات: المكعب ومتوازي المستطيلات",
+      "en": "Solids: cube and cuboid"
+     },
+     "notions": [
+      "Faces, arêtes, sommets",
+      "Patrons"
+     ]
+    },
+    {
+     "id": "6p-05",
+     "domain": "mesures",
+     "title": {
+      "fr": "Aires et volumes",
+      "ar": "المساحات والأحجام",
+      "en": "Areas and volumes"
+     },
+     "notions": [
+      "Aire du disque",
+      "Volume du cube et du pavé droit"
+     ]
+    },
+    {
+     "id": "6p-06",
+     "domain": "statistiques",
+     "title": {
+      "fr": "Tableaux et graphiques",
+      "ar": "الجداول والرسوم البيانية",
+      "en": "Tables and charts"
+     },
+     "notions": [
+      "Lire un tableau",
+      "Diagramme en bâtons",
+      "Moyenne"
+     ]
+    }
+   ]
+  },
+  {
    "id": "7e",
-   "cycle": "base",
+   "cycle": "college",
    "name": {
     "fr": "7e année de base",
     "ar": "السنة السابعة أساسي",
@@ -181,7 +747,7 @@
   },
   {
    "id": "8e",
-   "cycle": "base",
+   "cycle": "college",
    "name": {
     "fr": "8e année de base",
     "ar": "السنة الثامنة أساسي",
@@ -357,7 +923,7 @@
   },
   {
    "id": "9e",
-   "cycle": "base",
+   "cycle": "college",
    "name": {
     "fr": "9e année de base",
     "ar": "السنة التاسعة أساسي",
@@ -531,7 +1097,7 @@
   },
   {
    "id": "1s",
-   "cycle": "secondaire",
+   "cycle": "lycee",
    "name": {
     "fr": "1ère année secondaire",
     "ar": "السنة الأولى ثانوي",
@@ -678,7 +1244,7 @@
   },
   {
    "id": "2s",
-   "cycle": "secondaire",
+   "cycle": "lycee",
    "name": {
     "fr": "2e année Sciences",
     "ar": "السنة الثانية علوم",
@@ -825,7 +1391,7 @@
   },
   {
    "id": "3m",
-   "cycle": "secondaire",
+   "cycle": "lycee",
    "name": {
     "fr": "3e année Mathématiques",
     "ar": "السنة الثالثة رياضيات",
@@ -971,7 +1537,7 @@
   },
   {
    "id": "3se",
-   "cycle": "secondaire",
+   "cycle": "lycee",
    "name": {
     "fr": "3e année Sciences expérimentales",
     "ar": "السنة الثالثة علوم تجريبية",
@@ -1113,7 +1679,7 @@
   },
   {
    "id": "bac-m",
-   "cycle": "secondaire",
+   "cycle": "lycee",
    "name": {
     "fr": "Bac Mathématiques (4e année)",
     "ar": "باكالوريا رياضيات (السنة الرابعة)",
@@ -1302,7 +1868,7 @@
   },
   {
    "id": "bac-se",
-   "cycle": "secondaire",
+   "cycle": "lycee",
    "name": {
     "fr": "Bac Sciences expérimentales (4e année)",
     "ar": "باكالوريا علوم تجريبية (السنة الرابعة)",
@@ -1458,7 +2024,7 @@
   },
   {
    "id": "bac-t",
-   "cycle": "secondaire",
+   "cycle": "lycee",
    "name": {
     "fr": "Bac Sciences techniques (4e année)",
     "ar": "باكالوريا علوم تقنية (السنة الرابعة)",
@@ -1573,7 +2139,7 @@
   },
   {
    "id": "bac-eg",
-   "cycle": "secondaire",
+   "cycle": "lycee",
    "name": {
     "fr": "Bac Économie et gestion (4e année)",
     "ar": "باكالوريا اقتصاد وتصرف (السنة الرابعة)",
@@ -1675,7 +2241,7 @@
   },
   {
    "id": "bac-si",
-   "cycle": "secondaire",
+   "cycle": "lycee",
    "name": {
     "fr": "Bac Sciences de l'informatique (4e année)",
     "ar": "باكالوريا علوم الإعلامية (السنة الرابعة)",

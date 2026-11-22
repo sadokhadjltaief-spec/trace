@@ -574,5 +574,65 @@
   "en": "Summary generated from your material. Each point cites its page. The guards checked every text ({dropped} removed). No teacher has reviewed it.",
   "fr": "Résumé généré depuis ton contenu. Chaque point cite sa page. Les garde-fous ont vérifié chaque texte ({dropped} retirés). Aucun enseignant ne l'a relu.",
   "ar": "ملخّص مولّد من محتواك. كل نقطة تذكر صفحتها. فحصت الضوابط كل نصّ ({dropped} حُذفت). لم يراجعه أي معلّم."
+ },
+ "chplan_title": {
+  "fr": "Plan d'étude : {chapter}",
+  "en": "Study plan: {chapter}",
+  "ar": "خطة مراجعة: {chapter}"
+ },
+ "chplan_summary": {
+  "fr": "{n} séances courtes. Lis la leçon sur {site}, puis entraîne-toi. Plan construit à partir du programme indicatif.",
+  "en": "{n} short sessions. Read the lesson on {site}, then practise. Plan built from the indicative programme.",
+  "ar": "{n} حصص قصيرة. اقرأ الدرس على {site} ثم تدرّب. خطة مبنية على البرنامج التقريبي."
+ },
+ "chplan_day": {
+  "fr": "Notion : {notion}",
+  "en": "Notion: {notion}",
+  "ar": "المفهوم: {notion}"
+ },
+ "chplan_goal": {
+  "fr": "Savoir expliquer et utiliser : {notion}.",
+  "en": "Explain and use: {notion}.",
+  "ar": "أن تشرح وتستعمل: {notion}."
+ },
+ "chplan_read": {
+  "fr": "Lis la leçon « {notion} » sur {site} et note la règle principale.",
+  "en": "Read the lesson \"{notion}\" on {site} and write down the main rule.",
+  "ar": "اقرأ درس «{notion}» على {site} واكتب القاعدة الأساسية."
+ },
+ "chplan_examples": {
+  "fr": "Refais deux exemples corrigés sans regarder la solution.",
+  "en": "Redo two worked examples without looking at the solution.",
+  "ar": "أعد حلّ مثالين محلولين دون النظر إلى الحل."
+ },
+ "chplan_exercises": {
+  "fr": "Fais trois exercices, puis vérifie tes réponses.",
+  "en": "Do three exercises, then check your answers.",
+  "ar": "حلّ ثلاثة تمارين ثم تحقّق من أجوبتك."
+ },
+ "chplan_explain": {
+  "fr": "Explique « {notion} » en trois phrases, à voix haute ou au tuteur.",
+  "en": "Explain \"{notion}\" in three sentences, aloud or to the tutor.",
+  "ar": "اشرح «{notion}» في ثلاث جمل بصوت عالٍ أو للمعلّم الآلي."
+ },
+ "chplan_review_day": {
+  "fr": "Révision : {chapter}",
+  "en": "Review: {chapter}",
+  "ar": "مراجعة: {chapter}"
+ },
+ "chplan_review_sheet": {
+  "fr": "Écris une fiche d'une page avec les règles et un exemple par notion.",
+  "en": "Write a one-page sheet with the rules and one example per notion.",
+  "ar": "اكتب ورقة واحدة فيها القواعد ومثال لكل مفهوم."
+ },
+ "chplan_review_cards": {
+  "fr": "Révise avec des flashcards sur le chapitre.",
+  "en": "Review with flashcards on the chapter.",
+  "ar": "راجع باستعمال بطاقات حول الفصل."
+ },
+ "chplan_review_quiz": {
+  "fr": "Fais un quiz ou un diagnostic TRACE pour vérifier ce que tu as compris.",
+  "en": "Take a quiz or a TRACE diagnosis to check what you understood.",
+  "ar": "اختبر نفسك بمسابقة أو بتشخيص TRACE."
  }
 }

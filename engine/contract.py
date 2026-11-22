@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.11"  # 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7-1.8 plan; 1.9 practice; 1.10 summary; 1.11 curriculum
+CONTRACT_VERSION = "1.12"  # 1.12 cycles + chapter page + sources youtube/wikipedia; 1.1 evidence; 1.2 CourseAnswer; 1.3 sims; 1.4 game; 1.5 report; 1.6 chat; 1.7-1.8 plan; 1.9 practice; 1.10 summary; 1.11 curriculum
 
 Lang = Literal["fr", "ar", "en"]
 HypId = Literal["M0", "M1", "M2", "M3", "M4"]
@@ -466,7 +466,7 @@ class CurriculumChapter(_M):
 
 class CurriculumLevel(_M):
     id: str
-    cycle: str                     # "base" | "secondaire"
+    cycle: str                     # since 1.12: "primaire" | "college" | "lycee"
     name: dict[str, str]
     chapters: list[CurriculumChapter] = []
 
@@ -481,3 +481,33 @@ class Curriculum(_M):
     domains: dict[str, dict[str, str]]
     levels: list[CurriculumLevel]
     level: CurriculumLevel | None = None
+    cycles: dict[str, "CurriculumCycle"] = {}   # since 1.12, in school order
+    cycle: str | None = None                    # since 1.12: the cycle asked for (levels filtered to it)
+
+
+class CurriculumResource(_M):
+    name: str
+    url: str                       # the app only links to the site (no download, no copy)
+
+
+class CurriculumCycle(_M):
+    name: dict[str, str]
+    aliases: list[str] = []
+    resource: CurriculumResource
+
+
+class ChapterDetail(_M):
+    """One chapter of the programme with where to read the lesson (since 1.12). INDICATIVE: show the disclaimer."""
+    contract_version: str = CONTRACT_VERSION
+    chapter: CurriculumChapter
+    number: int                    # position in its level (1-based)
+    level_id: str
+    level_name: dict[str, str]
+    cycle: str
+    cycle_name: dict[str, str]
+    domain_name: dict[str, str]
+    resource: CurriculumResource
+    disclaimer: dict[str, str]
+
+
+Curriculum.model_rebuild()
